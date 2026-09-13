@@ -13,3 +13,17 @@
 .externalNativeBuild
 .cxx
 local.properties
+node_modules/
+dist/
+.env
+*.log
+backend/.data/
+app/build/
+*.jks
+*.keystore
+.kotlin/
+.env.*
+!.env.example
+.secrets/
+deploy/credentials/
+google-services.json

@@ -1,0 +1,13 @@
+.git
+.gradle
+.kotlin
+.idea
+**/node_modules
+**/dist
+**/.env
+**/.data
+**/build
+**/*.log
+app
+AI_INSTRUCTIONS
+local.properties
