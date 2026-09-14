@@ -38,15 +38,26 @@ export function authentication(db, config) {
         .object({
           organization: z.string().min(1).max(100),
           employeeId: z.string().min(1).max(100),
+          phone: z
+            .string()
+            .regex(/^\+[1-9]\d{7,14}$/)
+            .optional(),
+          portal: z.enum(["worker", "manager"]).optional(),
         })
         .strict()
         .parse(body);
-      const user = (
+      const candidate = (
         await db.query(
           "SELECT * FROM users WHERE org_id=$1 AND employee_id=$2 AND active=true",
           [p.organization, p.employeeId],
         )
       ).rows[0];
+      const user =
+        candidate &&
+        (!p.phone || candidate.phone === p.phone) &&
+        (p.portal !== "manager" || candidate.role !== "WORKER")
+          ? candidate
+          : null;
       const challengeId = randomUUID(),
         code = String(randomInt(100000, 1000000));
       await db.transaction(async (tx) => {
@@ -82,7 +93,7 @@ export function authentication(db, config) {
       return {
         challengeId,
         message:
-          "If the employee account exists, a code has been sent to its registered number.",
+          "If the account and phone match, a code has been sent to the registered number.",
       };
     },
     async verify(body) {

@@ -244,7 +244,7 @@ export function createApp(db, config) {
   );
   if (config.adminPath) {
     app.use(express.static(config.adminPath));
-    app.get(["/", "/verify/:id"], (req, res) =>
+    app.get(["/", "/manager", "/verify/:id"], (req, res) =>
       res.sendFile(`${config.adminPath}/index.html`),
     );
   }

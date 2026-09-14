@@ -20,7 +20,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        val apiUrl = providers.gradleProperty("API_BASE_URL").orElse("https://localhost:8080/").get()
+        val apiUrl = providers.gradleProperty("API_BASE_URL").orElse("https://skill-kavach.onrender.com/").get()
         require(apiUrl.startsWith("https://") || apiUrl == "http://10.0.2.2:8080/")
         val apiUri = URI(apiUrl)
         require(apiUri.host != null && apiUri.userInfo == null && apiUri.query == null && apiUri.fragment == null && apiUri.path == "/") {
@@ -75,7 +75,7 @@ dependencies {
 }
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 val validateProductionEndpoint by tasks.registering {
-    val configuredUrl = providers.gradleProperty("API_BASE_URL")
+    val configuredUrl = providers.gradleProperty("API_BASE_URL").orElse("https://skill-kavach.onrender.com/")
     doLast {
         val endpoint = configuredUrl.orNull.orEmpty()
         require(endpoint.startsWith("https://") && !endpoint.contains("localhost")) {

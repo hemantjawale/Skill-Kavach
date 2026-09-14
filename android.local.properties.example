@@ -1,6 +1,7 @@
 # Copy these values into C:/Users/YOUR_USER/.gradle/gradle.properties, or pass -P flags.
 # Never put server JWT, OTP, Twilio or service-account secrets into an Android build.
-API_BASE_URL=http://10.0.2.2:8080/
+API_BASE_URL=https://skill-kavach.onrender.com/
+# Local emulator development only: override with http://10.0.2.2:8080/
 # Optional Firebase client configuration from this Android app's google-services.json.
 FIREBASE_APP_ID=
 FIREBASE_API_KEY=

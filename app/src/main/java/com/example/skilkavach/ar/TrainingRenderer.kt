@@ -30,6 +30,8 @@ data class ScreenMarker(val id: String, val label: String, val x: Float, val y: 
 
 class MarkerLabels(context: Context) : View(context) {
     @Volatile var markers: List<ScreenMarker> = emptyList()
+    @Volatile var placementVisible = true
+    @Volatile var placementReady = false
     private val paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             textSize = 14 * resources.displayMetrics.scaledDensity
@@ -37,6 +39,15 @@ class MarkerLabels(context: Context) : View(context) {
         }
 
     override fun onDraw(canvas: Canvas) {
+        if (placementVisible) {
+            val density = resources.displayMetrics.density
+            paint.color = if (placementReady) 0xFF16834A.toInt() else 0xFFD63D35.toInt()
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 4 * density
+            canvas.drawCircle(width / 2f, height / 2f, 22 * density, paint)
+            paint.style = Paint.Style.FILL
+            canvas.drawCircle(width / 2f, height / 2f, 4 * density, paint)
+        }
         markers.forEach { m ->
             val width = paint.measureText(m.label) + 24
             paint.color = 0xEEFFFFFF.toInt()
@@ -64,6 +75,11 @@ class TrainingRenderer(
     private val onStatus: (String) -> Unit,
     private val onHit: (String) -> Unit,
 ) : GLSurfaceView.Renderer {
+    @Volatile private var resetRequested = false
+    @Volatile private var placeRequested = false
+    fun reposition() { resetRequested = true }
+    fun placeEquipment() { placeRequested = true }
+
     private var cameraProgram = 0
     private var objectProgram = 0
     private var texture = 0
@@ -155,6 +171,13 @@ class TrainingRenderer(
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
             glDepthMask(true)
             glEnable(GL_DEPTH_TEST)
+            if (resetRequested) {
+                anchor?.detach()
+                anchor = null
+                resetRequested = false
+            }
+            labels.placementVisible = anchor == null
+            labels.placementReady = false
             val camera = frame.camera
             if (camera.trackingState != TrackingState.TRACKING) {
                 labels.markers = emptyList()
@@ -163,9 +186,18 @@ class TrainingRenderer(
                 tap.set(null)
                 return
             }
-            val touch = tap.getAndSet(null)
+            val touch = if (placeRequested) {
+                placeRequested = false
+                tap.set(null)
+                width / 2f to height / 2f
+            } else tap.getAndSet(null)
             if (anchor == null) {
-                status("Scan a clear floor, then tap to place the training equipment.")
+                labels.placementReady = frame.hitTest(width / 2f, height / 2f).any { hit ->
+                    val plane = hit.trackable
+                    plane is Plane && plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING && plane.isPoseInPolygon(hit.hitPose)
+                }
+                labels.postInvalidate()
+                status(if (labels.placementReady) "Green ring: floor detected. Tap Place equipment." else "Red ring: point at a textured floor and move slowly until it turns green.")
                 if (touch != null)
                     anchor =
                         frame

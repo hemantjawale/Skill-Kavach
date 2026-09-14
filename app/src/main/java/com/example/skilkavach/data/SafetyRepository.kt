@@ -158,10 +158,10 @@ class SafetyRepository(private val context: Context) {
         }
     }
 
-    suspend fun requestCode(org: String, employee: String): String =
+    suspend fun requestCode(org: String, employee: String, phone: String): String =
         raw(
                 "api/auth/request",
-                JSONObject().put("organization", org.trim()).put("employeeId", employee.trim()),
+                JSONObject().put("organization", org.trim()).put("employeeId", employee.trim()).put("phone", phone.trim()),
             )
             .getString("challengeId")
 

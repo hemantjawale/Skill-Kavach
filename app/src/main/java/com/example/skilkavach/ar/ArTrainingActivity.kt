@@ -154,12 +154,19 @@ class ArTrainingActivity : ComponentActivity() {
                         Surface(color = Color.White) {
                             Column(
                                 Modifier.fillMaxWidth()
-                                    .heightIn(max = 420.dp)
+                                    .heightIn(max = 300.dp)
                                     .verticalScroll(rememberScrollState())
                                     .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                if (!practice) Text(status)
+                                if (!practice) {
+                                    Text(status)
+                                    Text("Red ring = keep scanning. Green ring = ready to place. Virtual red equipment and green exit appear after placement.", style = MaterialTheme.typography.bodySmall)
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        OutlinedButton(onClick = { renderer?.placeEquipment() }, enabled = session != null) { Text("Place equipment") }
+                                        OutlinedButton(onClick = { renderer?.reposition() }, enabled = session != null) { Text("Reposition") }
+                                    }
+                                }
                                 if (step < steps.size) {
                                     val current = steps[step]
                                     Text(

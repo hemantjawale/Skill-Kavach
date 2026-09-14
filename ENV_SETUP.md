@@ -1,5 +1,7 @@
 # SurakshaSetu — environment setup
 
+Android now defaults to `https://skill-kavach.onrender.com/`. Build with `.\gradlew.bat :app:assembleDebug` and install the new APK to use the hosted backend over Wi-Fi or mobile data. No local server is required. Remove any old `API_BASE_URL` override from your user Gradle properties if it points to localhost or the emulator.
+
 **Hosting on Render:** follow [the Render deployment guide](deploy/RENDER.md) for the reviewed environment, Blueprint setup, database TLS configuration, secret files and Android URL update.
 
 Start with **Option A** to try the whole local workflow without paying for SMS, creating a Firebase project, or installing PostgreSQL. Use **Option B** for a persistent PostgreSQL setup. Production configuration is explained afterward.

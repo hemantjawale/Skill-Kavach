@@ -4,14 +4,14 @@ The repository now includes `render.yaml`. It builds the Android API and React s
 
 ## Environment review — 14 September 2026
 
-Your local `backend/.env` was inspected without printing secret values and was left unchanged.
+Your local `backend/.env` was inspected without printing secret values. After you supplied the CA certificate, only `DATABASE_CA_CERT` was added, pointing to `D:/EDGE DOWNLOADS/ca.pem`.
 
 | Item | Result |
 |---|---|
 | JWT_SECRET / OTP_PEPPER | Both 128 characters and different; structurally acceptable. Entropy cannot be proven from length. |
 | Twilio account SID, auth token, sender and Messaging Service SID | Expected formats; actual provider permissions and delivery still need verification. |
 | Firebase credentials | File exists, service-account private key parses, project ID matches. Live push delivery is not tested. |
-| DATABASE_URL | Remote PostgreSQL URL with TLS requested. Connection failed with `SELF_SIGNED_CERT_IN_CHAIN`, including with Windows system trust. Database credentials and schema could not be verified. |
+| DATABASE_URL | Authenticated connection now passes with the supplied CA and certificate verification enabled. All ten application tables are absent; the Render pre-deploy migration will create them. |
 | NODE_ENV | Currently `development`; use `production` on Render. |
 | SMS_PROVIDER | Currently `local`; use `twilio` on Render. Existing Twilio values are ignored in local mode. |
 | PUBLIC_URL | Currently localhost; omit it on Render to use `RENDER_EXTERNAL_URL` automatically, or set the actual HTTPS custom origin. |
@@ -19,9 +19,9 @@ Your local `backend/.env` was inspected without printing secret values and was l
 | BOOTSTRAP_ADMIN_PHONE | Empty; must be your actual SMS-receiving administrator number in E.164 format before seeding. |
 | GOOGLE_APPLICATION_CREDENTIALS | Local path works only on this computer; replace with Render's secret-file path. |
 
-## 1. Resolve the database TLS error
+## 1. Configure the database CA
 
-Download the trusted root CA/bundle from your database provider's dashboard or official connection documentation. Do not download a certificate from an unverified third-party source. Upload the PEM to Render as a Secret File named `database-ca.pem`, and set:
+Your supplied `D:/EDGE DOWNLOADS/ca.pem` is a currently valid CA certificate, and the database accepts an authenticated connection with it. The local backend is configured to use it. Upload the same PEM to Render as a Secret File named `database-ca.pem`, and set:
 
 ```dotenv
 DATABASE_CA_CERT=/etc/secrets/database-ca.pem

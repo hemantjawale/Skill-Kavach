@@ -191,7 +191,7 @@ function App() {
     return (
       <main className="login">
         <div className="brand">SurakshaSetu</div>
-        <h1>Workforce safety console</h1>
+        <h1>Manager login</h1>
         <p>Training, qualifications and daily work in one place.</p>
         {error && (
           <p role="alert" className="error">
@@ -205,7 +205,10 @@ function App() {
             label="Send verification code"
             submit={(p) =>
               run(async () => {
-                const r = await request("auth/request", p);
+                const r = await request("auth/request", {
+                  ...p,
+                  portal: "manager",
+                });
                 setChallenge(r.challengeId);
               })
             }
@@ -220,6 +223,17 @@ function App() {
               name="employeeId"
               autoComplete="username"
             />
+            <Field
+              label="Registered mobile number (+91…)"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              pattern="\+[1-9][0-9]{7,14}"
+            />
+            <p>
+              Use the phone registered for your staff account. Workers sign in
+              through the mobile app.
+            </p>
           </Form>
         ) : (
           <Form
@@ -232,12 +246,20 @@ function App() {
                   challengeId: challenge,
                   code: p.code,
                 });
+                if (session.user.role === "WORKER") {
+                  await request("auth/logout", {});
+                  session = null;
+                  throw Error(
+                    "This console is for managers and staff. Use the worker mobile app.",
+                  );
+                }
                 await reload();
               })
             }
           >
             <p>
-              If this account exists, a code was sent to its registered phone.
+              If the staff account and phone match, a code was sent to that
+              number.
             </p>
             <Field
               label="Verification code"
@@ -507,6 +529,21 @@ function App() {
               rows={rows("trainingAssignment")}
               title={(r) => moduleName(r.data.moduleId)}
               detail={(r) => `${workerName(r.owner_id)} • Due ${r.data.due}`}
+            />
+            <h2>Employee training history</h2>
+            <p>
+              Completed sequences appear after the worker saves and
+              synchronizes. Assessments and certificates are reviewed
+              separately.
+            </p>
+            <Records
+              rows={rows("progress")}
+              title={(r) =>
+                `${workerName(r.owner_id)} • ${moduleName(r.data.moduleId)}`
+              }
+              detail={(r) =>
+                `${r.data.mode} • ${r.data.durationSeconds}s • Completed ${time(r.data.completedAt)}`
+              }
             />
           </>
         )}

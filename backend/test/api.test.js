@@ -10,6 +10,7 @@ import { applyOperation, eligibility } from "../src/domain.js";
 
 let pg, db, api;
 const codes = new Map();
+const destinations = new Map();
 const actors = {};
 before(async () => {
   pg = new PGlite();
@@ -40,7 +41,10 @@ before(async () => {
       jwtSecret: "a".repeat(40),
       otpPepper: "b".repeat(40),
       publicUrl: "https://example.test",
-      sendOtp: async (phone, code, challenge) => codes.set(challenge, code),
+      sendOtp: async (phone, code, challenge) => {
+        codes.set(challenge, code);
+        destinations.set(challenge, phone);
+      },
     }),
   );
 });
@@ -412,23 +416,112 @@ test("training assignment creates a worker-owned notification", async () => {
   );
 });
 
-test('qualified worker can check in, submit tasks, receive verification and check out',async()=>{
-  await db.query("INSERT INTO users(id,org_id,employee_id,name,phone,role,site) VALUES('lifecycle','o1','lifecycle','Lifecycle worker','+919000000099','WORKER','A')");
-  actors.lifecycle=(await db.query("SELECT * FROM users WHERE id='lifecycle'")).rows[0];
-  await qualify('fire','lifecycle');
-  const start=new Date(Date.now()+3600000).toISOString(),end=new Date(Date.now()+7200000).toISOString();
-  const j=await op('admin','job.create',{title:'Inspection shift',site:'A',start,end,requirements:['fire'],ppe:'Site-approved PPE',tasks:['Inspect ventilation']});
-  await op('admin','job.assign',{jobId:j.id,workerId:'lifecycle'});
-  await assert.rejects(op('lifecycle','task.complete',{jobId:j.id,index:0,note:'Inspection complete'}),/Check in/);
+test("qualified worker can check in, submit tasks, receive verification and check out", async () => {
+  await db.query(
+    "INSERT INTO users(id,org_id,employee_id,name,phone,role,site) VALUES('lifecycle','o1','lifecycle','Lifecycle worker','+919000000099','WORKER','A')",
+  );
+  actors.lifecycle = (
+    await db.query("SELECT * FROM users WHERE id='lifecycle'")
+  ).rows[0];
+  await qualify("fire", "lifecycle");
+  const start = new Date(Date.now() + 3600000).toISOString(),
+    end = new Date(Date.now() + 7200000).toISOString();
+  const j = await op("admin", "job.create", {
+    title: "Inspection shift",
+    site: "A",
+    start,
+    end,
+    requirements: ["fire"],
+    ppe: "Site-approved PPE",
+    tasks: ["Inspect ventilation"],
+  });
+  await op("admin", "job.assign", { jobId: j.id, workerId: "lifecycle" });
+  await assert.rejects(
+    op("lifecycle", "task.complete", {
+      jobId: j.id,
+      index: 0,
+      note: "Inspection complete",
+    }),
+    /Check in/,
+  );
   // Advance only the fixture's shift window, without sleeping or altering the machine clock.
-  await db.query("UPDATE records SET data=jsonb_set(data,'{start}',to_jsonb($1::text)) WHERE id=$2",[new Date(Date.now()-60000).toISOString(),j.id]);
-  const attendance=await op('lifecycle','attendance.in',{jobId:j.id});
-  await assert.rejects(op('lifecycle','attendance.in',{jobId:j.id}),/Already checked in/);
-  const task=await op('lifecycle','task.complete',{jobId:j.id,index:0,note:'Inspection complete'});
-  assert.deepEqual(task.data.completedTasks,[0]);
-  const reviewed=await op('supervisor','task.verify',{jobId:j.id,index:0});
-  assert.deepEqual(reviewed.data.verifiedTasks,[0]);
-  const checkout=await op('lifecycle','attendance.out',{attendanceId:attendance.id});
-  assert.ok(checkout.data.checkOut);assert.ok(checkout.data.minutes>=0);
-  await assert.rejects(op('lifecycle','attendance.out',{attendanceId:attendance.id}),/Already checked out/);
+  await db.query(
+    "UPDATE records SET data=jsonb_set(data,'{start}',to_jsonb($1::text)) WHERE id=$2",
+    [new Date(Date.now() - 60000).toISOString(), j.id],
+  );
+  const attendance = await op("lifecycle", "attendance.in", { jobId: j.id });
+  await assert.rejects(
+    op("lifecycle", "attendance.in", { jobId: j.id }),
+    /Already checked in/,
+  );
+  const task = await op("lifecycle", "task.complete", {
+    jobId: j.id,
+    index: 0,
+    note: "Inspection complete",
+  });
+  assert.deepEqual(task.data.completedTasks, [0]);
+  const reviewed = await op("supervisor", "task.verify", {
+    jobId: j.id,
+    index: 0,
+  });
+  assert.deepEqual(reviewed.data.verifiedTasks, [0]);
+  const checkout = await op("lifecycle", "attendance.out", {
+    attendanceId: attendance.id,
+  });
+  assert.ok(checkout.data.checkOut);
+  assert.ok(checkout.data.minutes >= 0);
+  await assert.rejects(
+    op("lifecycle", "attendance.out", { attendanceId: attendance.id }),
+    /Already checked out/,
+  );
+});
+
+test("phone login sends only to the matched employee and manager portal rejects workers", async () => {
+  for (const [who, phone, portal, allowed] of [
+    ["worker", actors.worker.phone, "worker", true],
+    ["admin", actors.worker.phone, "manager", false],
+    ["worker", actors.worker.phone, "manager", false],
+    ["admin", actors.admin.phone, "manager", true],
+  ]) {
+    await db.query("DELETE FROM auth_throttles");
+    const response = await api
+      .post("/api/auth/request")
+      .send({ organization: "o1", employeeId: who, phone, portal })
+      .expect(200);
+    const id = response.body.challengeId;
+    assert.equal(destinations.has(id), allowed);
+    if (allowed) assert.equal(destinations.get(id), phone);
+    else {
+      const row = (
+        await db.query("SELECT user_id FROM otp_challenges WHERE id=$1", [id])
+      ).rows[0];
+      assert.equal(row.user_id, null);
+      await api
+        .post("/api/auth/verify")
+        .send({ challengeId: id, code: "123456" })
+        .expect(401);
+    }
+  }
+});
+
+test("payroll can be published and corrected by admin, but not by a worker", async () => {
+  const payload = {
+    workerId: "worker",
+    month: "2026-09",
+    base: 2000000,
+    overtime: 50000,
+    incentives: 10000,
+    deductions: 20000,
+    status: "PENDING",
+  };
+  const first = await op("admin", "payroll.publish", payload);
+  assert.equal(first.data.net, 2040000);
+  const updated = await op("admin", "payroll.publish", {
+    ...payload,
+    base: 2100000,
+    status: "PAID",
+  });
+  assert.equal(updated.id, first.id);
+  assert.equal(updated.data.net, 2140000);
+  await assert.rejects(op("worker", "payroll.publish", payload));
 });

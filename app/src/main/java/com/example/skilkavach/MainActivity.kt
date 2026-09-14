@@ -183,7 +183,7 @@ private fun SafetyApp(repo: SafetyRepository) {
         Login(
             busy,
             error,
-            { org, emp, done -> run { done(repo.requestCode(org, emp)) } },
+            { org, emp, phone, done -> run { done(repo.requestCode(org, emp, phone)) } },
             { challenge, code ->
                 run {
                     repo.signIn(challenge, code)
@@ -938,7 +938,7 @@ private fun SafetyApp(repo: SafetyRepository) {
 private fun Login(
     busy: Boolean,
     error: String,
-    request: (String, String, (String) -> Unit) -> Unit,
+    request: (String, String, String, (String) -> Unit) -> Unit,
     verify: (String, String) -> Unit,
     practice: (String) -> Unit,
     language: () -> Unit,
@@ -946,6 +946,8 @@ private fun Login(
 ) {
     var org by rememberSaveable { mutableStateOf("") }
     var employee by rememberSaveable { mutableStateOf("") }
+    var phone by rememberSaveable { mutableStateOf("") }
+    val loginContext = androidx.compose.ui.platform.LocalContext.current
     var challenge by rememberSaveable { mutableStateOf("") }
     var code by rememberSaveable { mutableStateOf("") }
     Page(systemBars = true) {
@@ -956,11 +958,13 @@ private fun Login(
         if (challenge.isEmpty()) {
             Field("Organization ID", org, { org = it })
             Field("Employee ID", employee, { employee = it })
-            Action("Send verification code", !busy && org.isNotBlank() && employee.isNotBlank()) {
-                request(org, employee) { challenge = it }
+            Field("Registered mobile number (e.g. +919876543210)", phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(16) })
+            Text("Use the number registered by your manager, including country code.", color = Muted)
+            Action("Send verification code", !busy && org.isNotBlank() && employee.isNotBlank() && phone.matches(Regex("\\+[1-9][0-9]{7,14}"))) {
+                request(org, employee, phone) { challenge = it }
             }
         } else {
-            Text("If this account exists, a code was sent to its registered phone.")
+            Text("If your account and mobile number match, a code was sent to that number.")
             Field("6-digit verification code", code, { code = it.filter(Char::isDigit).take(6) })
             Action("Verify and sign in", !busy && code.length == 6) { verify(challenge, code) }
             Secondary("Request another code") {
@@ -970,6 +974,9 @@ private fun Login(
         }
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (error.isNotEmpty()) Text(error, color = Danger)
+        Secondary("Manager login — workforce console") {
+            loginContext.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(BuildConfig.API_BASE_URL + "manager")))
+        }
         Secondary("Change language", onClick = language)
         Section("Explore offline practice")
         Text("Practice does not create qualifications or authorize work.", color = Muted)
