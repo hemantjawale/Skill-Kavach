@@ -5,6 +5,13 @@
 **/node_modules
 **/dist
 **/.env
+**/.env.*
+**/.secrets
+deploy/credentials
+**/*service-account*.json
+**/google-services.json
+**/*.pem
+**/*.key
 **/.data
 **/build
 **/*.log

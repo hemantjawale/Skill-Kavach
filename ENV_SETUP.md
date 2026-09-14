@@ -1,5 +1,7 @@
 # SurakshaSetu — environment setup
 
+**Hosting on Render:** follow [the Render deployment guide](deploy/RENDER.md) for the reviewed environment, Blueprint setup, database TLS configuration, secret files and Android URL update.
+
 Start with **Option A** to try the whole local workflow without paying for SMS, creating a Firebase project, or installing PostgreSQL. Use **Option B** for a persistent PostgreSQL setup. Production configuration is explained afterward.
 
 The app is always light, even when the phone uses dark mode. Install the latest rebuilt APK after changing code; changing `.env` alone does not update an installed Android APK.
@@ -287,4 +289,3 @@ Replace `YOUR_ORG` and `YOUR_E164_NUMBER` before running the seed command. The g
 | Job assignment blocked | The worker needs valid, unrevoked certificates covering the entire shift and must have no conflicting shift or approved leave |
 | Offline attendance not in payroll records | It remains a claim until a supervisor/HR/admin reviews it |
 | Environment change seems ignored | Restart the regular API after `.env` changes; rebuild Android after Gradle property changes; sandbox runner ignores `.env` |
-

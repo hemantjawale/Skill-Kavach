@@ -1,0 +1,37 @@
+# Existing external PostgreSQL database; no additional database is provisioned.
+# This paid compute plan supports pre-deploy migrations and avoids idle spin-down.
+services:
+  - type: web
+    name: suraksha-setu
+    runtime: docker
+    plan: 0.5c-512mb
+    region: singapore
+    numInstances: 1
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    preDeployCommand: node src/migrate.js
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PROXY_HOPS
+        value: "1"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OTP_PEPPER
+        sync: false
+      - key: SMS_PROVIDER
+        value: twilio
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_MESSAGING_SERVICE_SID
+        sync: false
+      - key: BOOTSTRAP_ORG
+        sync: false
+      - key: BOOTSTRAP_ADMIN_PHONE
+        sync: false
