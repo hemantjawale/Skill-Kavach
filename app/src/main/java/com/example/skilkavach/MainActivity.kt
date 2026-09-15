@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
@@ -66,7 +65,6 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle =
                 SystemBarStyle.light(android.graphics.Color.WHITE, android.graphics.Color.WHITE),
         )
-        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         val repository = (application as SafetyApplication).repository
         setContent {
             MaterialTheme(
