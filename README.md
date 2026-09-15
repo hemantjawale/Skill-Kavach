@@ -4,6 +4,72 @@ Android safety training and workforce management application built from the requ
 
 **Start with [ENV_SETUP.md](ENV_SETUP.md)** for complete local setup and the source of every environment variable.
 
+## What to enter on the website and mobile app
+
+Use the deployed [manager website](https://skill-kavach.onrender.com/manager) and the latest Android APK. The APK connects to the hosted backend; no local server is needed.
+
+| Where / account | Organization ID | Employee ID | Mobile number |
+|---|---|---|---|
+| Manager website — first administrator | `demo`* | `ADMIN` | The actual phone used as `BOOTSTRAP_ADMIN_PHONE` when the administrator was seeded |
+| Mobile APK — initial administrator test | `demo`* | `ADMIN` | The same administrator's registered phone |
+| Mobile APK — worker | `demo`* | The employee ID created for that worker, e.g. `EMP001` | That worker's registered phone |
+| Manager website — another staff member | `demo`* | Their separately created staff employee ID | That staff member's registered phone |
+
+\* `demo` is the configured local bootstrap organization and default. If you set a different `BOOTSTRAP_ORG` on Render when seeding, use that organization ID instead. IDs must match the saved account, including case: `ADMIN` is uppercase. The field is **Employee ID**, not an employer name or email address. Changing bootstrap environment values later does not rename an existing account or update its phone.
+
+Enter phone numbers with country code and without spaces, for example `+91` followed by the ten-digit Indian mobile number. Use your real registered number, not an example number. Click **Send verification code**, then enter the six-digit SMS code. The organization, employee ID and phone must match; entering a different number does not redirect an account's OTP.
+
+### Create a worker for a complete mobile test
+
+1. Log into the website using `demo` / `ADMIN` and the administrator's registered mobile number (substitute your actual organization if different).
+2. Open **Workers → Add employee**.
+3. Set Employee ID to `EMP001`, enter the worker's name, their real phone number and their site, then choose role **WORKER** and save. `EMP001` is an example you create, not an automatically seeded account.
+4. On the mobile APK, enter `demo` / `EMP001` and that worker's phone. Request and verify the SMS code.
+5. Use this worker account for training, leave and payslip tests. Use the administrator website to assign training, review leave and publish salary.
+
+To create another manager, add a separate employee with an appropriate staff role. `ORG_ADMIN` has organization administration access; `HR` handles payroll/leave; other roles have narrower permissions. Worker accounts cannot use the manager login. A role is assigned by an authorized administrator, not selected to gain access during login.
+
+If no OTP arrives, confirm the saved organization/employee/phone values and check Twilio delivery logs. A generic response intentionally does not reveal whether an account exists. Wait one minute before requesting another code.
+
+## How to use AR — worked fire-training example
+
+Install the latest APK containing the placement ring and buttons. Use a physical ARCore-supported phone, install/update Google Play Services for AR if prompted, and allow camera permission. Choose a clear training space with good lighting and a textured floor; do not light a real fire or use live hazards.
+
+1. Sign in as your worker, e.g. `EMP001`.
+2. Open **Training → Fire & Explosion Response → Start AR training**. Do not choose offline practice if you want camera AR.
+3. Point the phone at the floor roughly one to two metres ahead. Slowly move it sideways while keeping the floor in view.
+4. Look at the center ring: **red means keep scanning; green means the floor under the ring is ready for placement**. This ring does not detect danger or safety in the real scene.
+5. When green, tap **Place equipment**. Labelled virtual equipment should appear, including a green exit and red equipment. Keep the camera pointed at the placement area and stay approximately 0.4–4 metres horizontally from it.
+6. Follow the eight steps below. Tap the on-screen labels; you do not need real equipment for this app interaction test.
+
+| Step shown by the app | Action in this virtual scenario |
+|---|---|
+| Identify the exit | Tap **Exit** |
+| Raise the alarm | Tap **Alarm** |
+| Choose the equipment | Tap **Extinguisher** |
+| Pull | Tap **Pin** |
+| Aim | Tap **Base** |
+| Squeeze | Tap **Handle** |
+| Sweep | Drag sideways across the screen and finish on the **Sweep** label; a simple tap does not complete this step |
+| Evacuate | Tap **Exit** again |
+
+7. The app should show **Correct** after each correct selection and advance to the next step. A wrong selection does not advance.
+8. At the end, tap **Save training**. Spend at least 30 seconds reviewing the sequence before saving. Online progress synchronizes; offline submissions queue for later.
+9. On the manager website, open **Training → Employee training history** to see the saved completion after synchronization. The worker must also complete the assessment and receive an independent practical review before certification.
+
+### If you cannot see any marks or equipment
+
+- **Practice mode:** it shows target buttons, not AR marks. Reopen the module using **Start AR training**.
+- **Red ring stays red:** aim at a well-lit, textured floor and move slowly. A blank/shiny floor, darkness, or a wall may not provide a usable horizontal surface.
+- **Green ring but no equipment:** tap **Place equipment**. Opening AR alone does not place the scene.
+- **Equipment disappeared:** aim back at the original placement area, check the tracking message, and stay within the stated distance. Use **Reposition**, scan until green and place again if needed. Reposition does not reset completed steps.
+- **Camera permission/AR services unavailable:** follow the displayed permission/install prompt. Unsupported devices can use practice mode but cannot test tracked AR.
+- **No ring or placement buttons at all:** ensure you installed the newly rebuilt APK rather than the previous version.
+
+This is a virtual procedure simulation. It does not recognize real fires, gas leaks or real equipment, and completing it alone does not authorize work. Physical-device tracking and live SMS delivery still need testing on your setup.
+
+For the Render build settings and further manager workflows, see [the deployment and testing guide](docs/TESTING_GUIDE.md).
+
 ## Run the local system
 
 ```powershell
@@ -79,4 +145,3 @@ This is a working implementation, **not a claim of a security audit or completed
 6. Conduct deployment security review, device tests, backup restoration tests, scale/load tests and emergency-response operational acceptance.
 
 The broader brief also describes photo/video evidence and attachments, remote content authoring/storage, richer industrial models/physics, QR/geofenced attendance, ERP integration, configurable organization/site administration and expanded analytics. Those extensions are not implemented in this revision. Task evidence is currently a text note, training assets are bundled, and payslips are in-app views. See the source rather than treating these as working integrations.
-
