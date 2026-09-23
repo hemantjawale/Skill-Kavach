@@ -137,6 +137,23 @@ fun AdminComplianceScreen(
                 }
             }
 
+            // Pending Self-Registrations Approval Section
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Pending Worker Self-Registrations", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Approve worker accounts to enable OTP login access.", color = Color.Gray, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    PendingApprovalItem("Vikas Kumar (EMP002)", "+919876543211", "Coal Pit #2")
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    PendingApprovalItem("Anita Tudu (EMP003)", "+919876543212", "Mica Unit #1")
+                }
+            }
+
             // Overdue Recertification Alerts List
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -147,7 +164,7 @@ fun AdminComplianceScreen(
                     Text("Overdue Recertifications (Living Certificates)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     OverdueWorkerItem("Ramesh Oraon (EMP089)", "Mica Plant #2", "Gas Safety", "Confidence 42%")
-                    Divider(modifier = Modifier.padding(vertical = 4.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                     OverdueWorkerItem("Sunil Hembram (EMP104)", "Coal Shaft #1", "Electrical", "Confidence 49%")
                 }
             }
@@ -175,5 +192,43 @@ fun OverdueWorkerItem(name: String, site: String, domain: String, confidence: St
             Text("$site • $domain", color = Color.Gray, fontSize = 12.sp)
         }
         Text(confidence, color = Color(0xFFDC2626), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    }
+}
+
+@Composable
+fun PendingApprovalItem(name: String, phone: String, site: String) {
+    var approved by remember { mutableStateOf(false) }
+    var rejected by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text("$site • $phone", color = Color.Gray, fontSize = 12.sp)
+        }
+        if (approved) {
+            Text("Approved ✓", color = Color(0xFF166534), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        } else if (rejected) {
+            Text("Rejected ✗", color = Color(0xFF991B1B), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Button(
+                    onClick = { approved = true },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF166534))
+                ) {
+                    Text("Approve", fontSize = 12.sp)
+                }
+                OutlinedButton(
+                    onClick = { rejected = true },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text("Reject", fontSize = 12.sp, color = Color(0xFF991B1B))
+                }
+            }
+        }
     }
 }

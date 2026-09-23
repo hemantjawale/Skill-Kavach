@@ -187,6 +187,7 @@ private fun SafetyApp(repo: SafetyRepository) {
             busy,
             error,
             { org, emp, phone, done -> run { done(repo.requestCode(org, emp, phone)) } },
+            { org, emp, name, phone, site, done -> run { done(repo.selfRegisterWorker(org, emp, name, phone, site)) } },
             { challenge, code ->
                 run {
                     repo.signIn(challenge, code)
@@ -945,7 +946,8 @@ private fun SafetyApp(repo: SafetyRepository) {
 private fun Login(
     busy: Boolean,
     error: String,
-    request: (String, String, String, (String) -> Unit) -> Unit,
+    request: (String, String, String, (JSONObject) -> Unit) -> Unit,
+    register: (String, String, String, String, String, (JSONObject) -> Unit) -> Unit,
     verify: (String, String) -> Unit,
     practice: (String) -> Unit,
     language: () -> Unit,
@@ -954,29 +956,82 @@ private fun Login(
     var org by rememberSaveable { mutableStateOf("") }
     var employee by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
+    var workerName by rememberSaveable { mutableStateOf("") }
+    var siteName by rememberSaveable { mutableStateOf("") }
+    var isRegistering by rememberSaveable { mutableStateOf(false) }
+    var regMessage by rememberSaveable { mutableStateOf("") }
+    var debugOtpCode by rememberSaveable { mutableStateOf("") }
     val loginContext = androidx.compose.ui.platform.LocalContext.current
     var challenge by rememberSaveable { mutableStateOf("") }
     var code by rememberSaveable { mutableStateOf("") }
+
     Page(systemBars = true) {
         Spacer(Modifier.height(32.dp))
         Icon(Icons.Outlined.HealthAndSafety, null, tint = Primary, modifier = Modifier.size(48.dp))
-        Title("SurakshaSetu", "Safety training. Safer work.")
-        Text("Sign in with the employee account provided by your organization.")
-        if (challenge.isEmpty()) {
+        Title("SurakshaSetu", if (isRegistering) "Worker Self-Registration" else "Safety training. Safer work.")
+        
+        if (regMessage.isNotEmpty()) {
+            Text(
+                regMessage,
+                Modifier.fillMaxWidth().background(Color(0xFFEAF5EE)).padding(12.dp),
+                color = Success,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        if (isRegistering) {
+            Text("Register your worker details. Your registration will be sent to your site administrator for approval.")
             Field("Organization ID", org, { org = it })
-            Field("Employee ID", employee, { employee = it })
+            Field("Employee ID (e.g. EMP001)", employee, { employee = it })
+            Field("Full Name", workerName, { workerName = it })
             Field("Registered mobile number (e.g. +919876543210)", phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(16) })
-            Text("Use the number registered by your manager, including country code.", color = Muted)
-            Action("Send verification code", !busy && org.isNotBlank() && employee.isNotBlank() && phone.matches(Regex("\\+[1-9][0-9]{7,14}"))) {
-                request(org, employee, phone) { challenge = it }
+            Field("Site / Plant Name", siteName, { siteName = it })
+            Action(
+                "Submit Registration for Approval",
+                !busy && org.isNotBlank() && employee.isNotBlank() && workerName.isNotBlank() && phone.matches(Regex("\\+[1-9][0-9]{7,14}"))
+            ) {
+                register(org, employee, workerName, phone, siteName) { res ->
+                    regMessage = res.optString("message", "Registration submitted. Pending admin approval.")
+                    isRegistering = false
+                }
+            }
+            Secondary("Back to Sign In") {
+                isRegistering = false
             }
         } else {
-            Text("If your account and mobile number match, a code was sent to that number.")
-            Field("6-digit verification code", code, { code = it.filter(Char::isDigit).take(6) })
-            Action("Verify and sign in", !busy && code.length == 6) { verify(challenge, code) }
-            Secondary("Request another code") {
-                challenge = ""
-                code = ""
+            Text("Sign in with the employee account provided by your organization.")
+            if (challenge.isEmpty()) {
+                Field("Organization ID", org, { org = it })
+                Field("Employee ID", employee, { employee = it })
+                Field("Registered mobile number (e.g. +919876543210)", phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(16) })
+                Text("Use the number registered by your manager, including country code.", color = Muted)
+                Action("Send verification code", !busy && org.isNotBlank() && employee.isNotBlank() && phone.matches(Regex("\\+[1-9][0-9]{7,14}"))) {
+                    request(org, employee, phone) { res ->
+                        challenge = res.optString("challengeId")
+                        debugOtpCode = res.optString("debugCode", "")
+                    }
+                }
+                Secondary("New worker? Register account") {
+                    isRegistering = true
+                    regMessage = ""
+                }
+            } else {
+                Text("If your account and mobile number match, a code was sent to that number.")
+                if (debugOtpCode.isNotEmpty()) {
+                    Text(
+                        "⚡ DEBUG MODE OTP CODE: $debugOtpCode",
+                        Modifier.fillMaxWidth().background(Color(0xFFFFF6E5)).padding(12.dp),
+                        color = Color(0xFFD97706),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Field("6-digit verification code", code, { code = it.filter(Char::isDigit).take(6) })
+                Action("Verify and sign in", !busy && code.length == 6) { verify(challenge, code) }
+                Secondary("Request another code") {
+                    challenge = ""
+                    code = ""
+                    debugOtpCode = ""
+                }
             }
         }
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())

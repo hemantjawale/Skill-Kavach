@@ -77,7 +77,78 @@ export function createApp(db, config) {
       expiresAt: c.data.expiresAt,
     });
   });
+  app.post("/api/workers/self-register", authLimit, async (req, res) => {
+    const p = z
+      .object({
+        organization: z.string().min(1).max(100),
+        employeeId: z.string().min(1).max(100),
+        name: z.string().min(1).max(100),
+        phone: z.string().min(1).max(100),
+        site: z.string().min(1).max(100).default("Default Site"),
+      })
+      .strict()
+      .parse(req.body);
+
+    const existing = (
+      await db.query(
+        "SELECT id, active FROM users WHERE org_id=$1 AND employee_id=$2",
+        [p.organization, p.employeeId]
+      )
+    ).rows[0];
+
+    if (existing) {
+      if (!existing.active) {
+        return res.json({
+          status: "PENDING",
+          message: "Registration already submitted and pending admin approval."
+        });
+      }
+      return res.status(400).json({
+        error: "An active account with this Employee ID already exists."
+      });
+    }
+
+    const id = randomUUID();
+    await db.query(
+      "INSERT INTO users(id, org_id, employee_id, role, site, name, phone, active) VALUES($1, $2, $3, 'WORKER', $4, $5, $6, false)",
+      [id, p.organization, p.employeeId, p.site, p.name, p.phone]
+    );
+
+    res.json({
+      status: "PENDING",
+      message: "Registration successful. Your account is pending site administrator approval."
+    });
+  });
   app.use("/api", auth.middleware);
+  app.get("/api/admin/pending-workers", async (req, res) => {
+    need(["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role), "Unauthorized", 403);
+    const pending = (
+      await db.query(
+        "SELECT id, org_id, employee_id, role, site, name, phone, created_at FROM users WHERE org_id=$1 AND active=false ORDER BY created_at DESC",
+        [req.user.org_id]
+      )
+    ).rows;
+    res.json({ pending });
+  });
+  app.post("/api/admin/workers/:id/approve", async (req, res) => {
+    need(["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role), "Unauthorized", 403);
+    const workerId = z.string().uuid().parse(req.params.id);
+    const result = await db.query(
+      "UPDATE users SET active=true WHERE id=$1 AND org_id=$2 RETURNING id, name, employee_id",
+      [workerId, req.user.org_id]
+    );
+    need(result.rows.length > 0, "Worker not found or already active", 404);
+    res.json({ ok: true, worker: result.rows[0] });
+  });
+  app.post("/api/admin/workers/:id/reject", async (req, res) => {
+    need(["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role), "Unauthorized", 403);
+    const workerId = z.string().uuid().parse(req.params.id);
+    await db.query(
+      "DELETE FROM users WHERE id=$1 AND org_id=$2 AND active=false",
+      [workerId, req.user.org_id]
+    );
+    res.json({ ok: true });
+  });
   app.post("/api/auth/logout", async (req, res) => {
     await db.query("UPDATE sessions SET revoked=true WHERE id=$1", [
       req.sessionId,

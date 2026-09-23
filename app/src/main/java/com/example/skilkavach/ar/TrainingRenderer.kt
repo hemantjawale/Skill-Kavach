@@ -77,8 +77,10 @@ class TrainingRenderer(
 ) : GLSurfaceView.Renderer {
     @Volatile private var resetRequested = false
     @Volatile private var placeRequested = false
+    @Volatile private var autoPlaceRequested = false
     fun reposition() { resetRequested = true }
     fun placeEquipment() { placeRequested = true }
+    fun autoPlaceInFront() { autoPlaceRequested = true }
 
     private var cameraProgram = 0
     private var objectProgram = 0
@@ -119,7 +121,11 @@ class TrainingRenderer(
         anchor = null
     }
 
+    private val smokeRenderer = SmokeParticleRenderer(maxParticles = 30)
+    private val diffusionSimulator = HazardDiffusionSimulator(width = 10, height = 10)
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+        smokeRenderer.initialize()
         cameraProgram =
             program(
                 "attribute vec2 p; attribute vec2 uv; varying vec2 t; void main(){gl_Position=vec4(p,0.,1.);t=uv;}",
@@ -192,6 +198,20 @@ class TrainingRenderer(
                 width / 2f to height / 2f
             } else tap.getAndSet(null)
             if (anchor == null) {
+                if (autoPlaceRequested) {
+                    autoPlaceRequested = false
+                    val camPose = camera.pose
+                    val forward = camPose.zAxis
+                    val autoPose = Pose.makeTranslation(
+                        camPose.tx() - forward[0] * 1.5f,
+                        camPose.ty() - forward[1] * 1.5f - 0.5f,
+                        camPose.tz() - forward[2] * 1.5f
+                    )
+                    anchor = s.createAnchor(autoPose)
+                    labels.placementVisible = false
+                    status("Equipment placed via Auto-place in front of camera.")
+                    return
+                }
                 labels.placementReady = frame.hitTest(width / 2f, height / 2f).any { hit ->
                     val plane = hit.trackable
                     plane is Plane && plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING && plane.isPoseInPolygon(hit.hitPose)
@@ -254,6 +274,15 @@ class TrainingRenderer(
                             (1 - clip[1] / clip[3]) * height / 2,
                         )
             }
+            // Update hazard diffusion and render camera-facing smoke/fire particles at hazard origin
+            diffusionSimulator.step()
+            val hazardMarker = markers.firstOrNull { it.id == "base" || it.id == "extinguisher" }
+            val hzX = a.pose.tx() + (hazardMarker?.x ?: 0f)
+            val hzY = a.pose.ty()
+            val hzZ = a.pose.tz() + (hazardMarker?.z ?: 0f)
+            smokeRenderer.update(hzX, hzY, hzZ, density = 1.0f)
+            smokeRenderer.draw(view, projection)
+
             labels.markers = projected
             labels.postInvalidate()
             if (touch != null) {

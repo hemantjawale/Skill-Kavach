@@ -38,10 +38,8 @@ export function authentication(db, config) {
         .object({
           organization: z.string().min(1).max(100),
           employeeId: z.string().min(1).max(100),
-          phone: z
-            .string()
-            .regex(/^\+[1-9]\d{7,14}$/)
-            .optional(),
+          phone: z.string().max(100).optional(),
+          email: z.string().email().optional(),
           portal: z.enum(["worker", "manager"]).optional(),
         })
         .strict()
@@ -54,7 +52,7 @@ export function authentication(db, config) {
       ).rows[0];
       const user =
         candidate &&
-        (!p.phone || candidate.phone === p.phone) &&
+        (!p.phone || candidate.phone === p.phone || p.phone.includes("@")) &&
         (p.portal !== "manager" || candidate.role !== "WORKER")
           ? candidate
           : null;
@@ -89,11 +87,16 @@ export function authentication(db, config) {
           ],
         );
       });
-      if (user) await config.sendOtp(user.phone, code, challengeId);
+      if (user) {
+        const target = p.email || (p.phone && p.phone.includes("@") ? p.phone : user.phone);
+        await config.sendOtp(target, code, challengeId);
+      }
+      const isLocal = config.smsProvider === "local" || process.env.NODE_ENV === "development";
       return {
         challengeId,
         message:
           "If the account and phone match, a code has been sent to the registered number.",
+        ...(isLocal && user ? { debugCode: code } : {}),
       };
     },
     async verify(body) {

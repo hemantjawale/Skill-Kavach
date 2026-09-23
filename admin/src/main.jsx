@@ -295,6 +295,7 @@ function App() {
   const sections = [
     "Overview",
     "Workers",
+    "Pending Approvals",
     "Training",
     "Assessments",
     "Certificates",
@@ -492,6 +493,49 @@ function App() {
               </Form>
             )}
           </>
+        )}
+        {page === "Pending Approvals" && (
+          <section className="panel">
+            <h2>Pending Worker Self-Registrations</h2>
+            <p>Approve or reject self-registered workers to enable their login access.</p>
+            {workers.filter((w) => w.active === false).length === 0 ? (
+              <p>No worker registrations currently pending approval.</p>
+            ) : (
+              workers.filter((w) => w.active === false).map((w) => (
+                <div className="record" key={w.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <h3>{w.name}</h3>
+                    <p>{w.employeeId} • {w.site} • {w.phone}</p>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      className="primary"
+                      onClick={() =>
+                        run(async () => {
+                          await request(`admin/workers/${w.id}/approve`, {});
+                          await reload();
+                          setNotice(`Approved worker account for ${w.name}.`);
+                        })
+                      }
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() =>
+                        run(async () => {
+                          await request(`admin/workers/${w.id}/reject`, {});
+                          await reload();
+                          setNotice(`Rejected registration for ${w.name}.`);
+                        })
+                      }
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </section>
         )}
         {page === "Training" && (
           <>

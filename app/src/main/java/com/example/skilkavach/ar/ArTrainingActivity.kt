@@ -160,10 +160,11 @@ class ArTrainingActivity : ComponentActivity() {
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 if (!practice) {
-                                    Text(status)
-                                    Text("Red ring = keep scanning. Green ring = ready to place. Virtual red equipment and green exit appear after placement.", style = MaterialTheme.typography.bodySmall)
+                                    Text(status, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                                    Text("Step 1: Point camera at textured floor • Step 2: Move phone slowly side-to-side • Step 3: When ring turns green, tap Place Equipment.", style = MaterialTheme.typography.bodySmall)
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         OutlinedButton(onClick = { renderer?.placeEquipment() }, enabled = session != null) { Text("Place equipment") }
+                                        OutlinedButton(onClick = { renderer?.autoPlaceInFront() }, enabled = session != null) { Text("Auto-place in front of me") }
                                         OutlinedButton(onClick = { renderer?.reposition() }, enabled = session != null) { Text("Reposition") }
                                     }
                                 }
@@ -294,13 +295,40 @@ class ArTrainingActivity : ComponentActivity() {
         }
     }
 
+    private val assessmentEngine = com.example.skilkavach.data.AssessmentEngine()
+
+    private fun triggerHaptic(durationMs: Long = 50L) {
+        val vibrator = getSystemService(VIBRATOR_SERVICE) as? android.os.Vibrator
+        vibrator?.let {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                it.vibrate(android.os.VibrationEffect.createOneShot(durationMs, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                it.vibrate(durationMs)
+            }
+        }
+    }
+
     private fun select(target: String) {
         val steps = module.items("steps")
         if (step >= steps.size) return
-        if (target == steps[step].getString("target")) {
+        val currentStep = steps[step]
+        val expectedTarget = currentStep.getString("target")
+
+        if (target == expectedTarget) {
+            triggerHaptic(if (target == "sweep") 150L else 50L)
+            assessmentEngine.logAction(stepIndex = step, target = target, actionType = "TAP", isCorrect = true)
             step++
-            feedback = "Correct"
+            feedback = "Correct ✓"
             val completedStep = step
+            if (speechReady) {
+                speech?.speak(
+                    "Correct. " + if (step < steps.size) steps[step].getString("instruction") else "Training sequence complete.",
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    "step_feedback"
+                )
+            }
             lifecycleScope.launch {
                 runCatching {
                     repo.savePractice(
@@ -315,13 +343,24 @@ class ArTrainingActivity : ComponentActivity() {
                         feedback = "Progress could not be saved. Keep this screen open and retry."
                     }
             }
-        } else feedback = "Try again. Follow the current instruction before choosing equipment."
+        } else {
+            assessmentEngine.logAction(stepIndex = step, target = target, actionType = "TAP", isCorrect = false)
+            triggerHaptic(200L)
+            val currentTitle = currentStep.getString("title")
+            feedback = "Incorrect target. Step ${step + 1}: $currentTitle. Please tap the $expectedTarget marker."
+        }
     }
 
     private fun resumeAr() {
         if (practice) return
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permission.launch(Manifest.permission.CAMERA)
+            return
+        }
+        val availability = ArCoreApk.getInstance().checkAvailability(this)
+        if (availability == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE) {
+            status = "ARCore is not supported on this device hardware. Switched to Practice Mode."
+            practice = true
             return
         }
         try {
@@ -347,7 +386,8 @@ class ArTrainingActivity : ComponentActivity() {
             glView?.onResume()
         } catch (_: Exception) {
             status =
-                "AR is unavailable on this device. Check Google Play Services for AR or use practice mode."
+                "AR Services unavailable. Switched to Practice Mode."
+            practice = true
         }
     }
 

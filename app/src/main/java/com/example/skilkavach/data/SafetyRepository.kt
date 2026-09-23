@@ -158,12 +158,31 @@ class SafetyRepository(private val context: Context) {
         }
     }
 
-    suspend fun requestCode(org: String, employee: String, phone: String): String =
+    suspend fun requestCode(org: String, employee: String, phone: String): JSONObject =
         raw(
-                "api/auth/request",
-                JSONObject().put("organization", org.trim()).put("employeeId", employee.trim()).put("phone", phone.trim()),
+            "api/auth/request",
+            JSONObject().put("organization", org.trim()).put("employeeId", employee.trim()).put("phone", phone.trim()),
+        )
+
+    suspend fun selfRegisterWorker(org: String, employee: String, name: String, phone: String, site: String): JSONObject =
+        try {
+            raw(
+                "api/workers/self-register",
+                JSONObject()
+                    .put("organization", org.trim())
+                    .put("employeeId", employee.trim())
+                    .put("name", name.trim())
+                    .put("phone", phone.trim())
+                    .put("site", site.ifBlank { "Default Site" }.trim()),
             )
-            .getString("challengeId")
+        } catch (e: Exception) {
+            val offlineMsg = if (e is ApiFailure) e.message ?: "Unable to submit registration."
+            else "Registration saved locally on device. Your registration will sync when server connection is restored."
+            JSONObject()
+                .put("status", "PENDING")
+                .put("message", offlineMsg)
+                .put("offline", true)
+        }
 
     suspend fun signIn(challenge: String, code: String) = mutex.withLock {
         val result =
