@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
@@ -127,9 +127,16 @@ function App() {
       setBusy(false);
     }
   }
+  const reloadSequence = useRef(0);
   async function reload() {
+    const sequence = ++reloadSequence.current;
     const d = await request("bootstrap");
-    setData(d);
+    if (!Array.isArray(d.workers))
+      throw Error(
+        "The server did not return an employee directory. Check the deployed backend version.",
+      );
+    if (sequence === reloadSequence.current) setData(d);
+    return d;
   }
   async function operation(type, payload) {
     await run(async () => {
@@ -151,9 +158,7 @@ function App() {
   useEffect(() => {
     if (!data) return;
     const timer = setInterval(() => {
-      request("bootstrap")
-        .then(setData)
-        .catch((e) => setError(e.message));
+      reload().catch((e) => setError(e.message));
     }, 30000);
     return () => clearInterval(timer);
   }, [!!data]);
@@ -443,13 +448,32 @@ function App() {
         {page === "Workers" && (
           <>
             <section className="panel">
-              <h2>Worker directory</h2>
+              <h2>Employee directory ({workers.length})</h2>
+              <p>
+                Organization: <strong>{data.user.organization}</strong>. Use the
+                exact employee ID and registered email below for mobile login.
+              </p>
+              {!workers.length && (
+                <Empty>
+                  No employees were returned for this account. Use Refresh and
+                  check your organization and role.
+                </Empty>
+              )}
               {workers.map((w) => (
                 <div className="record" key={w.id}>
                   <strong>{w.name}</strong>
                   <p>
                     {w.employeeId} • {w.site} • {friendly(w.role)} •{" "}
                     {w.email || "Email not registered"}
+                  </p>
+                  <p>
+                    <Badge>
+                      {w.active === false
+                        ? "PENDING APPROVAL"
+                        : !w.email
+                          ? "EMAIL REQUIRED FOR LOGIN"
+                          : "ACTIVE"}
+                    </Badge>
                   </p>
                   {admin && (
                     <Form
@@ -487,10 +511,18 @@ function App() {
                 busy={busy}
                 submit={(p) =>
                   run(async () => {
-                    await request("workers", p);
-                    await reload();
+                    const created = await request("workers", p);
                     setNotice(
-                      "Employee created. They can now sign in using their registered email.",
+                      `Employee ${p.employeeId} saved. Refreshing the directory…`,
+                    );
+                    const refreshed = await reload();
+                    if (!refreshed.workers.some((w) => w.id === created.id)) {
+                      throw Error(
+                        "The employee was saved, but was not returned in this directory. Check the signed-in organization and refresh; do not create a duplicate.",
+                      );
+                    }
+                    setNotice(
+                      `Employee ${p.employeeId} is saved and visible in the directory. Use their registered email for mobile login.`,
                     );
                   })
                 }

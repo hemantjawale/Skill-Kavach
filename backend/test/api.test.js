@@ -681,3 +681,40 @@ test("a failed SMTP send consumes the generated challenge", async () => {
   ).rows[0].count;
   assert.equal(active, 0);
 });
+
+test("created employee persists, appears in the admin directory and can request email OTP", async () => {
+  const admin = await login("admin");
+  const auth = { Authorization: `Bearer ${admin.accessToken}` };
+  const payload = {
+    employeeId: "persisted-worker",
+    name: "Directory test",
+    email: "directory@example.test",
+    role: "WORKER",
+    site: "A",
+  };
+  const created = await api
+    .post("/api/workers")
+    .set(auth)
+    .send(payload)
+    .expect(201);
+  const stored = (
+    await db.query("SELECT * FROM users WHERE id=$1", [created.body.id])
+  ).rows[0];
+  assert.equal(stored.employee_id, payload.employeeId);
+  assert.equal(stored.email, payload.email);
+  assert.equal(stored.active, true);
+  const directory = await api.get("/api/bootstrap").set(auth).expect(200);
+  const visible = directory.body.workers.find((w) => w.id === created.body.id);
+  assert.equal(visible.employeeId, payload.employeeId);
+  assert.equal(visible.email, payload.email);
+  const otp = await api
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: payload.employeeId,
+      email: payload.email,
+    })
+    .expect(200);
+  assert.equal(destinations.get(otp.body.challengeId), payload.email);
+  await api.post("/api/workers").set(auth).send(payload).expect(409);
+});
