@@ -17,14 +17,14 @@ const db = {
 await db.query(
   "INSERT INTO organizations VALUES('local','Local training sandbox') ON CONFLICT DO NOTHING",
 );
-for (const [id, name, role, phone] of [
-  ["ADMIN", "Local administrator", "ORG_ADMIN", "+919000000001"],
-  ["WORKER", "Practice worker", "WORKER", "+919000000002"],
-  ["TRAINER", "Local trainer", "TRAINER", "+919000000003"],
+for (const [id, name, role, email] of [
+  ["ADMIN", "Local administrator", "ORG_ADMIN", "admin@example.test"],
+  ["WORKER", "Practice worker", "WORKER", "worker@example.test"],
+  ["TRAINER", "Local trainer", "TRAINER", "trainer@example.test"],
 ]) {
   await db.query(
-    "INSERT INTO users(id,org_id,employee_id,name,phone,role,site) VALUES($1,$2,$1,$3,$4,$5,$6) ON CONFLICT DO NOTHING",
-    [id, "local", name, phone, role, "Bokaro"],
+    "INSERT INTO users(id,org_id,employee_id,name,email,role,site) VALUES($1,$2,$1,$3,$4,$5,$6) ON CONFLICT(id) DO UPDATE SET email=EXCLUDED.email",
+    [id, "local", name, email, role, "Bokaro"],
   );
 }
 const app = createApp(db, {
@@ -32,7 +32,7 @@ const app = createApp(db, {
   otpPepper: randomBytes(48).toString("hex"),
   publicUrl: "http://localhost:8080",
   adminPath: resolve("../admin/dist"),
-  async sendOtp(phone, code, challengeId) {
+  async sendOtp(email, code, challengeId) {
     await writeFile(".data/otp.json", JSON.stringify({ challengeId, code }), {
       mode: 0o600,
     });

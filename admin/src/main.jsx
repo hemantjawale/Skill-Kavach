@@ -224,14 +224,13 @@ function App() {
               autoComplete="username"
             />
             <Field
-              label="Registered mobile number (+91…)"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              pattern="\+[1-9][0-9]{7,14}"
+              label="Registered email address"
+              name="email"
+              type="email"
+              autoComplete="email"
             />
             <p>
-              Use the phone registered for your staff account. Workers sign in
+              Use the email registered for your staff account. Workers sign in
               through the mobile app.
             </p>
           </Form>
@@ -258,8 +257,8 @@ function App() {
             }
           >
             <p>
-              If the staff account and phone match, a code was sent to that
-              number.
+              If the staff account and email match, a code was sent to that
+              email address.
             </p>
             <Field
               label="Verification code"
@@ -288,7 +287,7 @@ function App() {
     (id === data.user.id ? data.user.name : "Unassigned");
   const moduleName = (id) => data.modules.find((m) => m.id === id)?.title ?? id;
   const options = workers
-    .filter((w) => w.role === "WORKER")
+    .filter((w) => w.role === "WORKER" && w.active !== false)
     .map((w) => ({ value: w.id, label: `${w.name} • ${w.employeeId}` }));
   const can = (roles) => roles.includes(data.user.role);
   const admin = can(["ORG_ADMIN"]);
@@ -449,8 +448,36 @@ function App() {
                 <div className="record" key={w.id}>
                   <strong>{w.name}</strong>
                   <p>
-                    {w.employeeId} • {w.site} • {friendly(w.role)}
+                    {w.employeeId} • {w.site} • {friendly(w.role)} •{" "}
+                    {w.email || "Email not registered"}
                   </p>
+                  {admin && (
+                    <Form
+                      title="Set login email"
+                      busy={busy}
+                      label="Save email"
+                      submit={(p) =>
+                        run(async () => {
+                          await request(`workers/${w.id}/email`, p);
+                          if (w.id === data.user.id) {
+                            session = null;
+                            setData(null);
+                            setChallenge("");
+                          } else await reload();
+                          setNotice(
+                            "Email saved. Existing sessions and codes for this account have been revoked.",
+                          );
+                        })
+                      }
+                    >
+                      <Field
+                        label="Registered email"
+                        name="email"
+                        type="email"
+                        defaultValue={w.email || ""}
+                      />
+                    </Form>
+                  )}
                 </div>
               ))}
             </section>
@@ -463,19 +490,14 @@ function App() {
                     await request("workers", p);
                     await reload();
                     setNotice(
-                      "Employee created. They can now sign in using their registered phone.",
+                      "Employee created. They can now sign in using their registered email.",
                     );
                   })
                 }
               >
                 <Field label="Employee ID" name="employeeId" maxLength={50} />
                 <Field label="Full name" name="name" maxLength={100} />
-                <Field
-                  label="Phone (E.164, e.g. +91…)"
-                  name="phone"
-                  type="tel"
-                  pattern="\+[1-9][0-9]{7,14}"
-                />
+                <Field label="Email address" name="email" type="email" />
                 <Field label="Site" name="site" defaultValue={data.user.site} />
                 <Field
                   label="Role"
@@ -497,43 +519,59 @@ function App() {
         {page === "Pending Approvals" && (
           <section className="panel">
             <h2>Pending Worker Self-Registrations</h2>
-            <p>Approve or reject self-registered workers to enable their login access.</p>
+            <p>
+              Approve or reject self-registered workers to enable their login
+              access.
+            </p>
             {workers.filter((w) => w.active === false).length === 0 ? (
               <p>No worker registrations currently pending approval.</p>
             ) : (
-              workers.filter((w) => w.active === false).map((w) => (
-                <div className="record" key={w.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <h3>{w.name}</h3>
-                    <p>{w.employeeId} • {w.site} • {w.phone}</p>
+              workers
+                .filter((w) => w.active === false)
+                .map((w) => (
+                  <div
+                    className="record"
+                    key={w.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <h3>{w.name}</h3>
+                      <p>
+                        {w.employeeId} • {w.site} •{" "}
+                        {w.email || "Email not registered"}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        className="primary"
+                        onClick={() =>
+                          run(async () => {
+                            await request(`admin/workers/${w.id}/approve`, {});
+                            await reload();
+                            setNotice(`Approved worker account for ${w.name}.`);
+                          })
+                        }
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() =>
+                          run(async () => {
+                            await request(`admin/workers/${w.id}/reject`, {});
+                            await reload();
+                            setNotice(`Rejected registration for ${w.name}.`);
+                          })
+                        }
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      className="primary"
-                      onClick={() =>
-                        run(async () => {
-                          await request(`admin/workers/${w.id}/approve`, {});
-                          await reload();
-                          setNotice(`Approved worker account for ${w.name}.`);
-                        })
-                      }
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() =>
-                        run(async () => {
-                          await request(`admin/workers/${w.id}/reject`, {});
-                          await reload();
-                          setNotice(`Rejected registration for ${w.name}.`);
-                        })
-                      }
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))
+                ))
             )}
           </section>
         )}

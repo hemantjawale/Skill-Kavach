@@ -20,3 +20,6 @@ Deployment requirements include protected database volumes/backups, restricted d
 The current API loads tenant records as an aggregate and serializes domain writes per organization. It is designed for an initial deployment; benchmark it against actual tenant size and expected concurrency before rollout. The in-process IP limiter should be supplemented with gateway/shared rate limiting when running multiple API replicas. Current audit entries identify actor/action/record and time; they are not a cryptographically tamper-evident external audit ledger.
 
 The dependency override for `gaxios@6.7.1` selects patched `uuid@11.1.1` for Firebase Admin's optional storage dependency chain. That gaxios version uses the compatible CommonJS `v4()` interface. Re-evaluate/remove the override when the upstream dependency chain includes the fix itself.
+
+
+Email OTP migration: only a stored, matching email can receive a login code. Request-supplied fallback recipients and debug OTP responses are prohibited. SMTP uses authenticated TLS with certificate verification and bounded timeouts. The additive migration revokes former sessions and codes once; authorized email changes revoke the affected account's sessions/codes. Legacy phone contacts are retained solely as historical data, never as an authentication fallback. Register trusted employee emails before enabling their login.

@@ -5,7 +5,7 @@ All private endpoints require `Authorization: Bearer <accessToken>`. Browser cli
 | Method/path | Purpose |
 |---|---|
 | `GET /health` | Database connectivity health check |
-| `POST /api/auth/request` | `{organization, employeeId}` → opaque challenge ID |
+| `POST /api/auth/request` | `{organization, employeeId, email, portal?}` → opaque challenge ID |
 | `POST /api/auth/verify` | `{challengeId, code}` → access token, refresh token, user |
 | `POST /api/auth/refresh` | `{refreshToken}` → rotated credentials |
 | `POST /api/auth/logout` | Revoke current session |
@@ -59,3 +59,12 @@ The executable request schemas and role map are in `backend/src/domain.js`. Supp
 
 An offline client retains its operation ID and payload until acknowledged. A rejected operation is displayed for review rather than silently dropped. Shift authorization and certificate issuance remain online/server-controlled. Push delivery is at least once; the notification record ID provides stable device notification replacement.
 
+
+
+## Email OTP contract
+
+`POST /api/auth/request`: `{organization, employeeId, email, portal?}`. Email is required, trimmed/lowercased, and must match the active account. Optional portal is `worker` or `manager`; worker accounts cannot request a manager login code. Response contains `challengeId` and a generic message, never the OTP. Former phone payloads are rejected. SMTP always targets the stored account email.
+
+`POST /api/workers/self-register`: `{organization, employeeId, name, email, site}` creates a pending WORKER. `POST /api/workers` (organization administrator) accepts `{employeeId,name,email,role,site}`.
+
+`POST /api/workers/:id/email`: `{email}`; organization-admin only, same organization. Sets the account email, revokes all its sessions and outstanding codes, and audits `worker.email.update`. Bootstrap seeding migrates administrator emails only when unset.

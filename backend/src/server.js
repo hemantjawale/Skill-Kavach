@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { database } from "./db.js";
 import { createApp } from "./app.js";
 import { startPushWorker } from "./push.js";
-import { createOtpSender } from "./sms.js";
+import { createOtpSender } from "./email.js";
 import { runtimeConfig } from "./config.js";
 const config = runtimeConfig(process.env);
 const db = database(process.env.DATABASE_URL);

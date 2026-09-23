@@ -18,3 +18,5 @@ deploy/credentials
 app
 AI_INSTRUCTIONS
 local.properties
+
+backend/env

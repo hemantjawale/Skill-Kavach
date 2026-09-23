@@ -27,3 +27,5 @@ app/build/
 .secrets/
 deploy/credentials/
 google-services.json
+
+/backend/env

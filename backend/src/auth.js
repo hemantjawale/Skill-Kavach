@@ -8,6 +8,7 @@ import {
 } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { z } from "zod";
+import { emailAddress } from "./email.js";
 import { need } from "./domain.js";
 export const hash = (value) => createHash("sha256").update(value).digest("hex");
 export function authentication(db, config) {
@@ -38,8 +39,7 @@ export function authentication(db, config) {
         .object({
           organization: z.string().min(1).max(100),
           employeeId: z.string().min(1).max(100),
-          phone: z.string().max(100).optional(),
-          email: z.string().email().optional(),
+          email: emailAddress,
           portal: z.enum(["worker", "manager"]).optional(),
         })
         .strict()
@@ -52,7 +52,7 @@ export function authentication(db, config) {
       ).rows[0];
       const user =
         candidate &&
-        (!p.phone || candidate.phone === p.phone || p.phone.includes("@")) &&
+        candidate.email === p.email &&
         (p.portal !== "manager" || candidate.role !== "WORKER")
           ? candidate
           : null;
@@ -78,25 +78,31 @@ export function authentication(db, config) {
           );
         }
         await tx.query(
-          "INSERT INTO otp_challenges(id,user_id,digest,expires_at) VALUES($1,$2,$3,$4)",
+          "INSERT INTO otp_challenges(id,user_id,digest,expires_at,email) VALUES($1,$2,$3,$4,$5)",
           [
             challengeId,
             user?.id ?? null,
             digest(challengeId, code),
             new Date(Date.now() + 5 * 60000),
+            user?.email ?? null,
           ],
         );
       });
       if (user) {
-        const target = p.email || (p.phone && p.phone.includes("@") ? p.phone : user.phone);
-        await config.sendOtp(target, code, challengeId);
+        try {
+          await config.sendOtp(user.email, code, challengeId);
+        } catch (error) {
+          await db.query(
+            "UPDATE otp_challenges SET consumed=true WHERE id=$1",
+            [challengeId],
+          );
+          throw error;
+        }
       }
-      const isLocal = config.smsProvider === "local" || process.env.NODE_ENV === "development";
       return {
         challengeId,
         message:
-          "If the account and phone match, a code has been sent to the registered number.",
-        ...(isLocal && user ? { debugCode: code } : {}),
+          "If the account and email match, a code has been sent to the registered email address.",
       };
     },
     async verify(body) {
@@ -138,7 +144,7 @@ export function authentication(db, config) {
             c.user_id,
           ])
         ).rows[0];
-        return u ? tokens(tx, u) : null;
+        return u && c.email && u.email === c.email ? tokens(tx, u) : null;
       });
       need(result, "Code invalid or expired. Request a new code.", 401);
       return result;
@@ -169,7 +175,7 @@ export function authentication(db, config) {
             s.user_id,
           ])
         ).rows[0];
-        return u ? tokens(tx, u) : null;
+        return u && u.email ? tokens(tx, u) : null;
       });
       need(result, "Session expired. Sign in again.", 401);
       return result;
@@ -204,6 +210,8 @@ export const publicUser = (u) => ({
   organization: u.org_id,
   employeeId: u.employee_id,
   name: u.name,
+  email: u.email,
+  active: u.active,
   role: u.role,
   site: u.site,
 });

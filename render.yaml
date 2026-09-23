@@ -1,15 +1,15 @@
 # Existing external PostgreSQL database; no additional database is provisioned.
-# This paid compute plan supports pre-deploy migrations and avoids idle spin-down.
+# Free Node service with Brevo HTTPS email delivery.
 services:
   - type: web
     name: suraksha-setu
-    runtime: docker
-    plan: 0.5c-512mb
+    runtime: node
+    plan: free
     region: singapore
     numInstances: 1
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
-    preDeployCommand: node src/migrate.js
+    rootDir: backend
+    buildCommand: npm --prefix ../admin install --include=dev && npm --prefix ../admin run build && npm install --omit=dev
+    startCommand: npm run migrate && npm run seed && npm start
     healthCheckPath: /health
     autoDeployTrigger: off
     envVars:
@@ -23,15 +23,17 @@ services:
         sync: false
       - key: OTP_PEPPER
         sync: false
-      - key: SMS_PROVIDER
-        value: twilio
-      - key: TWILIO_ACCOUNT_SID
+      - key: EMAIL_PROVIDER
+        value: brevo
+      - key: BREVO_API_KEY
         sync: false
-      - key: TWILIO_AUTH_TOKEN
+      - key: BREVO_SENDER_EMAIL
         sync: false
-      - key: TWILIO_MESSAGING_SERVICE_SID
-        sync: false
+      - key: BREVO_SENDER_NAME
+        value: SurakshaSetu
       - key: BOOTSTRAP_ORG
         sync: false
-      - key: BOOTSTRAP_ADMIN_PHONE
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      - key: BOOTSTRAP_SECOND_ADMIN_EMAIL
         sync: false

@@ -21,13 +21,14 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT secret required}
       OTP_PEPPER: ${OTP_PEPPER:?OTP pepper required}
       PUBLIC_URL: https://${APP_DOMAIN:?Public domain required}
-      SMS_PROVIDER: ${SMS_PROVIDER:?Choose twilio or webhook}
-      SMS_WEBHOOK_URL: ${SMS_WEBHOOK_URL:-}
-      SMS_WEBHOOK_TOKEN: ${SMS_WEBHOOK_TOKEN:-}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
-      TWILIO_FROM: ${TWILIO_FROM:-}
-      TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
+      SMTP_HOST: ${SMTP_HOST:?SMTP host required}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:?SMTP username required}
+      SMTP_PASS: ${SMTP_PASS:?SMTP password required}
+      SMTP_FROM: ${SMTP_FROM:?SMTP sender required}
+      BOOTSTRAP_ORG: ${BOOTSTRAP_ORG:-demo}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_SECOND_ADMIN_EMAIL: ${BOOTSTRAP_SECOND_ADMIN_EMAIL:-}
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
       GOOGLE_APPLICATION_CREDENTIALS: /run/firebase/service-account.json
       PROXY_HOPS: 1

@@ -158,13 +158,13 @@ class SafetyRepository(private val context: Context) {
         }
     }
 
-    suspend fun requestCode(org: String, employee: String, phone: String): JSONObject =
+    suspend fun requestCode(org: String, employee: String, email: String): JSONObject =
         raw(
             "api/auth/request",
-            JSONObject().put("organization", org.trim()).put("employeeId", employee.trim()).put("phone", phone.trim()),
+            JSONObject().put("organization", org.trim()).put("employeeId", employee.trim()).put("email", email.trim()),
         )
 
-    suspend fun selfRegisterWorker(org: String, employee: String, name: String, phone: String, site: String): JSONObject =
+    suspend fun selfRegisterWorker(org: String, employee: String, name: String, email: String, site: String): JSONObject =
         try {
             raw(
                 "api/workers/self-register",
@@ -172,7 +172,7 @@ class SafetyRepository(private val context: Context) {
                     .put("organization", org.trim())
                     .put("employeeId", employee.trim())
                     .put("name", name.trim())
-                    .put("phone", phone.trim())
+                    .put("email", email.trim())
                     .put("site", site.ifBlank { "Default Site" }.trim()),
             )
         } catch (e: Exception) {

@@ -186,8 +186,8 @@ private fun SafetyApp(repo: SafetyRepository) {
         Login(
             busy,
             error,
-            { org, emp, phone, done -> run { done(repo.requestCode(org, emp, phone)) } },
-            { org, emp, name, phone, site, done -> run { done(repo.selfRegisterWorker(org, emp, name, phone, site)) } },
+            { org, emp, email, done -> run { done(repo.requestCode(org, emp, email)) } },
+            { org, emp, name, email, site, done -> run { done(repo.selfRegisterWorker(org, emp, name, email, site)) } },
             { challenge, code ->
                 run {
                     repo.signIn(challenge, code)
@@ -955,12 +955,11 @@ private fun Login(
 ) {
     var org by rememberSaveable { mutableStateOf("") }
     var employee by rememberSaveable { mutableStateOf("") }
-    var phone by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
     var workerName by rememberSaveable { mutableStateOf("") }
     var siteName by rememberSaveable { mutableStateOf("") }
     var isRegistering by rememberSaveable { mutableStateOf(false) }
     var regMessage by rememberSaveable { mutableStateOf("") }
-    var debugOtpCode by rememberSaveable { mutableStateOf("") }
     val loginContext = androidx.compose.ui.platform.LocalContext.current
     var challenge by rememberSaveable { mutableStateOf("") }
     var code by rememberSaveable { mutableStateOf("") }
@@ -984,13 +983,13 @@ private fun Login(
             Field("Organization ID", org, { org = it })
             Field("Employee ID (e.g. EMP001)", employee, { employee = it })
             Field("Full Name", workerName, { workerName = it })
-            Field("Registered mobile number (e.g. +919876543210)", phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(16) })
+            Field("Registered email address", email, { email = it.trim().take(254) })
             Field("Site / Plant Name", siteName, { siteName = it })
             Action(
                 "Submit Registration for Approval",
-                !busy && org.isNotBlank() && employee.isNotBlank() && workerName.isNotBlank() && phone.matches(Regex("\\+[1-9][0-9]{7,14}"))
+                !busy && org.isNotBlank() && employee.isNotBlank() && workerName.isNotBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
             ) {
-                register(org, employee, workerName, phone, siteName) { res ->
+                register(org, employee, workerName, email, siteName) { res ->
                     regMessage = res.optString("message", "Registration submitted. Pending admin approval.")
                     isRegistering = false
                 }
@@ -1003,12 +1002,11 @@ private fun Login(
             if (challenge.isEmpty()) {
                 Field("Organization ID", org, { org = it })
                 Field("Employee ID", employee, { employee = it })
-                Field("Registered mobile number (e.g. +919876543210)", phone, { phone = it.filter { c -> c.isDigit() || c == '+' }.take(16) })
-                Text("Use the number registered by your manager, including country code.", color = Muted)
-                Action("Send verification code", !busy && org.isNotBlank() && employee.isNotBlank() && phone.matches(Regex("\\+[1-9][0-9]{7,14}"))) {
-                    request(org, employee, phone) { res ->
+                Field("Registered email address", email, { email = it.trim().take(254) })
+                Text("Use the email address registered by your manager.", color = Muted)
+                Action("Send verification code", !busy && org.isNotBlank() && employee.isNotBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    request(org, employee, email) { res ->
                         challenge = res.optString("challengeId")
-                        debugOtpCode = res.optString("debugCode", "")
                     }
                 }
                 Secondary("New worker? Register account") {
@@ -1016,21 +1014,12 @@ private fun Login(
                     regMessage = ""
                 }
             } else {
-                Text("If your account and mobile number match, a code was sent to that number.")
-                if (debugOtpCode.isNotEmpty()) {
-                    Text(
-                        "⚡ DEBUG MODE OTP CODE: $debugOtpCode",
-                        Modifier.fillMaxWidth().background(Color(0xFFFFF6E5)).padding(12.dp),
-                        color = Color(0xFFD97706),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text("If your account and email match, a code was sent to that email. Check your inbox and spam folder.")
                 Field("6-digit verification code", code, { code = it.filter(Char::isDigit).take(6) })
                 Action("Verify and sign in", !busy && code.length == 6) { verify(challenge, code) }
                 Secondary("Request another code") {
                     challenge = ""
                     code = ""
-                    debugOtpCode = ""
                 }
             }
         }

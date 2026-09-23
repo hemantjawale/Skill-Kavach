@@ -16,7 +16,8 @@
     "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "migrate": "node --env-file-if-exists=.env src/migrate.js",
     "seed": "node --env-file-if-exists=.env src/seed.js",
-    "test": "node --test --test-concurrency=1 test/*.test.js"
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "check:smtp": "node --env-file-if-exists=.env scripts/check-smtp.js"
   },
   "dependencies": {
     "express": "^5.1.0",

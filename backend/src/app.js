@@ -1,4 +1,5 @@
 import express from "express";
+import { emailAddress } from "./email.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
@@ -83,7 +84,7 @@ export function createApp(db, config) {
         organization: z.string().min(1).max(100),
         employeeId: z.string().min(1).max(100),
         name: z.string().min(1).max(100),
-        phone: z.string().min(1).max(100),
+        email: emailAddress,
         site: z.string().min(1).max(100).default("Default Site"),
       })
       .strict()
@@ -92,7 +93,7 @@ export function createApp(db, config) {
     const existing = (
       await db.query(
         "SELECT id, active FROM users WHERE org_id=$1 AND employee_id=$2",
-        [p.organization, p.employeeId]
+        [p.organization, p.employeeId],
       )
     ).rows[0];
 
@@ -100,52 +101,65 @@ export function createApp(db, config) {
       if (!existing.active) {
         return res.json({
           status: "PENDING",
-          message: "Registration already submitted and pending admin approval."
+          message: "Registration already submitted and pending admin approval.",
         });
       }
       return res.status(400).json({
-        error: "An active account with this Employee ID already exists."
+        error: "An active account with this Employee ID already exists.",
       });
     }
 
     const id = randomUUID();
     await db.query(
-      "INSERT INTO users(id, org_id, employee_id, role, site, name, phone, active) VALUES($1, $2, $3, 'WORKER', $4, $5, $6, false)",
-      [id, p.organization, p.employeeId, p.site, p.name, p.phone]
+      "INSERT INTO users(id, org_id, employee_id, role, site, name, email, active) VALUES($1, $2, $3, 'WORKER', $4, $5, $6, false)",
+      [id, p.organization, p.employeeId, p.site, p.name, p.email],
     );
 
     res.json({
       status: "PENDING",
-      message: "Registration successful. Your account is pending site administrator approval."
+      message:
+        "Registration successful. Your account is pending site administrator approval.",
     });
   });
   app.use("/api", auth.middleware);
   app.get("/api/admin/pending-workers", async (req, res) => {
-    need(["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role), "Unauthorized", 403);
+    need(
+      ["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role),
+      "Unauthorized",
+      403,
+    );
     const pending = (
       await db.query(
-        "SELECT id, org_id, employee_id, role, site, name, phone, created_at FROM users WHERE org_id=$1 AND active=false ORDER BY created_at DESC",
-        [req.user.org_id]
+        "SELECT id, org_id, employee_id, role, site, name, email, created_at FROM users WHERE org_id=$1 AND active=false ORDER BY created_at DESC",
+        [req.user.org_id],
       )
     ).rows;
     res.json({ pending });
   });
   app.post("/api/admin/workers/:id/approve", async (req, res) => {
-    need(["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role), "Unauthorized", 403);
+    need(
+      ["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role),
+      "Unauthorized",
+      403,
+    );
     const workerId = z.string().uuid().parse(req.params.id);
     const result = await db.query(
       "UPDATE users SET active=true WHERE id=$1 AND org_id=$2 RETURNING id, name, employee_id",
-      [workerId, req.user.org_id]
+      [workerId, req.user.org_id],
     );
     need(result.rows.length > 0, "Worker not found or already active", 404);
     res.json({ ok: true, worker: result.rows[0] });
   });
   app.post("/api/admin/workers/:id/reject", async (req, res) => {
-    need(["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role), "Unauthorized", 403);
+    need(
+      ["ORG_ADMIN", "HR", "TRAINER"].includes(req.user.role),
+      "Unauthorized",
+      403,
+    );
     const workerId = z.string().uuid().parse(req.params.id);
     await db.query(
       "DELETE FROM users WHERE id=$1 AND org_id=$2 AND active=false",
-      [workerId, req.user.org_id]
+      [workerId, req.user.org_id],
     );
     res.json({ ok: true });
   });
@@ -216,10 +230,7 @@ export function createApp(db, config) {
       u.role === "WORKER"
         ? []
         : (
-            await db.query(
-              "SELECT * FROM users WHERE org_id=$1 AND active=true",
-              [u.org_id],
-            )
+            await db.query("SELECT * FROM users WHERE org_id=$1", [u.org_id])
           ).rows
             .filter((w) => orgWide || w.site === u.site)
             .map(publicUser);
@@ -268,7 +279,7 @@ export function createApp(db, config) {
       .object({
         employeeId: z.string().trim().min(1).max(50),
         name: z.string().trim().min(1).max(100),
-        phone: z.string().regex(/^\+[1-9]\d{7,14}$/),
+        email: emailAddress,
         role: z.enum([
           "WORKER",
           "SUPERVISOR",
@@ -285,8 +296,8 @@ export function createApp(db, config) {
     const uid = randomUUID();
     await db.transaction(async (tx) => {
       await tx.query(
-        "INSERT INTO users(id,org_id,employee_id,name,phone,role,site) VALUES($1,$2,$3,$4,$5,$6,$7)",
-        [uid, u.org_id, p.employeeId, p.name, p.phone, p.role, p.site],
+        "INSERT INTO users(id,org_id,employee_id,name,email,role,site) VALUES($1,$2,$3,$4,$5,$6,$7)",
+        [uid, u.org_id, p.employeeId, p.name, p.email, p.role, p.site],
       );
       await tx.query(
         "INSERT INTO audit_log(id,org_id,actor_id,action,record_id) VALUES($1,$2,$3,$4,$5)",
@@ -294,6 +305,35 @@ export function createApp(db, config) {
       );
     });
     res.status(201).json({ id: uid });
+  });
+  app.post("/api/workers/:id/email", async (req, res) => {
+    need(
+      req.user.role === "ORG_ADMIN",
+      "Organization administrator permission required.",
+      403,
+    );
+    const id = z.string().min(1).max(100).parse(req.params.id);
+    const { email } = z
+      .object({ email: emailAddress })
+      .strict()
+      .parse(req.body);
+    await db.transaction(async (tx) => {
+      const result = await tx.query(
+        "UPDATE users SET email=$1 WHERE id=$2 AND org_id=$3 RETURNING id",
+        [email, id, req.user.org_id],
+      );
+      need(result.rows.length, "Employee not found.", 404);
+      await tx.query("UPDATE sessions SET revoked=true WHERE user_id=$1", [id]);
+      await tx.query(
+        "UPDATE otp_challenges SET consumed=true WHERE user_id=$1",
+        [id],
+      );
+      await tx.query(
+        "INSERT INTO audit_log(id,org_id,actor_id,action,record_id) VALUES($1,$2,$3,$4,$5)",
+        [randomUUID(), req.user.org_id, req.user.id, "worker.email.update", id],
+      );
+    });
+    res.json({ ok: true });
   });
   app.get("/api/audit", async (req, res) => {
     need(

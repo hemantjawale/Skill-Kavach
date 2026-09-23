@@ -1,48 +1,14 @@
 # Mobile, manager console and AR testing
 
-## Deploy this update first (Node.js on Render)
+## Deploy this update first
 
-The current hosted root returned HTTP 404 during review: the backend is running, but the console is not built. Push these code changes to the deployment branch, then update the existing Render Node service:
+Follow [the SMTP Render migration guide](../deploy/RENDER.md), including the additive schema migration, administrator email setup, Node build settings and SMTP hosting requirement. Deploy backend first, then install the email-login APK.
 
-| Setting | Value |
-|---|---|
-| Root Directory | Leave empty (remove `backend`) |
-| Build Command | `npm --prefix admin install --include=dev && npm --prefix admin run build && npm --prefix backend install --omit=dev` |
-| Start Command | `cd backend && npm run migrate && npm start` |
-| Health Check Path | `/health` |
+## Email login and manager workflows
 
-Keep the existing database, CA secret file, SMS and Firebase environment values. The administrator is already seeded; do not change accounts or re-seed. Manually deploy the latest commit. After it succeeds, open **https://skill-kavach.onrender.com/manager**. The root URL also opens the manager console. This replaces the website that used to be served at localhost:8080.
+Follow [README login instructions](../README.md#email-otp-login-website-and-android) and [the SMTP migration guide](../deploy/RENDER.md). Each employee needs a stored email; manager email updates revoke old sessions and codes. Mobile self-registration remains pending until an authorized reviewer approves it.
 
-Deploy the backend before installing this APK: older backend versions reject the new phone and portal fields. No new schema migration is needed for these fields; the normal migration remains safe to run.
-
-## Mobile login and employee numbers
-
-Enter your organization ID (currently `demo` if unchanged on Render), employee ID (`ADMIN` for the bootstrap administrator), and registered mobile number including country code, such as `+91` followed by ten digits. Enter digits without spaces.
-
-The submitted number must match that employee's registered number. A mismatch gets the same generic response but sends no SMS and cannot produce a session. Login does not create an account or change its phone number. This prevents someone entering `ADMIN` with their own number and obtaining administrator access. Older mobile clients can still request OTP using their existing account fields; SMS always goes to the stored account number.
-
-OTP was already addressed to each employee's registered phone, not globally to the bootstrap number. To test another employee:
-
-1. Sign into the manager console as `ADMIN` with the bootstrap administrator's registered number.
-2. Open **Workers → Add employee**. Enter employee ID, name, their actual phone, site and `WORKER` role.
-3. On that employee's phone, enter the same organization, their employee ID and phone. The code goes to their number.
-4. If Twilio does not deliver, inspect its delivery logs and account/destination permissions. The app cannot bypass provider restrictions.
-
-## Separate manager login and existing features
-
-The mobile sign-in screen has **Manager login — workforce console**, opening `/manager` in the browser. This is a staff portal: worker accounts cannot get an OTP through its manager login flow. Server-side role and site checks still control every operation; opening this URL does not grant manager permissions.
-
-Use `ADMIN` initially. In **Workers → Add employee**, provision separate staff accounts with their own employee IDs and phone numbers. Choose `ORG_ADMIN` only for someone authorized to administer the whole organization; choose `HR`, `SUPERVISOR`, `TRAINER` or the other scoped roles for limited duties. There is no shared manager password or automatic privilege upgrade.
-
-Already implemented:
-
-- **Payroll:** HR/organization administrators can publish base salary, overtime, incentives, deductions and payment status. Values entered in INR are stored in integer paise. Publishing the same worker/month updates that payroll record. Workers see their own published payslips in the mobile app. This records payroll; it does not transfer money.
-- **Leave:** workers submit leave; authorized staff review and approve/reject it.
-- **Training:** assign modules and due dates. The new employee training-history section shows saved, synchronized completions with mode, duration and completion time. Unsaved local steps are not a live manager feed.
-- **Assessments/certificates:** view attempts, perform independent practical review, issue and revoke qualifications.
-- **Jobs/tasks/attendance:** assign eligible workers, review submitted tasks and offline attendance claims.
-
-There is not universal CRUD for every entity. For example, employee edit/deactivation and payroll deletion are not exposed in the current console. Payroll correction uses the existing worker/month update. Do not treat the console as a full HR/ERP integration.
+The console includes salary publish/update (HR/admin), leave review, training assignments/history, assessments, certificates, tasks and attendance. Manager access uses staff roles, not shared credentials. Payroll is a record, not a bank transfer.
 
 ## AR: getting the marks to appear
 
@@ -61,9 +27,9 @@ The AR renderer does not recognize real fires, gas, machines, hazards or safe zo
 
 ## Quick acceptance checks
 
-- Worker phone login sends to the correct registered number; a mismatched number does not authenticate.
+- Worker email login sends to the correct registered email; a mismatched email does not authenticate.
 - Worker credentials cannot log in through the manager portal.
 - Create a worker, publish salary, submit/review leave, save training and view its history as staff.
 - Confirm the red-to-green placement ring and equipment on an AR-supported physical phone, then reposition and complete a lesson.
 
-Backend tests cover phone matching, staff login gating, salary correction and authorization. Android build/unit tests and lint validate code; physical-device AR tracking and live SMS delivery still require your device/provider test.
+Backend tests cover phone matching, staff login gating, salary correction and authorization. Android build/unit tests and lint validate code; physical-device AR tracking and live email delivery still require your device/provider test.

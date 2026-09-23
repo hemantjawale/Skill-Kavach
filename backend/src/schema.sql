@@ -36,3 +36,18 @@ CREATE TABLE IF NOT EXISTS push_jobs (
  notification_id text PRIMARY KEY REFERENCES records(id), attempts int NOT NULL DEFAULT 0,
  next_attempt timestamptz NOT NULL DEFAULT now(), delivered_at timestamptz, last_error text
 );
+
+-- Email is nullable only for legacy accounts awaiting administrator migration.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE users ALTER COLUMN phone SET DEFAULT '';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+ALTER TABLE otp_challenges ADD COLUMN IF NOT EXISTS email text;
+CREATE TABLE IF NOT EXISTS auth_migrations (id text PRIMARY KEY);
+-- Invalidate sessions/challenges issued by the former, partially migrated auth flow once.
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM auth_migrations WHERE id='smtp-email-v1') THEN
+    UPDATE sessions SET revoked=true;
+    UPDATE otp_challenges SET consumed=true;
+    INSERT INTO auth_migrations(id) VALUES ('smtp-email-v1');
+  END IF;
+END $$;

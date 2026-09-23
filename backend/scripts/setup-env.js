@@ -17,7 +17,7 @@ for (const path of [apiPath, dockerPath]) {
 const password = randomBytes(32).toString("hex");
 await writeFile(
   apiPath,
-  `NODE_ENV=development\nPORT=8080\nDATABASE_URL=postgresql://suraksha:${password}@127.0.0.1:5432/suraksha\nJWT_SECRET=${randomBytes(48).toString("hex")}\nOTP_PEPPER=${randomBytes(48).toString("hex")}\nPUBLIC_URL=http://localhost:8080\nSMS_PROVIDER=local\nDEV_OTP_FILE=.data/otp.json\nPROXY_HOPS=0\nFIREBASE_PROJECT_ID=\nGOOGLE_APPLICATION_CREDENTIALS=\nBOOTSTRAP_ORG=demo\nBOOTSTRAP_ADMIN_PHONE=\n`,
+  `NODE_ENV=development\nPORT=8080\nDATABASE_URL=postgresql://suraksha:${password}@127.0.0.1:5432/suraksha\nJWT_SECRET=${randomBytes(48).toString("hex")}\nOTP_PEPPER=${randomBytes(48).toString("hex")}\nPUBLIC_URL=http://localhost:8080\nSMTP_HOST=\nSMTP_PORT=587\nSMTP_USER=\nSMTP_PASS=\nSMTP_FROM=\nPROXY_HOPS=0\nFIREBASE_PROJECT_ID=\nGOOGLE_APPLICATION_CREDENTIALS=\nBOOTSTRAP_ORG=demo\nBOOTSTRAP_ADMIN_EMAIL=\n`,
   { flag: "wx", mode: 0o600 },
 );
 await writeFile(dockerPath, `POSTGRES_PASSWORD=${password}\n`, {
@@ -25,5 +25,5 @@ await writeFile(dockerPath, `POSTGRES_PASSWORD=${password}\n`, {
   mode: 0o600,
 });
 console.log(
-  "Created backend/.env and root .env with independent random secrets. Set BOOTSTRAP_ADMIN_PHONE, then follow ENV_SETUP.md. No existing files were overwritten.",
+  "Created backend/.env and root .env with independent random secrets. Set BOOTSTRAP_ADMIN_EMAIL, then follow ENV_SETUP.md. No existing files were overwritten.",
 );

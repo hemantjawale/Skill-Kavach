@@ -1,4 +1,4 @@
-import { test, before, after } from "node:test";
+import { test, before, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { PGlite } from "@electric-sql/pglite";
@@ -29,21 +29,23 @@ before(async () => {
     ["remote", "o1", "WORKER", "B"],
   ]) {
     await db.query(
-      "INSERT INTO users(id,org_id,employee_id,name,phone,role,site) VALUES($1,$2,$1,$1,$3,$4,$5)",
-      [id, org, `+91900000000${Object.keys(actors).length}`, role, site],
+      "INSERT INTO users(id,org_id,employee_id,name,email,role,site) VALUES($1,$2,$1,$1,$3,$4,$5)",
+      [id, org, `${id}@example.test`, role, site],
     );
     actors[id] = (
       await db.query("SELECT * FROM users WHERE id=$1", [id])
     ).rows[0];
   }
+});
+beforeEach(() => {
   api = supertest(
     createApp(db, {
       jwtSecret: "a".repeat(40),
       otpPepper: "b".repeat(40),
       publicUrl: "https://example.test",
-      sendOtp: async (phone, code, challenge) => {
+      sendOtp: async (email, code, challenge) => {
         codes.set(challenge, code);
-        destinations.set(challenge, phone);
+        destinations.set(challenge, email);
       },
     }),
   );
@@ -55,7 +57,7 @@ async function login(who) {
   await db.query("DELETE FROM otp_challenges WHERE user_id=$1", [who]);
   const start = await api
     .post("/api/auth/request")
-    .send({ organization: user.org_id, employeeId: who })
+    .send({ organization: user.org_id, employeeId: who, email: user.email })
     .expect(200);
   return (
     await api
@@ -92,7 +94,11 @@ test("OTP is one-use, and unauthenticated access is rejected", async () => {
   await api.get("/api/bootstrap").expect(401);
   const s = await api
     .post("/api/auth/request")
-    .send({ organization: "o1", employeeId: "worker" })
+    .send({
+      organization: "o1",
+      employeeId: "worker",
+      email: actors.worker.email,
+    })
     .expect(200);
   const body = {
     challengeId: s.body.challengeId,
@@ -106,7 +112,11 @@ test("OTP incorrect-attempt counter persists and locks out at five", async () =>
   await db.query("DELETE FROM otp_challenges WHERE user_id='worker'");
   const s = await api
     .post("/api/auth/request")
-    .send({ organization: "o1", employeeId: "worker" })
+    .send({
+      organization: "o1",
+      employeeId: "worker",
+      email: actors.worker.email,
+    })
     .expect(200);
   for (let i = 0; i < 5; i++)
     await api
@@ -418,7 +428,7 @@ test("training assignment creates a worker-owned notification", async () => {
 
 test("qualified worker can check in, submit tasks, receive verification and check out", async () => {
   await db.query(
-    "INSERT INTO users(id,org_id,employee_id,name,phone,role,site) VALUES('lifecycle','o1','lifecycle','Lifecycle worker','+919000000099','WORKER','A')",
+    "INSERT INTO users(id,org_id,employee_id,name,email,role,site) VALUES('lifecycle','o1','lifecycle','Lifecycle worker','+919000000099','WORKER','A')",
   );
   actors.lifecycle = (
     await db.query("SELECT * FROM users WHERE id='lifecycle'")
@@ -476,21 +486,21 @@ test("qualified worker can check in, submit tasks, receive verification and chec
   );
 });
 
-test("phone login sends only to the matched employee and manager portal rejects workers", async () => {
-  for (const [who, phone, portal, allowed] of [
-    ["worker", actors.worker.phone, "worker", true],
-    ["admin", actors.worker.phone, "manager", false],
-    ["worker", actors.worker.phone, "manager", false],
-    ["admin", actors.admin.phone, "manager", true],
+test("email login sends only to the matched employee and manager portal rejects workers", async () => {
+  for (const [who, email, portal, allowed] of [
+    ["worker", actors.worker.email, "worker", true],
+    ["admin", actors.worker.email, "manager", false],
+    ["worker", actors.worker.email, "manager", false],
+    ["admin", actors.admin.email, "manager", true],
   ]) {
     await db.query("DELETE FROM auth_throttles");
     const response = await api
       .post("/api/auth/request")
-      .send({ organization: "o1", employeeId: who, phone, portal })
+      .send({ organization: "o1", employeeId: who, email, portal })
       .expect(200);
     const id = response.body.challengeId;
     assert.equal(destinations.has(id), allowed);
-    if (allowed) assert.equal(destinations.get(id), phone);
+    if (allowed) assert.equal(destinations.get(id), email);
     else {
       const row = (
         await db.query("SELECT user_id FROM otp_challenges WHERE id=$1", [id])
@@ -524,4 +534,150 @@ test("payroll can be published and corrected by admin, but not by a worker", asy
   assert.equal(updated.id, first.id);
   assert.equal(updated.data.net, 2140000);
   await assert.rejects(op("worker", "payroll.publish", payload));
+});
+
+test("email OTP rejects legacy phone payload and never exposes a debug code", async () => {
+  await db.query("DELETE FROM auth_throttles");
+  await api
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: "admin",
+      phone: "attacker@example.test",
+    })
+    .expect(400);
+  const response = await api
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: "admin",
+      email: " ADMIN@EXAMPLE.TEST ",
+    })
+    .expect(200);
+  assert.equal(response.body.debugCode, undefined);
+  assert.equal(
+    destinations.get(response.body.challengeId),
+    "admin@example.test",
+  );
+});
+
+test("self registration stores email, requires approval and cannot assign a role", async () => {
+  const input = {
+    organization: "o1",
+    employeeId: "new-email-worker",
+    name: "New Worker",
+    email: " NEW@EXAMPLE.TEST ",
+    site: "A",
+  };
+  await api
+    .post("/api/workers/self-register")
+    .send({ ...input, role: "ORG_ADMIN" })
+    .expect(400);
+  await api.post("/api/workers/self-register").send(input).expect(200);
+  const row = (
+    await db.query("SELECT * FROM users WHERE employee_id=$1", [
+      input.employeeId,
+    ])
+  ).rows[0];
+  assert.equal(row.email, "new@example.test");
+  assert.equal(row.active, false);
+  assert.equal(row.role, "WORKER");
+  await db.query("DELETE FROM auth_throttles");
+  const before = await api
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: input.employeeId,
+      email: input.email,
+    })
+    .expect(200);
+  assert.equal(destinations.has(before.body.challengeId), false);
+  const admin = await login("admin");
+  await api
+    .post(`/api/admin/workers/${row.id}/approve`)
+    .set("Authorization", `Bearer ${admin.accessToken}`)
+    .send({})
+    .expect(200);
+  await db.query("DELETE FROM auth_throttles");
+  const after = await api
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: input.employeeId,
+      email: input.email,
+    })
+    .expect(200);
+  assert.equal(destinations.get(after.body.challengeId), "new@example.test");
+});
+
+test("admin email migration is tenant-scoped and revokes the worker's codes and sessions", async () => {
+  const admin = await login("admin"),
+    worker = await login("worker"),
+    other = await login("other");
+  const bearer = (token) => `Bearer ${token.accessToken}`;
+  await api
+    .post("/api/workers/worker/email")
+    .set("Authorization", bearer(worker))
+    .send({ email: "changed@example.test" })
+    .expect(403);
+  await api
+    .post("/api/workers/worker/email")
+    .set("Authorization", bearer(other))
+    .send({ email: "changed@example.test" })
+    .expect(404);
+  await db.query("DELETE FROM auth_throttles");
+  const pending = await api
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: "worker",
+      email: actors.worker.email,
+    })
+    .expect(200);
+  await api
+    .post("/api/workers/worker/email")
+    .set("Authorization", bearer(admin))
+    .send({ email: "changed@example.test" })
+    .expect(200);
+  await api
+    .post("/api/auth/verify")
+    .send({
+      challengeId: pending.body.challengeId,
+      code: codes.get(pending.body.challengeId),
+    })
+    .expect(401);
+  await api
+    .get("/api/bootstrap")
+    .set("Authorization", bearer(worker))
+    .expect(401);
+});
+
+test("a failed SMTP send consumes the generated challenge", async () => {
+  await db.query("DELETE FROM auth_throttles");
+  const failing = supertest(
+    createApp(db, {
+      jwtSecret: "a".repeat(40),
+      otpPepper: "b".repeat(40),
+      publicUrl: "https://example.test",
+      sendOtp: async () => {
+        const e = Error("Mail unavailable");
+        e.status = 503;
+        throw e;
+      },
+    }),
+  );
+  await failing
+    .post("/api/auth/request")
+    .send({
+      organization: "o1",
+      employeeId: "admin",
+      email: actors.admin.email,
+    })
+    .expect(503);
+  const active = (
+    await db.query(
+      "SELECT count(*)::int AS count FROM otp_challenges WHERE user_id='admin' AND consumed=false",
+    )
+  ).rows[0].count;
+  assert.equal(active, 0);
 });

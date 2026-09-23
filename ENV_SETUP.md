@@ -1,10 +1,12 @@
 # SurakshaSetu — environment setup
 
+**Render free / Brevo API:** use [the Brevo setup guide](BREVO_SETUP.md). SMTP port restrictions below do not apply to Brevo HTTPS delivery. Set `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, and `BREVO_SENDER_EMAIL`.
+
 Android now defaults to `https://skill-kavach.onrender.com/`. Build with `.\gradlew.bat :app:assembleDebug` and install the new APK to use the hosted backend over Wi-Fi or mobile data. No local server is required. Remove any old `API_BASE_URL` override from your user Gradle properties if it points to localhost or the emulator.
 
 **Hosting on Render:** follow [the Render deployment guide](deploy/RENDER.md) for the reviewed environment, Blueprint setup, database TLS configuration, secret files and Android URL update.
 
-Start with **Option A** to try the whole local workflow without paying for SMS, creating a Firebase project, or installing PostgreSQL. Use **Option B** for a persistent PostgreSQL setup. Production configuration is explained afterward.
+Start with **Option A** to try the whole local workflow without paying for email, creating a Firebase project, or installing PostgreSQL. Use **Option B** for a persistent PostgreSQL setup. Production configuration is explained afterward.
 
 The app is always light, even when the phone uses dark mode. Install the latest rebuilt APK after changing code; changing `.env` alone does not update an installed Android APK.
 
@@ -12,7 +14,7 @@ The app is always light, even when the phone uses dark mode. Install the latest 
 
 | Location | Used by | Contents |
 |---|---|---|
-| `backend/.env` | Node API launched with `npm start`, `npm run migrate`, or `npm run seed` from `backend` | Database URL, server secrets, SMS configuration, optional Firebase server configuration |
+| `backend/.env` | Node API launched with `npm start`, `npm run migrate`, or `npm run seed` from `backend` | Database URL, server secrets, email configuration, optional Firebase server configuration |
 | Repository-root `.env` | Local `docker compose` | Local PostgreSQL password |
 | `%USERPROFILE%/.gradle/gradle.properties` or Gradle `-P` arguments | Android build | API base URL and optional Firebase **client** configuration |
 | `deploy/.env.production` | Production Docker Compose, when passed with `--env-file` | Domain, database/server secrets and service configuration |
@@ -21,7 +23,7 @@ The React console uses the same origin as the API. It does **not** need a separa
 
 `local.properties` at the repository root contains your Android SDK path. It is **not** the API environment file. Leave `sdk.dir` as configured by Android Studio.
 
-Do not place `JWT_SECRET`, `OTP_PEPPER`, Twilio secrets, database passwords, or Firebase service-account JSON in the Android app or React code. The client Firebase API key is a different kind of value from a server service-account private key.
+Do not place `JWT_SECRET`, `OTP_PEPPER`, SMTP secrets, database passwords, or Firebase service-account JSON in the Android app or React code. The client Firebase API key is a different kind of value from a server service-account private key.
 
 ## 2. Option A — run locally without external services
 
@@ -54,7 +56,7 @@ After clicking **Send verification code**, read the newly generated code in anot
 Get-Content 'D:\Skill Kavach\backend\.data\otp.json'
 ```
 
-Enter the `code` value. It expires after five minutes and can be used once. Wait one minute before requesting another code. The file is for local development; real SMS is not sent. The most recent request replaces the local code file.
+Enter the `code` value. It expires after five minutes and can be used once. Wait one minute before requesting another code. The file is for local development; real email is not sent. The most recent request replaces the local code file.
 
 The sandbox stores data in `backend/.data/local-postgres`. Its signing secrets change on restart, so sign in again after restarting it. This runner does not load `backend/.env`; it is deliberately independent of production credentials and refuses `NODE_ENV=production`.
 
@@ -90,10 +92,10 @@ It creates:
 Open `backend/.env` and set:
 
 ```dotenv
-BOOTSTRAP_ADMIN_PHONE=+91YOUR_REAL_10_DIGIT_NUMBER
+BOOTSTRAP_ADMIN_EMAIL=your-real-address@example.com
 ```
 
-Replace the entire example with your real number, e.g. `+91` followed by your ten digits, with no spaces. This is the account's registered phone. With `SMS_PROVIDER=local`, codes still go to the local file; switching to a real provider later uses this registered phone.
+Replace the example with your real administrator email and configure SMTP using section 4. Normal server startup requires SMTP credentials.
 
 Then:
 
@@ -114,75 +116,38 @@ Sign in as the administrator, then use **Workers → Add employee** to create re
 
 If Docker is unavailable, install PostgreSQL separately, create a database and login, and replace `DATABASE_URL` with that connection string. Skip the `docker compose` command.
 
-## 4. Every backend variable and where its value comes from
+## 4. Backend environment and SMTP email OTP
 
-| Variable | What to enter / where to obtain it | Needed? |
-|---|---|---|
-| `NODE_ENV` | `development` locally; `production` on the deployed server | Yes |
-| `PORT` | Port on which Node listens; use `8080` unless your host supplies another value | Default `8080` |
-| `DATABASE_URL` | PostgreSQL connection string. Generated by the local helper. For hosted PostgreSQL, copy the provider's connection string and use its required TLS/CA settings. | Yes for the regular API |
-| `JWT_SECRET` | Generate a fresh random secret using the command below. Used to sign access tokens. It does not come from Firebase. | Yes |
-| `OTP_PEPPER` | Generate a **different** random secret with the same command. Used to hash OTP values. | Yes |
-| `PUBLIC_URL` | Browser-accessible API/admin origin, e.g. `http://localhost:8080` locally or `https://safety.yourdomain.com` in production. Do not append `/api`. Used in certificate verification links. | HTTPS required in production |
-| `SMS_PROVIDER` | `local`, `twilio`, or `webhook`. `local` writes a development code file and is rejected in production. | Yes; defaults to local when no webhook is configured |
-| `DEV_OTP_FILE` | Local file path for development OTPs; `.data/otp.json` is sufficient. Relative to `backend` when using the documented commands. | Local delivery only |
-| `TWILIO_ACCOUNT_SID` | Account SID from your Twilio console; starts with `AC` | Twilio only |
-| `TWILIO_AUTH_TOKEN` | Auth token from the same Twilio account's console. Keep private. | Twilio only |
-| `TWILIO_FROM` | SMS-capable sender number or sender configured in that Twilio account | Twilio, unless using a Messaging Service SID |
-| `TWILIO_MESSAGING_SERVICE_SID` | SID of your configured Twilio Messaging Service; starts with `MG`. If supplied, the service selects the sender and `TWILIO_FROM` is not used. | Optional alternative to `TWILIO_FROM` |
-| `SMS_WEBHOOK_URL` | HTTPS endpoint of an SMS bridge you operate, implementing the contract below. This is **not** an arbitrary provider console URL. | Webhook only |
-| `SMS_WEBHOOK_TOKEN` | Bearer secret accepted by that bridge. Generate it and configure the same value in the bridge. | Webhook only |
-| `FIREBASE_PROJECT_ID` | Firebase console → project settings → Project ID. For server push delivery. | Optional; empty disables the push worker |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Absolute path to a protected Firebase/Google service-account JSON file, or use Google Application Default Credentials / workload identity supported by your host. This variable contains a **path**, not the JSON contents. | When Firebase push uses a service-account file |
-| `PROXY_HOPS` | `0` locally. `1` only when requests must pass through the supplied single trusted gateway and the API port is private. | Default `0` |
-| `BOOTSTRAP_ORG` | Your chosen organization identifier, e.g. `demo` or `bokaro-training`. Workers enter this at login. | Seed command; default `demo` |
-| `BOOTSTRAP_ADMIN_PHONE` | Actual administrator phone in E.164 format | Required by the seed command |
+Use [backend/.env.example](backend/.env.example). Normal startup sends all OTPs through authenticated SMTP; the standalone `scripts/dev-local.js` sandbox is the only file-based test delivery harness.
 
-Generate each server secret separately:
+| Variable | Source / value |
+|---|---|
+| `DATABASE_URL` | PostgreSQL provider connection string |
+| `DATABASE_CA_CERT` | Provider CA PEM path if required |
+| `JWT_SECRET`, `OTP_PEPPER` | Independent cryptographically random secrets, at least 32 characters |
+| `NODE_ENV` | `production` on Render |
+| `PUBLIC_URL` | HTTPS origin; omit on Render to use its assigned URL |
+| `PROXY_HOPS` | `1` behind Render ingress; `0` for direct local use |
+| `PORT` | Let Render supply it, or `8080` locally |
+| `SMTP_HOST` / `EMAIL_HOST` | Your provider's SMTP hostname |
+| `SMTP_PORT` / `EMAIL_PORT` | Provider port, commonly `587` (STARTTLS) or `465` (implicit TLS) |
+| `SMTP_SECURE` / `EMAIL_SECURE` | Optional `true` for implicit TLS; defaults to true only on port 465. STARTTLS remains required on other ports |
+| `SMTP_USER` / `EMAIL_USER` | SMTP authentication username |
+| `SMTP_PASS` / `EMAIL_PASS` | SMTP password/app password supplied by the provider |
+| `SMTP_FROM` / `EMAIL_FROM` | Authenticated mailbox or provider-approved sender; defaults to SMTP user |
+| `BOOTSTRAP_ORG` | Organization ID, e.g. `demo` |
+| `BOOTSTRAP_ADMIN_EMAIL` | Real login email for `ADMIN` |
+| `BOOTSTRAP_SECOND_ADMIN_EMAIL` | Optional real login email for separate `ADMIN2` account |
 
-```powershell
-node -e "process.stdout.write(require('node:crypto').randomBytes(48).toString('hex'))"
-```
+Choose either SMTP_* or EMAIL_* names consistently; SMTP_* takes precedence. Existing EMAIL_* values work. Do not place SMTP credentials in Android or frontend code. Remove obsolete SMS delivery and provider-selection variables from Render; keep your SMTP/EMAIL credentials.
 
-Run it once for `JWT_SECRET` and again for `OTP_PEPPER`. Copy each output into its matching `.env` line. Do not use the same value for both. The setup helper already performs this generation without printing secrets.
+## 5. Verify email configuration and migrate accounts
 
-Example database URL structure:
+From `backend`, run `npm run check:smtp`. It verifies connection, TLS and authentication without sending email. Successful SMTP acceptance does not guarantee inbox delivery; test actual login and check spam/provider logs afterward.
 
-```text
-postgresql://USERNAME:PASSWORD@HOST:5432/DATABASE
-```
+Run `npm run migrate` to add account/challenge email fields and invalidate former sessions once. Run `npm run seed` with explicit bootstrap emails to migrate existing administrators or create new ones. Seed does not overwrite an already assigned email. Existing workers need an organization administrator to register their email in the console.
 
-URL-encode special characters in passwords when constructing a connection string manually. The helper generates hexadecimal passwords to avoid this problem. A Docker-internal host is `db`; a database published to the Windows host is `127.0.0.1`. These are not interchangeable.
-
-## 5. Real SMS using Twilio
-
-Create/configure a Twilio account, obtain an SMS sender or Messaging Service, and copy the account SID/auth token into the backend environment. Twilio's [Messages API](https://www.twilio.com/docs/messaging/api/message-resource) documents the account, recipient, body, and sender parameters used by this implementation.
-
-```dotenv
-SMS_PROVIDER=twilio
-TWILIO_ACCOUNT_SID=AC_REPLACE_WITH_YOUR_ACCOUNT_SID
-TWILIO_AUTH_TOKEN=REPLACE_WITH_YOUR_AUTH_TOKEN
-TWILIO_FROM=REPLACE_WITH_YOUR_CONFIGURED_SENDER
-TWILIO_MESSAGING_SERVICE_SID=
-```
-
-Those `REPLACE` strings are explanations, not working credentials. Use a sender that is enabled for your recipients' country. Complete the provider's sender/recipient setup before testing delivery. If a provider rejects an SMS, inspect its delivery logs; the app never treats a failed provider request as a successful login.
-
-The API creates the six-digit OTP and sends it through the Messages API. This integration does not use Twilio Verify, so a Verify Service SID is not one of these variables.
-
-### Alternative: a different SMS provider via webhook
-
-Your bridge must accept:
-
-```http
-POST /your-sms-endpoint
-Authorization: Bearer YOUR_SMS_WEBHOOK_TOKEN
-Content-Type: application/json
-
-{"phone":"+91...","code":"123456","expiresInSeconds":300}
-```
-
-It should authenticate the bearer token, call your provider using the approved sender/template, and return a success status only when that provider accepts the message. Configure the bridge URL and token in the API. Never point the bridge back to `/api/auth/request`; that would recurse.
+**Render free services block SMTP ports 25, 465 and 587.** Your configured port 587 needs a Render plan or host permitting SMTP. Do not disable TLS to work around this. [Render's documented restriction](https://render.com/docs/free).
 
 ## 6. Optional Firebase push notifications
 
@@ -268,7 +233,7 @@ From the repository root on your deployment host:
 docker compose --env-file deploy/.env.production -f deploy/compose.production.yaml up -d db
 docker compose --env-file deploy/.env.production -f deploy/compose.production.yaml build api
 docker compose --env-file deploy/.env.production -f deploy/compose.production.yaml run --rm api node src/migrate.js
-docker compose --env-file deploy/.env.production -f deploy/compose.production.yaml run --rm -e BOOTSTRAP_ORG=YOUR_ORG -e BOOTSTRAP_ADMIN_PHONE=YOUR_E164_NUMBER api node src/seed.js
+docker compose --env-file deploy/.env.production -f deploy/compose.production.yaml run --rm -e BOOTSTRAP_ORG=YOUR_ORG -e BOOTSTRAP_ADMIN_EMAIL=admin@example.com api node src/seed.js
 docker compose --env-file deploy/.env.production -f deploy/compose.production.yaml up -d
 ```
 
@@ -276,18 +241,10 @@ Replace `YOUR_ORG` and `YOUR_E164_NUMBER` before running the seed command. The g
 
 ## 9. Troubleshooting
 
-| Symptom | Check |
-|---|---|
-| Dark login background | Install the rebuilt APK. The updated code forces a light Android window, Compose surface, input backgrounds, and system bars. |
-| Can't connect on emulator | API running on computer, APK built with `http://10.0.2.2:8080/`, port 8080 available |
-| Can't connect on a physical phone | A reachable trusted HTTPS URL is required; `10.0.2.2` is emulator-only |
-| No local OTP file | Request a code for an existing employee in the correct organization; distinguish `local` sandbox from `demo` PostgreSQL setup |
-| Invalid OTP | Use latest request, six digits, within five minutes; after five wrong attempts request a new code |
-| `JWT_SECRET` / `OTP_PEPPER` startup error | Both must be at least 32 characters and different; regenerate if needed |
-| Database relation missing | Run `npm run migrate` against the same database the API uses |
-| Bootstrap phone error | Enter a real E.164 value beginning with `+`; remove placeholder text |
-| Firebase not configured message | Supply all four Android properties, configure server project/credentials, rebuild, then enable notifications |
-| Certificate not issued after passing | A different trainer/safety officer must approve practical competence in **Assessments** |
-| Job assignment blocked | The worker needs valid, unrevoked certificates covering the entire shift and must have no conflicting shift or approved leave |
-| Offline attendance not in payroll records | It remains a claim until a supervisor/HR/admin reviews it |
-| Environment change seems ignored | Restart the regular API after `.env` changes; rebuild Android after Gradle property changes; sandbox runner ignores `.env` |
+- A registered email is required for every account; typing a new address at login does not change it.
+- Deploy backend/schema and provision administrator emails before installing the new APK. Older phone-login clients are not compatible.
+- SMTP timeout on Render: check the SMTP port restriction above and provider/network access.
+- SMTP authentication failure: check SMTP username and provider app-password requirements.
+- No email despite a generic response: confirm organization, employee ID, registered email and approval status; check spam/provider delivery logs.
+- Existing administrator email differs from seed configuration: use the authorized console update flow. Seed deliberately refuses to overwrite identities.
+- Firebase remains optional and independent of email login.
