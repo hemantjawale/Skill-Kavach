@@ -54,3 +54,10 @@ Existing workers need an administrator to set their email in Workers → Set log
 Request a code and inspect Brevo transactional logs and the recipient inbox/spam folder. A successful API response means provider acceptance, not guaranteed inbox delivery. Check sender verification, account approval and available quota if rejected. Brevo failures return a generic 503 and consume the failed challenge; there is no fallback to SMS or another mailbox.
 
 Brevo HTTP transport is covered by mocked tests. Your actual API key and inbox delivery have not been tested here.
+
+
+## If Render logs only “Request failed Error”
+
+Deploy the latest diagnostic update. Email delivery failures now log a safe code and HTTP status, never the API key, OTP, recipient or raw provider response. Examples: `BREVO_HTTP_401` (authentication), `BREVO_HTTP_403` (permission/account restrictions), `BREVO_HTTP_429` (request limiting), `BREVO_TIMEOUT`, or `BREVO_NETWORK_ERROR`. Use the accompanying provider code and Brevo logs to determine the actual cause; do not assume all 403 errors mean an invalid key. Clients see an email-delivery message rather than a generic server error.
+
+Render free instances can take about a minute to wake after inactivity. The updated APK allows a longer response wait and distinguishes timeouts from connection and delivery errors. For a demo, open `/health` and wait for `{"status":"ok"}` before logging in. Wait at least one minute between OTP requests. This does not resolve Brevo sender/account/quota restrictions; check those separately.

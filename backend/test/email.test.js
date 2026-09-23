@@ -107,3 +107,13 @@ test("Brevo fails closed for missing configuration and provider failures", async
     );
   }
 });
+
+
+test("Brevo diagnostics retain only safe status and known error codes", async()=>{
+  const sender=createOtpSender({BREVO_API_KEY:"private-key",BREVO_SENDER_EMAIL:"sender@example.test"},undefined,async()=>({status:403,json:async()=>({code:"permission_denied",message:"private-key user@example.test"})}));
+  await assert.rejects(sender("worker@example.test","123456"),e=>e.code==="BREVO_HTTP_403" && e.providerStatus===403 && e.providerCode==="permission_denied" && !JSON.stringify(e).includes("private-key") && !JSON.stringify(e).includes("123456"));
+});
+test("Brevo timeouts have a distinct safe diagnostic",async()=>{
+  const sender=createOtpSender({BREVO_API_KEY:"test",BREVO_SENDER_EMAIL:"sender@example.test"},undefined,async()=>{const e=Error("timeout");e.name="TimeoutError";throw e;});
+  await assert.rejects(sender("worker@example.test","123456"),e=>e.code==="BREVO_TIMEOUT" && e.status===503);
+});

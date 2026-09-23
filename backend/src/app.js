@@ -369,10 +369,19 @@ export function createApp(db, config) {
         ? "Check the submitted fields and try again."
         : err.code === "23505"
           ? "This record already exists."
-          : status < 500
+          : status < 500 || err.safeToExpose === true
             ? err.message
             : "Unable to complete the request. Please retry.";
-    if (status >= 500) console.error("Request failed", err.code ?? err.name);
+    if (status >= 500)
+      console.error("Request failed", {
+        code: err.code ?? err.name,
+        ...(err.safeToExpose
+          ? {
+              providerStatus: err.providerStatus,
+              providerCode: err.providerCode,
+            }
+          : {}),
+      });
     res.status(status).json({ error: message });
   });
   return app;

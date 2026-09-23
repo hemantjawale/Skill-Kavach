@@ -109,9 +109,15 @@ private fun SafetyApp(repo: SafetyRepository) {
                     action()
                     error = ""
                 } catch (e: Exception) {
-                    error =
-                        if (e is ApiFailure) e.message ?: "Please retry."
-                        else "Unable to connect. Check your connection and retry."
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    error = when (e) {
+                        is ApiFailure -> e.message ?: "Please retry."
+                        is java.net.SocketTimeoutException, is java.io.InterruptedIOException -> "The server took too long to respond. It may be waking up. Wait a minute and retry."
+                        is java.net.UnknownHostException, is java.net.ConnectException -> "Cannot reach the server. Check your internet connection and retry."
+                        is javax.net.ssl.SSLException -> "A secure connection could not be established. Check your device date and network."
+                        is java.io.IOException -> "Connection interrupted. Wait a moment and retry."
+                        else -> "Unable to complete this action. Please retry or contact your administrator."
+                    }
                 } finally {
                     busy = false
                 }

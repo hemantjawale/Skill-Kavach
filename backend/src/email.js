@@ -1,6 +1,17 @@
 import nodemailer from "nodemailer";
 import { z } from "zod";
 export const emailAddress = z.string().trim().toLowerCase().max(254).email();
+function deliveryError(code, providerStatus, providerCode) {
+  const error = new Error(
+    "Email delivery is temporarily unavailable. Please wait a minute and retry. If it continues, contact your administrator.",
+  );
+  error.status = 503;
+  error.code = code;
+  error.providerStatus = providerStatus;
+  error.providerCode = providerCode;
+  error.safeToExpose = true;
+  return error;
+}
 export function smtpConfig(env) {
   const host = env.SMTP_HOST || env.EMAIL_HOST;
   const port = Number(env.SMTP_PORT || env.EMAIL_PORT || 587);
@@ -69,14 +80,39 @@ export function createOtpSender(
             textContent: `Your SurakshaSetu verification code is ${code}. It expires in 5 minutes and can be used once. Do not share it. If you did not request it, ignore this email.`,
           }),
         });
-        if (response.status !== 201 || !(await response.json()).messageId)
-          throw new Error("Provider rejected email");
-      } catch {
-        const error = new Error(
-          "Email delivery is unavailable. Please retry later or contact your administrator.",
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          result = {};
+        }
+        if (response.status !== 201 || !result.messageId) {
+          const knownCodes = [
+            "invalid_parameter",
+            "missing_parameter",
+            "unauthorized",
+            "document_not_found",
+            "method_not_allowed",
+            "out_of_range",
+            "duplicate_parameter",
+            "not_enough_credits",
+            "permission_denied",
+            "invalid_credentials",
+            "account_under_validation",
+          ];
+          throw deliveryError(
+            `BREVO_HTTP_${response.status}`,
+            response.status,
+            knownCodes.includes(result.code) ? result.code : "unspecified",
+          );
+        }
+      } catch (cause) {
+        if (cause.safeToExpose) throw cause;
+        throw deliveryError(
+          cause.name === "TimeoutError" || cause.name === "AbortError"
+            ? "BREVO_TIMEOUT"
+            : "BREVO_NETWORK_ERROR",
         );
-        error.status = 503;
-        throw error;
       }
     };
   }
@@ -99,12 +135,19 @@ export function createOtpSender(
         result.rejected?.length
       )
         throw new Error("Recipient rejected");
-    } catch {
-      const error = new Error(
-        "Email delivery is unavailable. Please retry later or contact your administrator.",
+    } catch (cause) {
+      const safeCodes = [
+        "EAUTH",
+        "ETIMEDOUT",
+        "ESOCKET",
+        "ECONNECTION",
+        "EENVELOPE",
+        "EMESSAGE",
+      ];
+      throw deliveryError(
+        "SMTP_" +
+          (safeCodes.includes(cause.code) ? cause.code : "DELIVERY_FAILED"),
       );
-      error.status = 503;
-      throw error;
     }
   };
 }

@@ -50,8 +50,8 @@ class SafetyRepository(private val context: Context) {
     private val client =
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .callTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .callTimeout(105, TimeUnit.SECONDS)
             .followRedirects(false)
             .followSslRedirects(false)
             .build()
@@ -137,6 +137,7 @@ class SafetyRepository(private val context: Context) {
                         response.code,
                         parsed.optString("error", "Unable to complete the request. Please retry."),
                     )
+                if (parsed.length() == 0) throw ApiFailure(response.code, "The server returned an unexpected response. Please wait a moment and retry.")
                 parsed
             }
         }
