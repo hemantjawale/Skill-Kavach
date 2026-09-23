@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">सुरक्षासेतु</string>
+    <string name="title_ar_training">एआर सुरक्षा प्रशिक्षण</string>
+    <string name="title_assessment">सुरक्षा मूल्यांकन</string>
+    <string name="title_certificates">प्रमाणित डिजिटल प्रमाणपत्र</string>
+    <string name="title_admin_dashboard">प्रबंधक अनुपालन पोर्टल</string>
+    <string name="title_safety_mitra">सुरक्षा मित्र एआई सहायक</string>
+    <string name="btn_start_ar">एआर प्रशिक्षण शुरू करें</string>
+    <string name="btn_practice_mode">ऑफलाइन अभ्यास मोड</string>
+    <string name="btn_verify_qr">क्यूआर प्रमाणपत्र सत्यापित करें</string>
+    <string name="btn_voice_mode">आवाज नेविगेशन मोड</string>
+    <string name="lbl_stress_mode">तनाव सिमुलेशन मोड</string>
+    <string name="lbl_hazard_diffusion">खतरा भौतिकी फैलाव</string>
+    <string name="lbl_mesh_status">पी2पी मेश रिले स्थिति</string>
+</resources>

@@ -66,6 +66,8 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-messaging")
+    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("com.google.android.gms:play-services-nearby:19.3.0")
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)

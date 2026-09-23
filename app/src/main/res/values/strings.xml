@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">SurakshaSetu</string>
+    <string name="title_ar_training">AR Safety Training</string>
+    <string name="title_assessment">Safety Assessment</string>
+    <string name="title_certificates">Tamper-Proof Certificates</string>
+    <string name="title_admin_dashboard">Admin Compliance Portal</string>
+    <string name="title_safety_mitra">Safety Mitra AI Assistant</string>
+    <string name="btn_start_ar">Start AR Training</string>
+    <string name="btn_practice_mode">Offline Practice Mode</string>
+    <string name="btn_verify_qr">Verify QR Certificate</string>
+    <string name="btn_voice_mode">Voice Navigation Mode</string>
+    <string name="lbl_stress_mode">Stress Simulation Mode</string>
+    <string name="lbl_hazard_diffusion">Hazard Physics Diffusion</string>
+    <string name="lbl_mesh_status">P2P Mesh Relay Status</string>
 </resources>

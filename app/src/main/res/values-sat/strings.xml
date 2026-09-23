@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">ᱥᱩᱨᱚᱠᱷᱟᱥᱮᱛᱩ</string>
+    <string name="title_ar_training">ᱮ.ᱟᱨ. ᱥᱩᱨᱚᱠᱷᱟ ᱴᱨᱮᱱᱤᱝ</string>
+    <string name="title_assessment">ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱹᱥᱛᱤ</string>
+    <string name="title_certificates">ᱥᱟᱠᱷᱤ ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ</string>
+    <string name="title_admin_dashboard">ᱢᱮᱱᱮᱡᱚᱨ ᱯᱚᱨᱴᱟᱞ</string>
+    <string name="title_safety_mitra">ᱥᱩᱨᱚᱠᱷᱟ ᱢᱤᱛᱨᱚ AI</string>
+    <string name="btn_start_ar">ᱮ.ᱟᱨ. ᱴᱨᱮᱱᱤᱝ ᱮᱦᱚᱵ</string>
+    <string name="btn_practice_mode">ᱚᱯᱷᱞᱟᱭᱤᱱ ᱯᱨᱮᱠᱴᱤᱥ</string>
+    <string name="btn_verify_qr">QR ᱥᱟᱠᱷᱤ ᱪᱮᱠ</string>
+    <string name="btn_voice_mode">ᱨᱚᱲ ᱱᱮᱵᱷᱤᱜᱮᱥᱚᱱ</string>
+    <string name="lbl_stress_mode">ᱴᱮᱱᱥᱚᱱ ᱢᱚᱰ</string>
+    <string name="lbl_hazard_diffusion">ᱵᱚᱛᱚᱨ ᱯᱟᱥᱱᱟᱣ</string>
+    <string name="lbl_mesh_status">P2P ᱢᱮᱥ ᱥᱴᱮᱴᱚᱥ</string>
+</resources>

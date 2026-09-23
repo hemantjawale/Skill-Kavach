@@ -22,6 +22,74 @@ data class PendingAction(
     val error: String = "",
 )
 
+@Entity(tableName = "workers")
+data class WorkerEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val siteId: String,
+    val role: String,
+    val preferredLanguage: String,
+    val biometricEmbeddingHash: String?,
+    val createdAt: Long
+)
+
+@Entity(tableName = "training_sessions")
+data class TrainingSessionEntity(
+    @PrimaryKey val id: String,
+    val workerId: String,
+    val moduleId: String,
+    val siteMapId: String?,
+    val startTime: Long,
+    val endTime: Long,
+    val eventLogJson: String,
+    val isStressMode: Boolean
+)
+
+@Entity(tableName = "assessment_results")
+data class AssessmentResultEntity(
+    @PrimaryKey val id: String,
+    val sessionId: String,
+    val workerId: String,
+    val quizScore: Float,
+    val behavioralScore: Float,
+    val voiceScore: Float,
+    val combinedScore: Float,
+    val passed: Boolean,
+    val evaluatedAt: Long
+)
+
+@Entity(tableName = "certificates")
+data class CertificateEntity(
+    @PrimaryKey val id: String,
+    val workerId: String,
+    val hazardDomain: String,
+    val issuedAt: Long,
+    val expiresAt: Long,
+    val currentConfidenceScore: Float,
+    val signature: String,
+    val prevCertificateHash: String,
+    val biometricHash: String
+)
+
+@Entity(tableName = "site_maps")
+data class SiteMapEntity(
+    @PrimaryKey val id: String,
+    val siteId: String,
+    val name: String,
+    val cloudAnchorRef: String?,
+    val scannedAt: Long
+)
+
+@Entity(tableName = "sync_queue")
+data class SyncQueueEntity(
+    @PrimaryKey val id: String,
+    val payloadType: String,
+    val payloadJson: String,
+    val synced: Boolean,
+    val createdAt: Long,
+    val hopCount: Int = 0
+)
+
 @Dao
 interface SafetyDao {
     @Query("SELECT * FROM cache WHERE id = :id") suspend fun get(id: String): CacheEntry?
@@ -42,6 +110,33 @@ interface SafetyDao {
 
     @Query("DELETE FROM outbox") suspend fun clearOutbox()
 
+    // Certificates Ledger
+    @Query("SELECT * FROM certificates WHERE workerId = :workerId ORDER BY issuedAt DESC")
+    suspend fun getWorkerCertificates(workerId: String): List<CertificateEntity>
+
+    @Query("SELECT * FROM certificates WHERE workerId = :workerId AND hazardDomain = :domain ORDER BY issuedAt DESC LIMIT 1")
+    suspend fun getLatestCertificate(workerId: String, domain: String): CertificateEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCertificate(cert: CertificateEntity)
+
+    // Sync Queue
+    @Query("SELECT * FROM sync_queue WHERE synced = 0 ORDER BY createdAt ASC")
+    suspend fun getUnsyncedItems(): List<SyncQueueEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun enqueueSyncItem(item: SyncQueueEntity)
+
+    @Query("UPDATE sync_queue SET synced = 1 WHERE id = :id")
+    suspend fun markSynced(id: String)
+
+    // Assessment Results
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAssessmentResult(result: AssessmentResultEntity)
+
+    @Query("SELECT * FROM assessment_results WHERE workerId = :workerId ORDER BY evaluatedAt DESC")
+    suspend fun getWorkerAssessments(workerId: String): List<AssessmentResultEntity>
+
     @Transaction
     suspend fun clear() {
         clearCache()
@@ -49,7 +144,20 @@ interface SafetyDao {
     }
 }
 
-@Database(entities = [CacheEntry::class, PendingAction::class], version = 1, exportSchema = true)
+@Database(
+    entities = [
+        CacheEntry::class,
+        PendingAction::class,
+        WorkerEntity::class,
+        TrainingSessionEntity::class,
+        AssessmentResultEntity::class,
+        CertificateEntity::class,
+        SiteMapEntity::class,
+        SyncQueueEntity::class
+    ],
+    version = 2,
+    exportSchema = false
+)
 abstract class SafetyDatabase : RoomDatabase() {
     abstract fun dao(): SafetyDao
 }

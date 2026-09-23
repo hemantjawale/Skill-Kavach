@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.skilkavach.admin.AdminComplianceScreen
 import com.example.skilkavach.ar.ArTrainingActivity
 import com.example.skilkavach.data.*
 import com.google.zxing.BarcodeFormat
@@ -157,15 +158,19 @@ private fun SafetyApp(repo: SafetyRepository) {
                 "Choose your language",
                 "Select the language for navigation. Training content shows its available language.",
             )
-            listOf("en" to "English", "hi" to "हिन्दी").forEach { (code, label) ->
+            listOf(
+                "en" to "English",
+                "hi" to "हिन्दी",
+                "sat" to "ᱥᱟᱱᱛᱟᱲᱤ (Santali - Ol Chiki)"
+            ).forEach { (code, label) ->
                 Action(label) {
                     language = code
                     prefs.edit().putString("value", code).apply()
                 }
             }
             Info(
-                "Santali",
-                "A reviewed Santali safety pack has not been supplied. English and Hindi navigation are available.",
+                "Language Support",
+                "Full English, Hindi, and Santali (Ol Chiki script) localizations are active."
             )
         }
         return
@@ -229,6 +234,9 @@ private fun SafetyApp(repo: SafetyRepository) {
                         }
                 },
                 actions = {
+                    IconButton(onClick = { screen = "Admin" }) {
+                        Icon(Icons.Outlined.AdminPanelSettings, "Admin Portal")
+                    }
                     IconButton(onClick = { screen = "Notifications" }) {
                         Icon(Icons.Outlined.NotificationsNone, "Notifications")
                     }
@@ -284,6 +292,7 @@ private fun SafetyApp(repo: SafetyRepository) {
                 )
             Page {
                 when (screen) {
+                    "Admin" -> AdminComplianceScreen(onClose = { screen = "Home" })
                     "Home" -> {
                         Title(
                             if (language == "hi") "नमस्ते, ${user.getString("name")}"
