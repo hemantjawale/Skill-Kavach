@@ -157,6 +157,7 @@ class TrainingRenderer(
     private val markers: List<Marker>,
     private val onStatus: (String) -> Unit,
     private val onHit: (String) -> Unit,
+    val moduleId: String = "fire",
 ) : GLSurfaceView.Renderer {
 
     @Volatile private var resetRequested = false
@@ -164,12 +165,16 @@ class TrainingRenderer(
     @Volatile private var autoPlaceRequested = false
     @Volatile var fireState: FireState = FireState.ACTIVE
         private set
+    @Volatile var alarmActive: Boolean = false
+        private set
 
     fun reposition() { resetRequested = true }
     fun placeEquipment() { placeRequested = true }
     fun autoPlaceInFront() { autoPlaceRequested = true }
     fun suppressFire() { if (fireState == FireState.ACTIVE) fireState = FireState.SUPPRESSING }
     fun extinguishFire() { fireState = FireState.EXTINGUISHED }
+    fun triggerAlarm() { alarmActive = true }
+    fun resetAlarm() { alarmActive = false }
 
     // GL state
     private var cameraProgram = 0
@@ -195,9 +200,10 @@ class TrainingRenderer(
     private val lightDir = floatArrayOf(0.3f, 1f, 0.5f)
     private val lightColor = floatArrayOf(1f, 0.97f, 0.92f)
 
-    // Fire effect
+    // Hazard effects
     private val fireEffect = FireEffectRenderer(maxParticles = 60)
-    private val diffusionSimulator = HazardDiffusionSimulator(width = 10, height = 10)
+    private val gasEffect = GasEffectRenderer(maxParticles = 75)
+    val diffusionSimulator = HazardDiffusionSimulator(width = 10, height = 10)
     private var suppressionProgress = 0f  // 0 = full fire, 1 = fully extinguished
 
     // Shadow disc mesh
@@ -356,8 +362,12 @@ class TrainingRenderer(
         glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
 
-        // Initialize fire effect
-        fireEffect.initialize()
+        // Initialize hazard effects
+        if (moduleId == "gas") {
+            gasEffect.initialize()
+        } else {
+            fireEffect.initialize()
+        }
 
         // Build shadow mesh
         shadowMesh = IndustrialMeshes.contactShadow(1f) // Unit radius, scaled per object
@@ -374,93 +384,166 @@ class TrainingRenderer(
     // ── Build spatial scene layout ──────────────────────────────────
 
     private fun buildScene() {
-        /**
-         * Spatial arrangement for an industrial fire training scenario:
-         *
-         *              EXIT SIGN (elevated, far)
-         *                   |
-         *     ALARM (elevated, left)    SAFE ZONE
-         *                   |
-         *         FIRE SOURCE (center-right, floor)
-         *                   |
-         *     EXTINGUISHER (near-left, floor)
-         */
-        sceneElements = markers.map { marker ->
-            val model: IndustrialMeshes.CompositeModel
-            val px: Float; val py: Float; val pz: Float
-            val scale: Float
-            val rotY: Float
+        val elements = mutableListOf<SceneElement>()
 
-            when (marker.id) {
-                "extinguisher" -> {
-                    model = IndustrialMeshes.fireExtinguisher()
-                    px = -0.35f; py = 0f; pz = 0.25f; scale = 1f; rotY = 25f
+        if (moduleId == "gas") {
+            /**
+             * Believable Industrial Confined Space Training Scenario:
+             *
+             *                        EXIT MUSTER SIGN (elevated, right upwind)
+             *                               |
+             *      ALARM BEACON (elevated)  |  STANDBY ATTENDANT (outside boundary)
+             *               \               |   /
+             *             CONFINED SPACE HATCH & RESCUE TRIPOD (center-floor)
+             *               /               |   \
+             *     PPE INSPECTION BENCH      |  EXCLUSION BARRICADES
+             *               \               |
+             *             PERMIT BOARD (left, outside boundary)
+             */
+            for (marker in markers) {
+                val model: IndustrialMeshes.CompositeModel
+                val px: Float; val py: Float; val pz: Float
+                val scale: Float; val rotY: Float
+
+                when (marker.id) {
+                    "hazard" -> {
+                        model = IndustrialMeshes.confinedSpaceHatch()
+                        px = 0.0f; py = 0.0f; pz = -1.20f; scale = 1.0f; rotY = 0f
+                    }
+                    "permit" -> {
+                        model = IndustrialMeshes.permitClipboard()
+                        px = -0.75f; py = 0.0f; pz = -0.55f; scale = 1.0f; rotY = 25f
+                    }
+                    "detector" -> {
+                        model = IndustrialMeshes.gasDetector()
+                        px = -0.52f; py = 0.73f; pz = -1.10f; scale = 1.0f; rotY = -25f
+                    }
+                    "ppe" -> {
+                        model = IndustrialMeshes.ppeStation()
+                        px = -0.70f; py = 0.0f; pz = -1.15f; scale = 1.0f; rotY = 30f
+                    }
+                    "buddy" -> {
+                        model = IndustrialMeshes.buddyFigure()
+                        px = 0.90f; py = 0.0f; pz = -0.65f; scale = 1.0f; rotY = -35f
+                    }
+                    "alarm" -> {
+                        model = IndustrialMeshes.industrialAlarmBeacon()
+                        px = -0.90f; py = 1.25f; pz = -1.20f; scale = 1.0f; rotY = 20f
+                    }
+                    "exit" -> {
+                        model = IndustrialMeshes.evacuationMusterSign()
+                        px = 1.10f; py = 1.35f; pz = 0.35f; scale = 1.1f; rotY = -140f
+                    }
+                    else -> {
+                        model = IndustrialMeshes.CompositeModel(
+                            listOf(IndustrialMeshes.ModelPart(
+                                "default", IndustrialMeshes.box(0.06f, 0.08f, 0.04f),
+                                IndustrialMeshes.Material(marker.color[0], marker.color[1], marker.color[2])
+                            )),
+                            height = 0.16f
+                        )
+                        px = marker.x; py = 0.12f; pz = marker.z; scale = 1f; rotY = 0f
+                    }
                 }
-                "pin" -> {
-                    // Pin is part of extinguisher — offset slightly
-                    model = IndustrialMeshes.CompositeModel(
-                        listOf(IndustrialMeshes.ModelPart(
-                            "pin_highlight", IndustrialMeshes.cylinder(0.006f, 0.04f, 12),
-                            IndustrialMeshes.Material(0.85f, 0.75f, 0.15f, metallic = 0.7f, roughness = 0.25f)
-                        )),
-                        height = 0.04f
-                    )
-                    px = -0.385f; py = 0.455f; pz = 0.25f; scale = 1f; rotY = 0f
-                }
-                "handle" -> {
-                    // Handle part of extinguisher
-                    model = IndustrialMeshes.CompositeModel(
-                        listOf(IndustrialMeshes.ModelPart(
-                            "handle_highlight", IndustrialMeshes.box(0.05f, 0.01f, 0.015f),
-                            IndustrialMeshes.Material(0.12f, 0.12f, 0.12f, metallic = 0.8f, roughness = 0.25f)
-                        )),
-                        height = 0.02f
-                    )
-                    px = -0.33f; py = 0.47f; pz = 0.25f; scale = 1f; rotY = 0f
-                }
-                "exit" -> {
-                    model = IndustrialMeshes.exitSign()
-                    px = 0f; py = 1.4f; pz = -0.8f; scale = 1.2f; rotY = 0f
-                }
-                "alarm" -> {
-                    model = IndustrialMeshes.fireAlarm()
-                    px = -0.55f; py = 1.1f; pz = -0.4f; scale = 1f; rotY = 20f
-                }
-                "base", "hazard", "sweep" -> {
-                    model = IndustrialMeshes.hazardZone()
-                    px = 0.30f; py = 0.005f; pz = -0.35f; scale = 1f; rotY = 0f
-                }
-                "detector" -> {
-                    model = IndustrialMeshes.gasDetector()
-                    px = 0.45f; py = 0.9f; pz = -0.5f; scale = 1f; rotY = -30f
-                }
-                "permit" -> {
-                    model = IndustrialMeshes.permitClipboard()
-                    px = -0.5f; py = 1.0f; pz = -0.4f; scale = 1f; rotY = 15f
-                }
-                "buddy" -> {
-                    model = IndustrialMeshes.buddyFigure()
-                    px = 0.5f; py = 0f; pz = 0.3f; scale = 1.2f; rotY = -45f
-                }
-                else -> {
-                    // Fallback: generic box
-                    model = IndustrialMeshes.CompositeModel(
-                        listOf(IndustrialMeshes.ModelPart(
-                            "default", IndustrialMeshes.box(0.06f, 0.08f, 0.04f),
-                            IndustrialMeshes.Material(marker.color[0], marker.color[1], marker.color[2])
-                        )),
-                        height = 0.16f
-                    )
-                    px = marker.x; py = 0.12f; pz = marker.z; scale = 1f; rotY = 0f
-                }
+                elements += SceneElement(
+                    id = marker.id, label = marker.label,
+                    model = model, x = px, y = py, z = pz,
+                    scale = scale, rotationY = rotY
+                )
             }
 
-            SceneElement(
-                id = marker.id, label = marker.label,
-                model = model, x = px, y = py, z = pz,
-                scale = scale, rotationY = rotY
+            // Companion ambient industrial objects (non-interactive, empty label)
+            elements += SceneElement(
+                id = "tripod_companion", label = "",
+                model = IndustrialMeshes.rescueTripod(),
+                x = 0.0f, y = 0.0f, z = -1.20f,
+                scale = 1.0f, rotationY = 0f
             )
+            elements += SceneElement(
+                id = "barricade_l", label = "",
+                model = IndustrialMeshes.safetyBarricade(),
+                x = -0.55f, y = 0.0f, z = -0.45f,
+                scale = 1.0f, rotationY = 0f
+            )
+            elements += SceneElement(
+                id = "barricade_r", label = "",
+                model = IndustrialMeshes.safetyBarricade(),
+                x = 0.55f, y = 0.0f, z = -0.45f,
+                scale = 1.0f, rotationY = 0f
+            )
+        } else {
+            /**
+             * Spatial arrangement for an industrial fire training scenario:
+             *
+             *              EXIT SIGN (elevated, far)
+             *                   |
+             *     ALARM (elevated, left)    SAFE ZONE
+             *                   |
+             *         FIRE SOURCE (center-right, floor)
+             *                   |
+             *     EXTINGUISHER (near-left, floor)
+             */
+            for (marker in markers) {
+                val model: IndustrialMeshes.CompositeModel
+                val px: Float; val py: Float; val pz: Float
+                val scale: Float; val rotY: Float
+
+                when (marker.id) {
+                    "extinguisher" -> {
+                        model = IndustrialMeshes.fireExtinguisher()
+                        px = -0.35f; py = 0f; pz = 0.25f; scale = 1f; rotY = 25f
+                    }
+                    "pin" -> {
+                        model = IndustrialMeshes.CompositeModel(
+                            listOf(IndustrialMeshes.ModelPart(
+                                "pin_highlight", IndustrialMeshes.cylinder(0.006f, 0.04f, 12),
+                                IndustrialMeshes.Material(0.85f, 0.75f, 0.15f, metallic = 0.7f, roughness = 0.25f)
+                            )),
+                            height = 0.04f
+                        )
+                        px = -0.385f; py = 0.455f; pz = 0.25f; scale = 1f; rotY = 0f
+                    }
+                    "handle" -> {
+                        model = IndustrialMeshes.CompositeModel(
+                            listOf(IndustrialMeshes.ModelPart(
+                                "handle_highlight", IndustrialMeshes.box(0.05f, 0.01f, 0.015f),
+                                IndustrialMeshes.Material(0.12f, 0.12f, 0.12f, metallic = 0.8f, roughness = 0.25f)
+                            )),
+                            height = 0.02f
+                        )
+                        px = -0.33f; py = 0.47f; pz = 0.25f; scale = 1f; rotY = 0f
+                    }
+                    "exit" -> {
+                        model = IndustrialMeshes.exitSign()
+                        px = 0f; py = 1.4f; pz = -0.8f; scale = 1.2f; rotY = 0f
+                    }
+                    "alarm" -> {
+                        model = IndustrialMeshes.fireAlarm()
+                        px = -0.55f; py = 1.1f; pz = -0.4f; scale = 1f; rotY = 20f
+                    }
+                    "base", "hazard", "sweep" -> {
+                        model = IndustrialMeshes.hazardZone()
+                        px = 0.30f; py = 0.005f; pz = -0.35f; scale = 1f; rotY = 0f
+                    }
+                    else -> {
+                        model = IndustrialMeshes.CompositeModel(
+                            listOf(IndustrialMeshes.ModelPart(
+                                "default", IndustrialMeshes.box(0.06f, 0.08f, 0.04f),
+                                IndustrialMeshes.Material(marker.color[0], marker.color[1], marker.color[2])
+                            )),
+                            height = 0.16f
+                        )
+                        px = marker.x; py = 0.12f; pz = marker.z; scale = 1f; rotY = 0f
+                    }
+                }
+                elements += SceneElement(
+                    id = marker.id, label = marker.label,
+                    model = model, x = px, y = py, z = pz,
+                    scale = scale, rotationY = rotY
+                )
+            }
         }
+        sceneElements = elements
     }
 
     // ── Frame rendering ─────────────────────────────────────────────
@@ -611,55 +694,81 @@ class TrainingRenderer(
                     Matrix.scaleM(model, 0, elem.scale, elem.scale, elem.scale)
                 }
 
-                // Compute fire glow contribution based on distance to fire source
-                val fireGlow = if (fireState != FireState.EXTINGUISHED) {
-                    val fireX = 0.30f; val fireZ = -0.35f
-                    val dx = elem.x - fireX; val dz = elem.z - fireZ
-                    val dist = sqrt(dx * dx + dz * dz)
-                    (1f - suppressionProgress) * (0.3f / (dist + 0.3f)).coerceAtMost(0.4f)
-                } else 0f
+                // Compute glow contribution (fire warmth or alarm strobe pulse)
+                val glow = when {
+                    moduleId == "gas" && alarmActive && elem.id == "alarm" -> {
+                        val pulse = (sin(System.currentTimeMillis() * 0.015) * 0.5 + 0.5).toFloat()
+                        pulse * 0.9f
+                    }
+                    moduleId == "fire" && fireState != FireState.EXTINGUISHED -> {
+                        val fireX = 0.30f; val fireZ = -0.35f
+                        val dx = elem.x - fireX; val dz = elem.z - fireZ
+                        val dist = sqrt(dx * dx + dz * dz)
+                        (1f - suppressionProgress) * (0.3f / (dist + 0.3f)).coerceAtMost(0.4f)
+                    }
+                    else -> 0f
+                }
 
                 // Draw each part with PBR shader
-                drawCompositeModel(elem.model, model, fireGlow)
+                drawCompositeModel(elem.model, model, glow)
 
                 // Contact shadow for floor-level objects
                 if (elem.y < 0.1f && elem.id !in listOf("base", "hazard", "sweep")) {
-                    drawContactShadow(anchorWorld, elem.x, elem.z, elem.model.height * elem.scale * 0.6f)
+                    val shadowRadius = when (elem.id) {
+                        "tripod_companion" -> 0.60f
+                        "ppe" -> 0.32f
+                        "buddy" -> 0.22f
+                        "permit" -> 0.20f
+                        else -> (elem.model.height * elem.scale * 0.55f).coerceIn(0.12f, 0.45f)
+                    }
+                    drawContactShadow(anchorWorld, elem.x, elem.z, shadowRadius)
                 }
 
-                // Project label position to screen
-                val labelWorldPos = FloatArray(16)
-                Matrix.setIdentityM(labelWorldPos, 0)
-                Matrix.multiplyMM(labelWorldPos, 0, anchorWorld, 0, labelWorldPos, 0)
-                Matrix.translateM(labelWorldPos, 0, elem.x, elem.y + elem.model.height * elem.scale + 0.06f, elem.z)
-                val mv = FloatArray(16)
-                val mvp = FloatArray(16)
-                Matrix.multiplyMM(mv, 0, view, 0, labelWorldPos, 0)
-                Matrix.multiplyMM(mvp, 0, projection, 0, mv, 0)
-                val clip = FloatArray(4)
-                Matrix.multiplyMV(clip, 0, mvp, 0, floatArrayOf(0f, 0f, 0f, 1f), 0)
-                if (clip[3] > 0 && abs(clip[0] / clip[3]) < 1 && abs(clip[1] / clip[3]) < 1) {
-                    projected += ScreenMarker(
-                        elem.id, elem.label,
-                        (clip[0] / clip[3] + 1) * width / 2,
-                        (1 - clip[1] / clip[3]) * height / 2,
-                    )
+                // Project label position to screen (only for interactive elements with labels)
+                if (elem.label.isNotEmpty()) {
+                    val labelWorldPos = FloatArray(16)
+                    Matrix.setIdentityM(labelWorldPos, 0)
+                    Matrix.multiplyMM(labelWorldPos, 0, anchorWorld, 0, labelWorldPos, 0)
+                    Matrix.translateM(labelWorldPos, 0, elem.x, elem.y + elem.model.height * elem.scale + 0.06f, elem.z)
+                    val mv = FloatArray(16)
+                    val mvp = FloatArray(16)
+                    Matrix.multiplyMM(mv, 0, view, 0, labelWorldPos, 0)
+                    Matrix.multiplyMM(mvp, 0, projection, 0, mv, 0)
+                    val clip = FloatArray(4)
+                    Matrix.multiplyMV(clip, 0, mvp, 0, floatArrayOf(0f, 0f, 0f, 1f), 0)
+                    if (clip[3] > 0 && abs(clip[0] / clip[3]) < 1 && abs(clip[1] / clip[3]) < 1) {
+                        projected += ScreenMarker(
+                            elem.id, elem.label,
+                            (clip[0] / clip[3] + 1) * width / 2,
+                            (1 - clip[1] / clip[3]) * height / 2,
+                        )
+                    }
                 }
             }
 
-            // ── Render fire/smoke particles ───────────────────────
-            if (fireState != FireState.EXTINGUISHED || suppressionProgress < 1f) {
+            // ── Render hazard dispersion effects (Gas or Fire) ───
+            if (moduleId == "gas") {
                 diffusionSimulator.step()
-                val fireWorldX = a.pose.tx() + 0.30f
-                val fireWorldY = a.pose.ty()
-                val fireWorldZ = a.pose.tz() + (-0.35f)
+                val sourceWorldX = a.pose.tx() + 0f
+                val sourceWorldY = a.pose.ty() + 0f
+                val sourceWorldZ = a.pose.tz() + (-1.20f)
 
-                fireEffect.update(
-                    fireWorldX, fireWorldY, fireWorldZ,
-                    fireIntensity = 1f - suppressionProgress,
-                    smokeIntensity = if (fireState == FireState.SUPPRESSING) 1.5f else 0.5f + suppressionProgress * 0.5f
-                )
-                fireEffect.draw(view, projection)
+                gasEffect.update(sourceWorldX, sourceWorldY, sourceWorldZ, concentration = 0.85f)
+                gasEffect.draw(view, projection, sourceWorldX, sourceWorldY, sourceWorldZ, concentration = 0.85f)
+            } else {
+                if (fireState != FireState.EXTINGUISHED || suppressionProgress < 1f) {
+                    diffusionSimulator.step()
+                    val fireWorldX = a.pose.tx() + 0.30f
+                    val fireWorldY = a.pose.ty()
+                    val fireWorldZ = a.pose.tz() + (-0.35f)
+
+                    fireEffect.update(
+                        fireWorldX, fireWorldY, fireWorldZ,
+                        fireIntensity = 1f - suppressionProgress,
+                        smokeIntensity = if (fireState == FireState.SUPPRESSING) 1.5f else 0.5f + suppressionProgress * 0.5f
+                    )
+                    fireEffect.draw(view, projection)
+                }
             }
 
             labels.markers = projected

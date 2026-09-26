@@ -48,6 +48,33 @@
     <string name="ar_label_detector">ᱰᱤᱴᱮᱠᱴᱚᱨ</string>
     <string name="ar_label_permit">ᱯᱚᱨᱢᱤᱴ</string>
     <string name="ar_label_buddy">ᱥᱟᱹᱜᱤ</string>
+    <string name="ar_label_confined_space">ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ ᱦᱮᱪ</string>
+    <string name="ar_label_tripod">ᱵᱟᱧᱪᱟᱣ ᱴᱨᱟᱭᱯᱚᱰ</string>
+    <string name="ar_label_ppe">PPE ᱥᱴᱮᱥᱚᱱ</string>
+
+    <!-- AR Confined Space & Gas Module Strings (Santali Ol Chiki) -->
+    <string name="ar_gas_disclaimer">ᱠᱷᱟᱞᱤ ᱥᱤᱢᱩᱞᱮᱥᱚᱱ: ᱴᱨᱮᱱᱤᱝ ᱞᱟᱹᱜᱤᱫ ᱵᱷᱟᱨᱪᱩᱣᱟᱞ ᱜᱮᱥ ᱰᱤᱴᱮᱠᱴᱚᱨ᱾ ᱥᱟᱹᱨᱤ ᱜᱮᱥ ᱵᱟᱝ ᱪᱮᱠᱟ᱾</string>
+    <string name="ar_permit_title">ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ ᱵᱚᱞᱚᱱ ᱯᱚᱨᱢᱤᱴ</string>
+    <string name="ar_permit_location">ᱡᱟᱭᱜᱟ: ᱴᱮᱝᱠ T-402 ᱥᱟᱢᱯ ᱠᱷᱟᱫᱟᱱ</string>
+    <string name="ar_permit_hazards">ᱵᱚᱛᱚᱨ: H₂S ᱵᱤᱥ ᱜᱮᱥ / O₂ ᱠᱚᱢ / ᱡᱩᱞᱩᱜ ᱵᱷᱟᱯ</string>
+    <string name="ar_permit_reqs">ᱱᱤᱭᱚᱢ: ᱞᱮᱛᱟᱲ ᱜᱟᱛᱮ + ᱵᱟᱧᱪᱟᱣ ᱞᱟᱭᱤᱱ + 4-ᱜᱮᱥ ᱢᱚᱱᱤᱴᱚᱨ</string>
+    <string name="ar_permit_confirm">ᱯᱚᱨᱢᱤᱴ ᱥᱟᱠᱷᱤ ᱢᱮ ᱟᱨ ᱥᱩᱦᱤ ᱢᱮ</string>
+    <string name="ar_ppe_title">ᱞᱟᱹᱠᱛᱤᱭᱟᱱ PPE ᱪᱮᱠ</string>
+    <string name="ar_ppe_harness">ᱰᱤ-ᱨᱤᱝ ᱟᱨ ᱵᱟᱧᱪᱟᱣ ᱫᱟᱹᱲᱤ ᱥᱟᱶ ᱦᱟᱨᱱᱮᱥ</string>
+    <string name="ar_ppe_detector">4-ᱜᱮᱥ ᱰᱤᱴᱮᱠᱴᱚᱨ (O₂, LEL, H₂S, CO)</string>
+    <string name="ar_ppe_respirator">ᱵᱟᱧᱪᱟᱣ ᱥᱟᱦᱮᱫ ᱥᱟᱢᱟᱱ (Respirator)</string>
+    <string name="ar_ppe_helmet">ᱦᱮᱰᱞᱟᱭᱤᱴ ᱦᱮᱞᱢᱮᱴ ᱟᱨ ᱠᱮᱢᱤᱠᱟᱞ ᱢᱚᱡᱟ</string>
+    <string name="ar_ppe_confirm">ᱡᱚᱛᱚ PPE ᱴᱷᱤᱠ ᱢᱮᱱᱟᱜᱼᱟ</string>
+    <string name="ar_attendant_title">ᱛᱟᱦᱮᱸᱱ ᱜᱟᱛᱮ ᱱᱤᱭᱚᱢ (Attendant Protocol)</string>
+    <string name="ar_attendant_desc">ᱜᱟᱛᱮ ᱵᱟᱦᱨᱮ ᱨᱮ ᱨᱮᱰᱤᱭᱳ ᱟᱨ ᱣᱤᱱᱪ ᱥᱟᱶ ᱢᱮᱱᱟᱭᱟ᱾ ᱢᱩᱬᱩᱛ ᱱᱤᱭᱚᱢ: ᱵᱟᱦᱨᱮ ᱦᱚᱲ ᱛᱤᱥ ᱦᱚᱸ ᱵᱚᱞᱚ ᱠᱟᱛᱮ ᱵᱟᱧᱪᱟᱣ ᱟᱞᱚᱭ ᱨᱤᱠᱟᱹᱭ ᱢᱟ!</string>
+    <string name="ar_attendant_confirm">ᱜᱟᱛᱮ ᱱᱤᱭᱚᱢ ᱥᱟᱠᱷᱤ ᱢᱮ</string>
+    <string name="ar_testing_title">ᱦᱚᱭ ᱴᱮᱥᱴ (Stratified Sampling)</string>
+    <string name="ar_test_top">ᱪᱮᱛᱟᱱ ᱛᱟᱞᱟ (Collar Rim)</string>
+    <string name="ar_test_middle">ᱛᱟᱞᱟ ᱦᱟᱹᱴᱤᱧ (Inside Collar)</string>
+    <string name="ar_test_bottom">ᱞᱟᱛᱟᱨ ᱦᱟᱹᱴᱤᱧ (Sump Floor — ᱵᱤᱥ H₂S)</string>
+    <string name="ar_sample_next">ᱫᱚᱥᱟᱨ ᱛᱟᱞᱟ ᱪᱮᱠ ᱢᱮ</string>
+    <string name="ar_alarm_raised">ᱵᱚᱞᱚᱱ ᱢᱟᱱᱟ! ᱵᱤᱥ H₂S ᱜᱮᱥ ᱧᱟᱢᱮᱱᱟ᱾ ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ ᱮᱱᱟ᱾</string>
+    <string name="ar_evacuate_guide">ᱦᱚᱭ ᱥᱟᱢᱱᱮ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱛᱮ ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱣᱨᱟ ᱡᱟᱭᱜᱟ ᱛᱮ ᱫᱟᱹᱲ ᱢᱮ᱾</string>
 
     <string name="ar_close_training">ᱴᱨᱮᱱᱤᱝ ᱵᱚᱸᱫ ᱠᱚᱨᱟᱣ ᱢᱮ</string>
     <string name="ar_practice_mode">ᱯᱨᱮᱠᱴᱤᱥ ᱢᱚᱰ — AR ᱵᱟᱝ</string>

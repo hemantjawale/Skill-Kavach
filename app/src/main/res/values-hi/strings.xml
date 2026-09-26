@@ -48,6 +48,33 @@
     <string name="ar_label_detector">डिटेक्टर</string>
     <string name="ar_label_permit">परमिट</string>
     <string name="ar_label_buddy">सहकर्मी</string>
+    <string name="ar_label_confined_space">सीमित स्थान हैच</string>
+    <string name="ar_label_tripod">बचाव ट्राइपॉड</string>
+    <string name="ar_label_ppe">पीपीई स्टेशन</string>
+
+    <!-- AR Confined Space & Gas Module Strings (Hindi) -->
+    <string name="ar_gas_disclaimer">केवल सिमुलेशन: प्रशिक्षण के लिए आभासी गैस डिटेक्टर। वास्तविक गैसों का पता नहीं लगाता है।</string>
+    <string name="ar_permit_title">सीमित स्थान प्रवेश परमिट</string>
+    <string name="ar_permit_location">स्थान: टैंक T-402 (भूमिगत सम्प गड्ढा)</string>
+    <string name="ar_permit_hazards">खतरे: H₂S विषैली गैस / O₂ की कमी / ज्वलनशील वाष्प</string>
+    <string name="ar_permit_reqs">नियंत्रण: निरंतर अटेंडेंट + लाइफलाइन विंच + 4-गैस मॉनिटर</string>
+    <string name="ar_permit_confirm">परमिट की पुष्टि करें और हस्ताक्षर करें</string>
+    <string name="ar_ppe_title">अनिवार्य पीपीई सत्यापन</string>
+    <string name="ar_ppe_harness">फुल-बॉडी फॉल अरेस्ट हार्नेस और रिट्रीवल डोरी</string>
+    <string name="ar_ppe_detector">कैलिब्रेटेड 4-गैस मॉनिटर (O₂, LEL, H₂S, CO)</string>
+    <string name="ar_ppe_respirator">आपातकालीन एस्केप रेस्पिरेटर सुरक्षा</string>
+    <string name="ar_ppe_helmet">हेडलाइट वाला सुरक्षा हेलमेट और केमिकल दस्ताने</string>
+    <string name="ar_ppe_confirm">आवश्यक पीपीई की पुष्टि करें</string>
+    <string name="ar_attendant_title">स्टैंडबाय अटेंडेंट प्रोटोकॉल</string>
+    <string name="ar_attendant_desc">अटेंडेंट दो-तरफ़ा रेडियो और बचाव विंच के साथ बाहर तैनात है। मुख्य नियम: अटेंडेंट को अनियोजित बचाव के लिए कभी अंदर नहीं जाना चाहिए!</string>
+    <string name="ar_attendant_confirm">अटेंडेंट निगरानी की पुष्टि करें</string>
+    <string name="ar_testing_title">वायुमंडलीय परीक्षण (स्तरीकृत नमूना)</string>
+    <string name="ar_test_top">शीर्ष स्तर (कॉलर किनारा)</string>
+    <string name="ar_test_middle">मध्य स्तर (कॉलर के अंदर)</string>
+    <string name="ar_test_bottom">निचला स्तर (सम्प तल — H₂S संचय)</string>
+    <string name="ar_sample_next">अगली स्तरीकृत गहराई मापें</string>
+    <string name="ar_alarm_raised">प्रवेश वर्जित! विषैली H₂S गैस मिली। साइट अलार्म सक्रिय।</string>
+    <string name="ar_evacuate_guide">हवा की दिशा के विपरीत निर्दिष्ट निकास मार्ग से सुरक्षित सभा स्थल पर जाएं।</string>
 
     <string name="ar_close_training">प्रशिक्षण बंद करें</string>
     <string name="ar_practice_mode">अभ्यास मोड — बिना AR ट्रैकिंग</string>

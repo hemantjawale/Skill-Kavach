@@ -1,0 +1,19 @@
+{
+    "java.jdt.ls.java.home": "/Users/jatinvijaybhosale/.antigravity-ide/extensions/redhat.java-1.56.0-darwin-arm64/jre/21.0.12.1-macosx-aarch64",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "/Users/jatinvijaybhosale/.antigravity-ide/extensions/redhat.java-1.56.0-darwin-arm64/jre/21.0.12.1-macosx-aarch64",
+            "default": true
+        },
+        {
+            "name": "JavaSE-21",
+            "path": "/Users/jatinvijaybhosale/.antigravity-ide/extensions/redhat.java-1.56.0-darwin-arm64/jre/21.0.12.1-macosx-aarch64"
+        },
+        {
+            "name": "JavaSE-25",
+            "path": "/Users/jatinvijaybhosale/.gradle/jdks/eclipse_adoptium-25-aarch64-os_x.2/jdk-25.0.3+9/Contents/Home"
+        }
+    ],
+    "gradle.java.home": "/Users/jatinvijaybhosale/.gradle/jdks/eclipse_adoptium-25-aarch64-os_x.2/jdk-25.0.3+9/Contents/Home"
+}

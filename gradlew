@@ -114,8 +114,17 @@ case "$( uname )" in                #(
   NONSTOP* )        nonstop=true ;;
 esac
 
-CLASSPATH="\\\"\\\""
+CLASSPATH="\"\""
 
+# Auto-detect modern JDK (17+) if JAVA_HOME is unset or pointing to legacy Java 8 plugin
+if [ -z "$JAVA_HOME" ] || [ "$JAVA_HOME" = "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home" ]; then
+    for candidate in "$HOME"/.gradle/jdks/*/*/Contents/Home "$HOME"/.antigravity-ide/extensions/redhat.java*/jre/*; do
+        if [ -x "$candidate/bin/java" ]; then
+            export JAVA_HOME="$candidate"
+            break
+        fi
+    done
+fi
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then

@@ -51,6 +51,33 @@
     <string name="ar_label_detector">Detector</string>
     <string name="ar_label_permit">Permit</string>
     <string name="ar_label_buddy">Buddy</string>
+    <string name="ar_label_confined_space">Confined Space Hatch</string>
+    <string name="ar_label_tripod">Rescue Tripod</string>
+    <string name="ar_label_ppe">PPE Station</string>
+
+    <!-- AR Confined Space & Gas Module Strings -->
+    <string name="ar_gas_disclaimer">SIMULATION ONLY: Virtual gas detector for training. Does not detect real gases.</string>
+    <string name="ar_permit_title">Confined Space Entry Permit</string>
+    <string name="ar_permit_location">Location: Tank T-402 (Underground Sump Pit)</string>
+    <string name="ar_permit_hazards">Hazards: H₂S Toxic Gas / O₂ Deficiency / Combustible Vapor</string>
+    <string name="ar_permit_reqs">Controls: Continuous Attendant + Lifeline Winch + 4-Gas Monitor</string>
+    <string name="ar_permit_confirm">Confirm &amp; Sign Permit</string>
+    <string name="ar_ppe_title">Mandatory PPE Verification</string>
+    <string name="ar_ppe_harness">Full-Body Fall Arrest Harness &amp; Retrieval Lanyard</string>
+    <string name="ar_ppe_detector">Calibrated 4-Gas Monitor (O₂, LEL, H₂S, CO)</string>
+    <string name="ar_ppe_respirator">Emergency Escape Respiratory Protection</string>
+    <string name="ar_ppe_helmet">Safety Helmet with Headlamp &amp; Chemical Gloves</string>
+    <string name="ar_ppe_confirm">Confirm Required PPE Equipped</string>
+    <string name="ar_attendant_title">Standby Attendant Protocol</string>
+    <string name="ar_attendant_desc">Attendant is stationed outside entry with two-way radio and rescue winch. CARDINAL RULE: Attendant must NEVER enter for unplanned rescue!</string>
+    <string name="ar_attendant_confirm">Confirm Attendant Watch</string>
+    <string name="ar_testing_title">Atmospheric Testing (Stratified Sampling)</string>
+    <string name="ar_test_top">Top Level (Collar Rim)</string>
+    <string name="ar_test_middle">Middle Level (Inside Collar)</string>
+    <string name="ar_test_bottom">Bottom Level (Sump Floor — H₂S Accumulation)</string>
+    <string name="ar_sample_next">Sample Next Stratified Depth</string>
+    <string name="ar_alarm_raised">ENTRY PROHIBITED! Toxic H₂S detected. Site alarm activated.</string>
+    <string name="ar_evacuate_guide">Withdraw upwind along designated evacuation route to muster point.</string>
 
     <!-- AR Training UI -->
     <string name="ar_close_training">Close training</string>
@@ -71,3 +98,4 @@
     <!-- Safety Disclaimer -->
     <string name="ar_safety_disclaimer">⚠ Training simulation only. Does not detect real fires or replace certified safety equipment and procedures.</string>
 </resources>
+
