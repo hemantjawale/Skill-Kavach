@@ -19,4 +19,49 @@
     <string name="lang_english">English</string>
     <string name="lang_hindi">हिन्दी (Hindi)</string>
     <string name="lang_santali">ᱥᱟᱱᱛᱟᱲᱤ (Santali - Ol Chiki)</string>
+
+    <string name="ar_tracking_paused">ट्रैकिंग रुकी। अच्छी रोशनी में धीरे-धीरे चलें।</string>
+    <string name="ar_surface_detected">फर्श मिला — उपकरण रखें दबाएं।</string>
+    <string name="ar_scanning_floor">बनावटदार फर्श की ओर इशारा करें और धीरे-धीरे चलाएं।</string>
+    <string name="ar_equipment_placed">उपकरण रखा गया। नीचे दिए निर्देशों का पालन करें।</string>
+    <string name="ar_tracking_lost">ट्रैकिंग खो गई। कैमरा प्रशिक्षण क्षेत्र की ओर करें।</string>
+    <string name="ar_distance_warning">प्रशिक्षण दृश्य से 0.3–5 मी. की दूरी पर रहें।</string>
+    <string name="ar_follow_steps">नीचे दिए प्रशिक्षण चरणों का पालन करें।</string>
+    <string name="ar_sweep_hint">स्वीप मार्कर पर बगल में खींचें।</string>
+    <string name="ar_camera_unavailable">कैमरा अनुपलब्ध। बंद करें और पुन: प्रयास करें।</string>
+
+    <string name="ar_correct">सही ✓</string>
+    <string name="ar_incorrect_target">गलत लक्ष्य। चरण %1$d: %2$s। %3$s मार्कर दबाएं।</string>
+    <string name="ar_incorrect_aim">आग के आधार पर निशाना लगाएं, ऊपर नहीं।</string>
+    <string name="ar_voice_unavailable">आवाज़ अनुपलब्ध है। ऊपर दिए निर्देश पढ़ें।</string>
+    <string name="ar_progress_not_saved">प्रगति सहेजी नहीं जा सकी। स्क्रीन खुली रखें और पुन: प्रयास करें।</string>
+    <string name="ar_min_duration">प्रक्रिया की समीक्षा करें। न्यूनतम अभ्यास 30 सेकंड है।</string>
+
+    <string name="ar_label_extinguisher">अग्निशामक</string>
+    <string name="ar_label_pin">सुरक्षा पिन</string>
+    <string name="ar_label_handle">हैंडल</string>
+    <string name="ar_label_exit">निकास</string>
+    <string name="ar_label_alarm">अलार्म</string>
+    <string name="ar_label_hazard">खतरा क्षेत्र</string>
+    <string name="ar_label_base">आग का आधार</string>
+    <string name="ar_label_sweep">स्वीप क्षेत्र</string>
+    <string name="ar_label_detector">डिटेक्टर</string>
+    <string name="ar_label_permit">परमिट</string>
+    <string name="ar_label_buddy">सहकर्मी</string>
+
+    <string name="ar_close_training">प्रशिक्षण बंद करें</string>
+    <string name="ar_practice_mode">अभ्यास मोड — बिना AR ट्रैकिंग</string>
+    <string name="ar_simulation_mode">AR सिमुलेशन — प्रशिक्षण क्षेत्र</string>
+    <string name="ar_step_counter">चरण %1$d / %2$d</string>
+    <string name="ar_hear_instruction">निर्देश सुनें</string>
+    <string name="ar_place_equipment">उपकरण रखें</string>
+    <string name="ar_auto_place">सामने स्वतः रखें</string>
+    <string name="ar_reposition">पुनः स्थापित करें</string>
+    <string name="ar_use_practice">अभ्यास मोड इस्तेमाल करें</string>
+    <string name="ar_training_complete">प्रशिक्षण क्रम पूर्ण</string>
+    <string name="ar_assessment_required">प्रमाणन से पहले मूल्यांकन और व्यावहारिक समीक्षा आवश्यक है।</string>
+    <string name="ar_save_training">प्रशिक्षण सहेजें</string>
+    <string name="ar_saving">सहेजा जा रहा है…</string>
+    <string name="ar_placement_guide">चरण 1: कैमरा बनावटदार फर्श की ओर करें। चरण 2: फोन धीरे-धीरे हिलाएं। चरण 3: हरा गोला दिखने पर उपकरण रखें दबाएं।</string>
+    <string name="ar_safety_disclaimer">⚠ केवल प्रशिक्षण सिमुलेशन। वास्तविक आग की पहचान या प्रमाणित अग्निशमन उपकरण का विकल्प नहीं है।</string>
 </resources>

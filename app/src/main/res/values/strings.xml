@@ -19,4 +19,55 @@
     <string name="lang_english">English</string>
     <string name="lang_hindi">हिन्दी (Hindi)</string>
     <string name="lang_santali">ᱥᱟᱱᱛᱟᱲᱤ (Santali - Ol Chiki)</string>
+
+    <!-- AR Training Status Messages -->
+    <string name="ar_tracking_paused">Tracking paused. Move slowly in a well-lit area.</string>
+    <string name="ar_surface_detected">Surface detected — tap Place Equipment.</string>
+    <string name="ar_scanning_floor">Point at a textured floor and move slowly.</string>
+    <string name="ar_equipment_placed">Equipment placed. Follow the instructions below.</string>
+    <string name="ar_tracking_lost">Tracking lost. Point camera at the training area.</string>
+    <string name="ar_distance_warning">Move to 0.3–5 m from the training scene.</string>
+    <string name="ar_follow_steps">Follow the training steps below.</string>
+    <string name="ar_sweep_hint">Drag sideways across the Sweep marker.</string>
+    <string name="ar_camera_unavailable">Camera unavailable. Close and retry.</string>
+
+    <!-- AR Training Feedback -->
+    <string name="ar_correct">Correct ✓</string>
+    <string name="ar_incorrect_target">Incorrect target. Step %1$d: %2$s. Tap the %3$s marker.</string>
+    <string name="ar_incorrect_aim">Aim at the base of the fire, not the top.</string>
+    <string name="ar_voice_unavailable">Voice is unavailable. Read the instruction above.</string>
+    <string name="ar_progress_not_saved">Progress could not be saved. Keep this screen open and retry.</string>
+    <string name="ar_min_duration">Take time to review the procedure. Minimum practice is 30 seconds.</string>
+
+    <!-- AR Training Labels -->
+    <string name="ar_label_extinguisher">Extinguisher</string>
+    <string name="ar_label_pin">Safety Pin</string>
+    <string name="ar_label_handle">Handle</string>
+    <string name="ar_label_exit">Exit</string>
+    <string name="ar_label_alarm">Alarm</string>
+    <string name="ar_label_hazard">Hazard Zone</string>
+    <string name="ar_label_base">Fire Base</string>
+    <string name="ar_label_sweep">Sweep Zone</string>
+    <string name="ar_label_detector">Detector</string>
+    <string name="ar_label_permit">Permit</string>
+    <string name="ar_label_buddy">Buddy</string>
+
+    <!-- AR Training UI -->
+    <string name="ar_close_training">Close training</string>
+    <string name="ar_practice_mode">Practice mode — no AR tracking</string>
+    <string name="ar_simulation_mode">AR simulation — training area only</string>
+    <string name="ar_step_counter">Step %1$d of %2$d</string>
+    <string name="ar_hear_instruction">Hear instruction</string>
+    <string name="ar_place_equipment">Place equipment</string>
+    <string name="ar_auto_place">Auto-place in front</string>
+    <string name="ar_reposition">Reposition</string>
+    <string name="ar_use_practice">Use practice mode</string>
+    <string name="ar_training_complete">Training sequence complete</string>
+    <string name="ar_assessment_required">Assessment and practical review required before certification.</string>
+    <string name="ar_save_training">Save training</string>
+    <string name="ar_saving">Saving…</string>
+    <string name="ar_placement_guide">Step 1: Point camera at textured floor. Step 2: Move phone slowly side-to-side. Step 3: When ring turns green, tap Place Equipment.</string>
+
+    <!-- Safety Disclaimer -->
+    <string name="ar_safety_disclaimer">⚠ Training simulation only. Does not detect real fires or replace certified safety equipment and procedures.</string>
 </resources>

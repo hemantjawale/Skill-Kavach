@@ -19,4 +19,49 @@
     <string name="lang_english">English</string>
     <string name="lang_hindi">हिन्दी (Hindi)</string>
     <string name="lang_santali">ᱥᱟᱱᱛᱟᱲᱤ (Santali - Ol Chiki)</string>
+
+    <string name="ar_tracking_paused">ᱴᱨᱮᱠᱤᱝ ᱛᱷᱟᱢᱮᱱᱟ᱾ ᱢᱟᱨᱥᱟᱞ ᱡᱟᱭᱜᱟ ᱨᱮ ᱟᱹᱥᱛᱮ ᱪᱟᱞᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_surface_detected">ᱯᱟᱴᱟ ᱧᱟᱢᱮᱱᱟ — ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱢᱮ ᱫᱟᱵᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_scanning_floor">ᱯᱟᱴᱟ ᱛᱟᱹᱠ ᱤᱥᱟᱨᱟ ᱢᱮ ᱟᱨ ᱟᱹᱥᱛᱮ ᱪᱟᱞᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_equipment_placed">ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱟᱠᱟᱱᱟ᱾ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱱᱤᱭᱚᱢ ᱢᱟᱱᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_tracking_lost">ᱴᱨᱮᱠᱤᱝ ᱦᱮᱡᱮᱱᱟ᱾ ᱠᱮᱢᱨᱟ ᱴᱨᱮᱱᱤᱝ ᱡᱟᱭᱜᱟ ᱛᱟᱹᱠ ᱠᱚᱨᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_distance_warning">ᱴᱨᱮᱱᱤᱝ ᱫᱨᱤᱥᱭ ᱠᱷᱚᱱ 0.3–5 ᱢᱤ. ᱥᱟᱸᱜᱤᱧ ᱛᱟᱦᱮᱸ ᱢᱮ᱾</string>
+    <string name="ar_follow_steps">ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱴᱨᱮᱱᱤᱝ ᱪᱟᱨᱚᱱ ᱢᱟᱱᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_sweep_hint">ᱥᱣᱤᱯ ᱢᱟᱨᱠᱚᱨ ᱨᱮ ᱯᱟᱥᱮ ᱛᱟᱹᱠ ᱜᱷᱟᱥᱤᱫ ᱢᱮ᱾</string>
+    <string name="ar_camera_unavailable">ᱠᱮᱢᱨᱟ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ᱾ ᱵᱚᱸᱫ ᱠᱚᱨᱟᱣ ᱢᱮ ᱟᱨ ᱫᱩᱦᱨᱟ ᱠᱚᱨᱟᱣ ᱢᱮ᱾</string>
+
+    <string name="ar_correct">ᱴᱷᱤᱠ ✓</string>
+    <string name="ar_incorrect_target">ᱵᱷᱩᱞ ᱞᱚᱠᱷᱚ᱾ ᱪᱟᱨᱚᱱ %1$d: %2$s᱾ %3$s ᱢᱟᱨᱠᱚᱨ ᱫᱟᱵᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_incorrect_aim">ᱥᱮᱸᱜᱮᱞ ᱨᱮᱭᱟᱜ ᱛᱚᱞᱟ ᱛᱟᱹᱠ ᱱᱤᱥᱟᱱ ᱠᱚᱨᱟᱣ ᱢᱮ, ᱪᱮᱛᱟᱱ ᱵᱟᱝ᱾</string>
+    <string name="ar_voice_unavailable">ᱨᱚᱲ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ᱾ ᱪᱮᱛᱟᱱ ᱨᱮᱭᱟᱜ ᱱᱤᱭᱚᱢ ᱯᱟᱲᱦᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_progress_not_saved">ᱯᱨᱚᱜᱨᱮᱥ ᱵᱟᱝ ᱥᱮᱵ ᱦᱩᱭᱮᱱᱟ᱾ ᱥᱠᱨᱤᱱ ᱡᱷᱤᱡ ᱫᱚᱦᱚ ᱢᱮ ᱟᱨ ᱫᱩᱦᱨᱟ ᱠᱚᱨᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_min_duration">ᱯᱨᱚᱥᱮᱥ ᱪᱮᱠ ᱢᱮ᱾ ᱠᱚᱢᱥᱮᱠᱚᱢ ᱯᱨᱮᱠᱴᱤᱥ 30 ᱥᱮᱠᱮᱱᱰ᱾</string>
+
+    <string name="ar_label_extinguisher">ᱥᱮᱸᱜᱮᱞ ᱢᱟᱪᱟ</string>
+    <string name="ar_label_pin">ᱥᱩᱨᱚᱠᱷᱟ ᱯᱤᱱ</string>
+    <string name="ar_label_handle">ᱦᱮᱱᱰᱚᱞ</string>
+    <string name="ar_label_exit">ᱚᱰᱚᱠᱚᱜ</string>
+    <string name="ar_label_alarm">ᱟᱞᱟᱨᱢ</string>
+    <string name="ar_label_hazard">ᱵᱚᱛᱚᱨ ᱡᱟᱭᱜᱟ</string>
+    <string name="ar_label_base">ᱥᱮᱸᱜᱮᱞ ᱛᱚᱞᱟ</string>
+    <string name="ar_label_sweep">ᱥᱣᱤᱯ ᱡᱟᱭᱜᱟ</string>
+    <string name="ar_label_detector">ᱰᱤᱴᱮᱠᱴᱚᱨ</string>
+    <string name="ar_label_permit">ᱯᱚᱨᱢᱤᱴ</string>
+    <string name="ar_label_buddy">ᱥᱟᱹᱜᱤ</string>
+
+    <string name="ar_close_training">ᱴᱨᱮᱱᱤᱝ ᱵᱚᱸᱫ ᱠᱚᱨᱟᱣ ᱢᱮ</string>
+    <string name="ar_practice_mode">ᱯᱨᱮᱠᱴᱤᱥ ᱢᱚᱰ — AR ᱵᱟᱝ</string>
+    <string name="ar_simulation_mode">AR ᱥᱤᱢᱩᱞᱮᱥᱚᱱ — ᱴᱨᱮᱱᱤᱝ ᱡᱟᱭᱜᱟ</string>
+    <string name="ar_step_counter">ᱪᱟᱨᱚᱱ %1$d / %2$d</string>
+    <string name="ar_hear_instruction">ᱱᱤᱭᱚᱢ ᱟᱸᱡᱚᱢ ᱢᱮ</string>
+    <string name="ar_place_equipment">ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱢᱮ</string>
+    <string name="ar_auto_place">ᱥᱟᱢᱱᱮ ᱟᱹᱯᱱᱟᱹᱛᱮ ᱫᱚᱦᱚ ᱢᱮ</string>
+    <string name="ar_reposition">ᱫᱩᱦᱨᱟ ᱫᱚᱦᱚ ᱢᱮ</string>
+    <string name="ar_use_practice">ᱯᱨᱮᱠᱴᱤᱥ ᱢᱚᱰ ᱵᱮᱣᱦᱟᱨ ᱢᱮ</string>
+    <string name="ar_training_complete">ᱴᱨᱮᱱᱤᱝ ᱯᱩᱨᱟᱹ ᱦᱩᱭᱮᱱᱟ</string>
+    <string name="ar_assessment_required">ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱟᱹᱥᱛᱤ ᱟᱨ ᱠᱟᱹᱢᱤ ᱪᱮᱠ ᱫᱚᱨᱠᱟᱨ᱾</string>
+    <string name="ar_save_training">ᱴᱨᱮᱱᱤᱝ ᱥᱮᱵ ᱢᱮ</string>
+    <string name="ar_saving">ᱥᱮᱵ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…</string>
+    <string name="ar_placement_guide">ᱪᱟᱨᱚᱱ 1: ᱠᱮᱢᱨᱟ ᱯᱟᱴᱟ ᱛᱟᱹᱠ ᱠᱚᱨᱟᱣ ᱢᱮ᱾ ᱪᱟᱨᱚᱱ 2: ᱯᱷᱚᱱ ᱟᱹᱥᱛᱮ ᱦᱤᱞᱟᱣ ᱢᱮ᱾ ᱪᱟᱨᱚᱱ 3: ᱦᱟᱹᱨᱤᱭᱟᱹ ᱜᱚᱞ ᱫᱮᱠᱷᱟᱣ ᱵᱟᱫ ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱢᱮ ᱫᱟᱵᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_safety_disclaimer">⚠ ᱠᱷᱟᱞᱤ ᱴᱨᱮᱱᱤᱝ ᱥᱤᱢᱩᱞᱮᱥᱚᱱ᱾ ᱥᱟᱹᱨᱤ ᱥᱮᱸᱜᱮᱞ ᱵᱟᱝ ᱪᱮᱠᱟ ᱟᱨ ᱥᱟᱹᱨᱤ ᱥᱟᱢᱟᱱ ᱨᱮᱭᱟᱜ ᱵᱚᱫᱚᱞ ᱵᱟᱝᱼᱟ᱾</string>
 </resources>
