@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import com.example.skilkavach.SafetyApplication
-import com.example.skilkavach.data.items
+import com.example.skilkavach.data.*
 import com.google.ar.core.*
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -75,12 +75,20 @@ class ArTrainingActivity : ComponentActivity() {
                 }
             }
         }
+        val currentLang = getSharedPreferences("language", 0).getString("value", "en") ?: "en"
         speech =
             TextToSpeech(this) { code ->
                 speechReady = code == TextToSpeech.SUCCESS
-                if (speechReady) speech?.language = Locale.ENGLISH
+                if (speechReady) {
+                    val locale = when (currentLang) {
+                        "hi" -> Locale("hi", "IN")
+                        else -> Locale.ENGLISH
+                    }
+                    speech?.language = locale
+                }
             }
         setContent {
+            val lang = remember { getSharedPreferences("language", 0).getString("value", "en") ?: "en" }
             MaterialTheme(
                 colorScheme =
                     lightColorScheme(primary = Color(0xFF586DAF), background = Color(0xFFF7F8FA))
@@ -137,7 +145,7 @@ class ArTrainingActivity : ComponentActivity() {
                             Column(Modifier.fillMaxWidth().padding(16.dp)) {
                                 TextButton(onClick = { finish() }) { Text("Close training") }
                                 Text(
-                                    module.getString("title"),
+                                    module.localizedTitle(lang),
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                                 Text(
@@ -171,10 +179,10 @@ class ArTrainingActivity : ComponentActivity() {
                                 if (step < steps.size) {
                                     val current = steps[step]
                                     Text(
-                                        current.getString("title"),
+                                        current.localizedStepTitle(lang),
                                         style = MaterialTheme.typography.titleLarge,
                                     )
-                                    Text(current.getString("instruction"))
+                                    Text(current.localizedStepInstruction(lang))
                                     TextButton(
                                         onClick = {
                                             if (speechReady)
@@ -322,8 +330,10 @@ class ArTrainingActivity : ComponentActivity() {
             feedback = "Correct ✓"
             val completedStep = step
             if (speechReady) {
+                val activeLang = getSharedPreferences("language", 0).getString("value", "en") ?: "en"
+                val nextInstruction = if (step < steps.size) steps[step].localizedStepInstruction(activeLang) else "Training sequence complete."
                 speech?.speak(
-                    "Correct. " + if (step < steps.size) steps[step].getString("instruction") else "Training sequence complete.",
+                    "Correct. $nextInstruction",
                     TextToSpeech.QUEUE_FLUSH,
                     null,
                     "step_feedback"

@@ -8,8 +8,15 @@
     <string name="btn_start_ar">ᱮ.ᱟᱨ. ᱴᱨᱮᱱᱤᱝ ᱮᱦᱚᱵ</string>
     <string name="btn_practice_mode">ᱚᱯᱷᱞᱟᱭᱤᱱ ᱯᱨᱮᱠᱴᱤᱥ</string>
     <string name="btn_verify_qr">QR ᱥᱟᱠᱷᱤ ᱪᱮᱠ</string>
-    <string name="btn_voice_mode">ᱨᱚᱲ ᱱᱮᱵᱷᱤᱜᱮᱥᱚᱱ</string>
+    <string name="btn_voice_mode">ᱨᱚᱲ ᱱᱮᱵᱷᱤ formal Mode</string>
     <string name="lbl_stress_mode">ᱴᱮᱱᱥᱚᱱ ᱢᱚᱰ</string>
     <string name="lbl_hazard_diffusion">ᱵᱚᱛᱚᱨ ᱯᱟᱥᱱᱟᱣ</string>
     <string name="lbl_mesh_status">P2P ᱢᱮᱥ ᱥᱴᱮᱴᱚᱥ</string>
+    <string name="lbl_offline_mode">ᱚᱯᱷᱞᱟᱭᱤᱱ ᱠᱟᱹᱢᱤ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ</string>
+    <string name="msg_simulated_notice">ᱵᱟᱰᱟᱭ : ᱱᱚᱶᱟ ᱮᱯ ᱥᱩᱨᱚᱠᱷᱟ ᱴᱨᱮᱱᱤᱝ ᱥᱤᱢᱩᱞᱮᱥᱚᱱ ᱵᱮᱣᱦᱟᱨᱮᱫᱼᱟ, ᱥᱟᱹᱨᱤ ᱵᱚᱛᱚᱨ ᱵᱟᱝ ᱪᱮᱠᱟ᱾</string>
+    <string name="title_choose_language">ᱟᱢᱟᱜ ᱯᱟᱹᱨᱥᱤ ᱪᱩᱱᱟᱹᱣ ᱢᱮ</string>
+    <string name="desc_choose_language">ᱱᱮᱵᱷᱤᱜᱮᱥᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱯᱟᱹᱨᱥᱤ ᱪᱩ visual ᱢᱮ᱾ ᱴᱨᱮᱱᱤᱝ ᱥᱟᱢᱟᱱ ᱯᱟᱹᱨᱥᱤ ᱞᱮᱠᱟᱛᱮ ᱵᱚᱫᱚᱞᱚᱜᱼᱟ᱾</string>
+    <string name="lang_english">English</string>
+    <string name="lang_hindi">हिन्दी (Hindi)</string>
+    <string name="lang_santali">ᱥᱟᱱᱛᱟᱲᱤ (Santali - Ol Chiki)</string>
 </resources>

@@ -1,199 +1,563 @@
 [
   {
     "id": "fire",
-    "title": "Fire & Explosion Response",
     "minutes": 12,
     "version": 1,
-    "description": "Recognize a simulated fire, protect your escape route, and practice the PASS sequence.",
-    "equipment": "Training area approved by your supervisor. Never light a real fire.",
+    "title": {
+      "en": "Fire & Explosion Response",
+      "hi": "आग और विस्फोट की स्थिति में प्रतिक्रिया",
+      "sat": "ᱥᱮᱸᱜᱮᱞ ᱟᱨ ᱵᱚᱢ ᱯᱟᱹᱥᱱᱟᱹᱣ ᱨᱩᱠᱷᱤᱭᱟᱹ"
+    },
+    "description": {
+      "en": "Recognize a simulated fire, protect your escape route, and practice the PASS sequence.",
+      "hi": "सिमुलेटेड आग को पहचानें, अपने निकलने का रास्ता सुरक्षित रखें और PASS क्रम का अभ्यास करें।",
+      "sat": "ᱥᱮᱸᱜᱮᱞ ᱪᱤᱱᱦᱟᱹᱣ, ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱨᱩᱠᱷᱤᱭᱟᱹ ᱟᱨ PASS ᱱᱤᱭᱚᱢ ᱯᱨᱮᱠᱴᱤᱥ ᱢᱮ᱾"
+    },
+    "objective": {
+      "en": "Master emergency response protocol for electrical & industrial fires, escape route protection, CO₂ equipment selection, and the PASS sequence.",
+      "hi": "विद्युत और औद्योगिक आग, निकास मार्ग सुरक्षा, CO₂ उपकरण चयन और PASS क्रम के लिए आपातकालीन प्रतिक्रिया प्रोटोकॉल में महारत हासिल करें।",
+      "sat": "ᱵᱤᱡᱽᱞᱤ ᱟᱨ ᱥᱮᱸᱜᱮᱞ ᱵᱚᱛᱚᱨ ᱚᱠᱛᱚ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ, CO₂ ᱥᱟᱢᱟᱱ ᱟᱨ PASS ᱱᱤᱭᱚᱢ ᱪᱮᱫᱚᱜ ᱢᱮ᱾"
+    },
+    "safetyBriefing": {
+      "en": "Notice: This simulation evaluates procedural accuracy. Never light a real fire. Always verify clear escape routes before attempting fire control.",
+      "hi": "सूचना: यह सिमुलेशन प्रक्रियात्मक सटीकता का मूल्यांकन करता है। कभी भी वास्तविक आग न जलाएं। आग नियंत्रण से पहले हमेशा स्पष्ट निकास मार्ग सत्यापित करें।",
+      "sat": "ᱵᱟᱰᱟᱭ: ᱱᱚᱶᱟ ᱥᱤᱢᱩᱞᱮᱥᱚᱱ ᱱᱤᱭᱚᱢ ᱪᱮᱠᱟ᱾ ᱥᱟᱹᱨᱤ ᱥᱮᱸᱜᱮᱞ ᱵᱟᱝ ᱡᱩᱞ ᱢᱮ᱾ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱪᱮᱠ ᱢᱮ᱾"
+    },
+    "equipment": {
+      "en": "Training area approved by your supervisor. Never light a real fire.",
+      "hi": "आपके पर्यवेक्षक द्वारा स्वीकृत प्रशिक्षण क्षेत्र। कभी भी वास्तविक आग न जलाएं।",
+      "sat": "ᱥᱩᱯᱚᱨᱵᱷᱟᱭᱤᱡᱚᱨ ᱴᱷᱮᱱ ᱠᱷᱚᱱ ᱥᱟᱹᱨᱤ ᱴᱨᱮᱱᱤᱝ ᱡᱟᱭᱜᱟ᱾ ᱥᱟᱹᱨᱤ ᱥᱮᱸᱜᱮᱞ ᱵᱟᱝ ᱡᱩᱞ ᱢᱮ᱾"
+    },
     "steps": [
       {
-        "title": "Identify the exit",
-        "instruction": "Keep a clear escape route behind you. Tap the green exit marker.",
-        "target": "exit"
+        "target": "exit",
+        "title": {
+          "en": "Identify the exit",
+          "hi": "निकास मार्ग की पहचान करें",
+          "sat": "ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱪᱤᱱᱦᱟᱹᱣ"
+        },
+        "instruction": {
+          "en": "Keep a clear escape route behind you. Tap the green exit marker.",
+          "hi": "अपने पीछे एक स्पष्ट निकास मार्ग रखें। हरे रंग के निकास मार्कर को टैप करें।",
+          "sat": "ᱟᱢ ᱛᱟᱭᱚᱢ ᱨᱮ ᱥᱟᱯᱷᱟ ᱦᱚᱨ ᱫᱚᱦᱚᱭ ᱢᱮ᱾ ᱦᱟᱹᱨᱤᱭᱟᱹᱲ exit ᱴᱮᱯ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Raise the alarm",
-        "instruction": "Alert the control room and evacuate people. Tap the alarm marker.",
-        "target": "alarm"
+        "target": "alarm",
+        "title": {
+          "en": "Raise the alarm",
+          "hi": "आपातकालीन अलार्म बजाएं",
+          "sat": "ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ"
+        },
+        "instruction": {
+          "en": "Alert the control room and evacuate people. Tap the alarm marker.",
+          "hi": "नियंत्रण कक्ष को सतर्क करें और तुरंत लोगों को बाहर निकालें। अलार्म मार्कर को टैप करें।",
+          "sat": "ᱠᱚᱱᱴᱨᱚᱞ ᱨᱩᱢ ᱠᱷᱚᱵᱚᱨ ᱮᱢ ᱢᱮ᱾ ᱟᱞᱟᱨᱢ ᱴᱮᱯ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Choose the equipment",
-        "instruction": "For this simulated energized electrical cabinet, select the labelled CO₂ extinguisher. Follow site-specific instructions.",
-        "target": "extinguisher"
+        "target": "extinguisher",
+        "title": {
+          "en": "Choose the equipment",
+          "hi": "सही उपकरण का चयन करें",
+          "sat": "ᱥᱟᱢᱟᱱ ᱪᱩ visual ᱢᱮ"
+        },
+        "instruction": {
+          "en": "For this simulated energized electrical cabinet, select the labelled CO₂ extinguisher. Follow site-specific instructions.",
+          "hi": "इस सिमुलेटेड विद्युत कैबिनेट के लिए, CO₂ अग्निशामक यंत्र का चयन करें।",
+          "sat": "CO₂ ᱥᱮᱸᱜᱮᱞ ᱵᱩᱡᱷᱟᱹᱣ ᱥᱟᱢᱟᱱ ᱪᱩ visual ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Pull",
-        "instruction": "Pull the safety pin on the simulated extinguisher.",
-        "target": "pin"
+        "target": "pin",
+        "title": {
+          "en": "Pull",
+          "hi": "सुरक्षा पिन खींचें",
+          "sat": "ᱯᱤᱱ ᱚᱨ"
+        },
+        "instruction": {
+          "en": "Pull the safety pin on the simulated extinguisher.",
+          "hi": "सिमुलेटेड अग्निशामक की सुरक्षा पिन खींचें।",
+          "sat": "ᱥᱩᱨᱚᱠᱷᱟ ᱯᱤᱱ ᱚᱨ ᱚᱰᱚᱠ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Aim",
-        "instruction": "Aim the nozzle at the base of the simulated fire while keeping an escape route.",
-        "target": "base"
+        "target": "base",
+        "title": {
+          "en": "Aim",
+          "hi": "आग के आधार पर निशाना लगाएं",
+          "sat": "ᱴᱟᱨ visual ᱢᱮ"
+        },
+        "instruction": {
+          "en": "Aim the nozzle at the base of the simulated fire while keeping an escape route.",
+          "hi": "निकास मार्ग बनाए रखते हुए सिमुलेटेड आग के आधार पर नोजल को लक्षित करें।",
+          "sat": "ᱥᱮᱸᱜᱮᱞ ᱨᱮᱱᱟᱜ ᱵᱩᱴᱟᱹ ᱥᱮᱫ ᱴᱟᱨ visual ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Squeeze",
-        "instruction": "Squeeze the handle on the simulated extinguisher.",
-        "target": "handle"
+        "target": "handle",
+        "title": {
+          "en": "Squeeze",
+          "hi": "हैंडल को दबाएं",
+          "sat": "ᱞᱤ visual ᱢᱮ"
+        },
+        "instruction": {
+          "en": "Squeeze the handle on the simulated extinguisher.",
+          "hi": "सिमुलेटेड अग्निशामक के हैंडल को दबाएं।",
+          "sat": "ᱦᱮᱱᱰᱮᱞ ᱞᱤ visual ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Sweep",
-        "instruction": "Drag across the labelled Sweep marker to practice sweeping across the base of the simulated fire.",
-        "target": "sweep"
+        "target": "sweep",
+        "title": {
+          "en": "Sweep",
+          "hi": "झाड़ू की तरह घुमाएं",
+          "sat": "ᱜᱩᱨ visual ᱢᱮ"
+        },
+        "instruction": {
+          "en": "Drag across the labelled Sweep marker to practice sweeping across the base of the simulated fire.",
+          "hi": "सिमुलेटेड आग के आधार पर झाड़ू की तरह घुमाने का अभ्यास करें।",
+          "sat": "ᱥᱮᱸᱜᱮᱞ ᱵᱩᱴᱟᱹ ᱨᱮ ᱜᱩᱨ visual ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Evacuate",
-        "instruction": "Withdraw immediately if conditions become unsafe. Tap the exit to finish the simulation.",
-        "target": "exit"
+        "target": "exit",
+        "title": {
+          "en": "Evacuate",
+          "hi": "सुरक्षित स्थान पर जाएं",
+          "sat": "ᱚᱰᱚᱠᱚᱜ ᱢᱮ"
+        },
+        "instruction": {
+          "en": "Withdraw immediately if conditions become unsafe. Tap the exit to finish the simulation.",
+          "hi": "यदि स्थिति अस्वास्थ्यकर हो जाती है तो तुरंत बाहर निकलें। सिमुलेशन समाप्त करने के लिए निकास पर टैप करें।",
+          "sat": "ᱵᱚᱛᱚᱨ ᱦᱩᱭᱞᱮᱱ ᱠᱷᱟᱱ ᱞᱚᱜᱚᱱ ᱚᱰᱚᱠᱚᱜ ᱢᱮ᱾ exit ᱴᱮᱯ ᱢᱮ᱾"
+        }
       }
     ],
     "questions": [
       {
         "id": "f1",
-        "topic": "Escape route",
-        "text": "Before attempting to tackle a small fire, what must you have?",
+        "topic": {
+          "en": "Escape route",
+          "hi": "निकास मार्ग",
+          "sat": "ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ"
+        },
+        "text": {
+          "en": "Before attempting to tackle a small fire, what must you have?",
+          "hi": "छोटी आग बुझाने का प्रयास करने से पहले आपके पास क्या होना चाहिए?",
+          "sat": "ᱥᱮᱸᱜᱮᱞ ᱵᱩᱡᱷᱟᱹᱣ ᱞᱟᱦᱟ ᱪᱮᱫ ᱛᱟᱦᱮᱸᱱ ᱞᱟᱹᱠᱛᱤᱭᱟ?"
+        },
         "options": [
-          "A clear escape route and site authorization",
-          "A closed exit",
-          "A phone recording"
+          {
+            "en": "A clear escape route and site authorization",
+            "hi": "एक स्पष्ट निकास मार्ग और स्थल प्राधिकरण",
+            "sat": "ᱥᱟᱯᱷᱟ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱟᱨ ᱪᱷᱟᱹᱴᱭᱟᱹᱨ"
+          },
+          {
+            "en": "A closed exit",
+            "hi": "एक बंद निकास द्वार",
+            "sat": "ᱵᱚᱸᱫᱽ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ"
+          },
+          {
+            "en": "A phone recording",
+            "hi": "एक फोन रिकॉर्डिंग",
+            "sat": "ᱯᱷᱚᱱ ᱨᱮᱠᱚᱨᱰᱤᱝ"
+          }
         ]
       },
       {
         "id": "f2",
-        "topic": "Equipment selection",
-        "text": "In this electrical-cabinet scenario, which labelled extinguisher was selected?",
+        "topic": {
+          "en": "Equipment selection",
+          "hi": "उपकरण चयन",
+          "sat": "ᱥᱟᱢᱟᱱ ᱪᱩ visual"
+        },
+        "text": {
+          "en": "In this electrical-cabinet scenario, which labelled extinguisher was selected?",
+          "hi": "इस विद्युत-कैबिनेट परिदृश्य में, कौन सा अग्निशामक चुना गया था?",
+          "sat": "ᱵᱤᱡᱽᱞᱤ ᱥᱮᱸᱜᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱥᱟᱢᱟᱱ ᱪᱩ visual ᱮᱱᱟ?"
+        },
         "options": [
-          "Water bucket",
-          "CO₂ extinguisher approved for the scenario",
-          "Any unlabelled cylinder"
+          {
+            "en": "Water bucket",
+            "hi": "पानी की बाल्टी",
+            "sat": "ᱫᱟᱜ ᱵᱟᱹᱞᱴᱤ"
+          },
+          {
+            "en": "CO₂ extinguisher approved for the scenario",
+            "hi": "परिदृश्य के लिए स्वीकृत CO₂ अग्निशामक यंत्र",
+            "sat": "CO₂ ᱥᱮᱸᱜᱮᱞ ᱵᱩᱡᱷᱟᱹᱣ ᱥᱟᱢᱟᱱ"
+          },
+          {
+            "en": "Any unlabelled cylinder",
+            "hi": "कोई भी अचिह्नित सिलेंडर",
+            "sat": "ᱚᱠᱟ ᱦᱚᱸ ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹᱣ ᱥᱤᱞᱤᱱᱰᱚᱨ"
+          }
         ]
       },
       {
         "id": "f3",
-        "topic": "PASS sequence",
-        "text": "What is the correct PASS order?",
+        "topic": {
+          "en": "PASS sequence",
+          "hi": "PASS क्रम",
+          "sat": "PASS ᱱᱤᱭᱚᱢ"
+        },
+        "text": {
+          "en": "What is the correct PASS order?",
+          "hi": "सही PASS क्रम क्या है?",
+          "sat": "ᱥᱟᱹᱨᱤ PASS ᱱᱤᱭᱚᱢ ᱪᱮᱫ ᱠᱟᱱᱟ?"
+        },
         "options": [
-          "Sweep, pull, aim, squeeze",
-          "Pull, aim, squeeze, sweep",
-          "Aim, sweep, pull, squeeze"
+          {
+            "en": "Sweep, pull, aim, squeeze",
+            "hi": "घुमाएं, खींचें, निशाना लगाएं, दबाएं",
+            "sat": "Sweep, pull, aim, squeeze"
+          },
+          {
+            "en": "Pull, aim, squeeze, sweep",
+            "hi": "खींचें, निशाना लगाएं, दबाएं, घुमाएं (Pull, Aim, Squeeze, Sweep)",
+            "sat": "Pull, aim, squeeze, sweep"
+          },
+          {
+            "en": "Aim, sweep, pull, squeeze",
+            "hi": "निशाना लगाएं, घुमाएं, खींचें, दबाएं",
+            "sat": "Aim, sweep, pull, squeeze"
+          }
         ]
       },
       {
         "id": "f4",
-        "topic": "Evacuation",
-        "text": "Smoke is spreading and your exit is threatened. What should you do?",
+        "topic": {
+          "en": "Evacuation",
+          "hi": "निकासी",
+          "sat": "ᱚᱰᱚᱠᱚᱜ"
+        },
+        "text": {
+          "en": "Smoke is spreading and your exit is threatened. What should you do?",
+          "hi": "धुआं फैल रहा है और आपका निकास मार्ग खतरे में है। आपको क्या करना चाहिए?",
+          "sat": "ᱫᱷᱩᱶᱟᱹ ᱯᱟᱥᱱᱟᱣ ᱠᱟᱱᱟ, ᱪᱮᱫ ᱪᱤᱠᱟᱹ ᱞᱟᱹᱠᱛᱤᱭᱟ?"
+        },
         "options": [
-          "Continue the drill near the fire",
-          "Retrieve personal belongings",
-          "Withdraw, raise the alarm and follow the site emergency plan"
+          {
+            "en": "Continue the drill near the fire",
+            "hi": "आग के पास अभ्यास जारी रखें",
+            "sat": "ᱥᱮᱸᱜᱮᱞ ᱥᱩᱨ ᱨᱮ ᱛᱟᱦᱮᱸᱱ"
+          },
+          {
+            "en": "Retrieve personal belongings",
+            "hi": "व्यक्तिगत सामान वापस पाएं",
+            "sat": "ᱱᱤᱡᱮᱨᱟᱜ ᱥᱟᱢᱟᱱ ᱦᱟᱛᱟᱣ"
+          },
+          {
+            "en": "Withdraw, raise the alarm and follow the site emergency plan",
+            "hi": "पीछे हटें, अलार्म बजाएं और आपातकालीन योजना का पालन करें",
+            "sat": "ᱛᱟᱭᱚᱢᱚᱜ, ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ ᱟᱨ ᱚᱰᱚᱠᱚᱜ ᱢᱮ"
+          }
         ]
       },
       {
         "id": "f5",
-        "topic": "Aim",
-        "text": "Where do you aim in the simulated PASS technique?",
+        "topic": {
+          "en": "Aim",
+          "hi": "लक्ष्य",
+          "sat": "ᱴᱟᱨ visual"
+        },
+        "text": {
+          "en": "Where do you aim in the simulated PASS technique?",
+          "hi": "सिमुलेटेड PASS तकनीक में आप कहां निशाना लगाते हैं?",
+          "sat": "PASS ᱨᱮ ᱚᱠᱟ ᱥᱮᱫ ᱴᱟᱨ visual ᱦᱩᱭᱩᱜᱼᱟ?"
+        },
         "options": [
-          "At the top of the smoke",
-          "At the base of the fire",
-          "At the exit"
+          {
+            "en": "At the top of the smoke",
+            "hi": "धुएँ के ऊपर",
+            "sat": "ᱫᱷᱩᱶᱟᱹ ᱪᱮᱛᱟᱱ ᱨᱮ"
+          },
+          {
+            "en": "At the base of the fire",
+            "hi": "आग के आधार पर (At the base of the fire)",
+            "sat": "ᱥᱮᱸᱜᱮᱞ ᱨᱮᱱᱟᱜ ᱵᱩᱴᱟᱹ ᱨᱮ"
+          },
+          {
+            "en": "At the exit",
+            "hi": "निकास पर",
+            "sat": "ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱨᱮ"
+          }
         ]
       }
     ]
   },
   {
     "id": "gas",
-    "title": "Gas Leak & Confined Space",
     "minutes": 15,
     "version": 1,
-    "description": "Practice hazard recognition, entry authorization, atmospheric checks and safe evacuation.",
-    "equipment": "Approved training area only. This app does not detect real gas or authorize entry.",
+    "title": {
+      "en": "Gas Leak & Confined Space",
+      "hi": "गैस रिसाव और सीमित स्थान प्रोटोकॉल",
+      "sat": "ᱜᱮᱥ ᱞᱤᱠ ᱟᱨ ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ"
+    },
+    "description": {
+      "en": "Practice hazard recognition, entry authorization, atmospheric checks and safe evacuation.",
+      "hi": "खतरा पहचान, प्रवेश प्राधिकरण, वायुमंडलीय जांच और सुरक्षित निकासी का अभ्यास करें।",
+      "sat": "ᱵᱚᱛᱚᱨ ᱪᱤᱱᱦᱟᱹᱣ, ᱵᱚᱞᱚᱱ ᱪᱷᱟᱹᱴᱭᱟᱹᱨ, ᱦᱚᱭ ᱪᱮᱠ ᱟᱨ ᱥᱩᱨᱚᱠᱷᱟ ᱚᱰᱚᱠᱚᱜ ᱯᱨᱮᱠᱴᱤᱥ ᱢᱮ᱾"
+    },
+    "objective": {
+      "en": "Master hazard recognition, entry authorization permit checks, atmospheric testing, PPE requirements, standby attendant protocol, and safe evacuation.",
+      "hi": "खतरा पहचान, प्रवेश प्राधिकरण परमिट जांच, वायुमंडलीय परीक्षण, पीपीई आवश्यकताएं, स्टैंडबाय अटेंडेंट प्रोटोकॉल और सुरक्षित निकासी में महारत हासिल करें।",
+      "sat": "ᱵᱚᱛᱚᱨ ᱪᱤᱱᱦᱟᱹᱣ, ᱯᱚᱨᱢᱤᱴ ᱪᱮᱠ, ᱦᱚᱭ ᱴᱮᱥᱴ, PPE ᱟᱨ ᱥᱩᱨᱚᱠᱷᱟ ᱚᱰᱚᱠᱚᱜ ᱪᱮᱫᱚᱜ ᱢᱮ᱾"
+    },
+    "safetyBriefing": {
+      "en": "Notice: This simulation evaluates entry protocols. This app does not detect real gas or authorize actual confined space entry. Always conduct certified atmospheric testing.",
+      "hi": "सूचना: यह सिमुलेशन प्रवेश प्रोटोकॉल का मूल्यांकन करता है। यह ऐप वास्तविक गैस का पता नहीं लगाता है या वास्तविक सीमित स्थान प्रवेश को अधिकृत नहीं करता है। हमेशा प्रमाणित वायुमंडलीय परीक्षण करें।",
+      "sat": "ᱵᱟᱰᱟᱭ: ᱱᱚᱶᱟ ᱥᱤᱢᱩᱞᱮᱥᱚᱱ ᱵᱚᱞᱚᱱ ᱱᱤᱭᱚᱢ ᱪᱮᱠᱟ᱾ ᱱᱚᱶᱟ ᱮᱯ ᱥᱟᱹᱨᱤ ᱜᱮᱥ ᱵᱟᱝ ᱪᱮᱠᱟ᱾ ᱥᱟᱹᱨᱤ ᱦᱚᱭ ᱴᱮᱥᱴ ᱢᱮ᱾"
+    },
+    "equipment": {
+      "en": "Approved training area only. This app does not detect real gas or authorize entry.",
+      "hi": "केवल स्वीकृत प्रशिक्षण क्षेत्र। यह ऐप वास्तविक गैस का पता नहीं लगाता है।",
+      "sat": "ᱥᱩᱨᱚᱠᱷᱟ ᱴᱨᱮᱱᱤᱝ ᱡᱟᱭᱜᱟ᱾ ᱱᱚᱶᱟ ᱮᱯ ᱥᱟᱹᱨᱤ ᱜᱮᱥ ᱵᱟᱝ ᱪᱮᱠᱟ᱾"
+    },
     "steps": [
       {
-        "title": "Recognize the hazard",
-        "instruction": "Treat the marked zone as a simulated gas hazard. Tap the hazard marker without entering.",
-        "target": "hazard"
+        "target": "hazard",
+        "title": {
+          "en": "Recognize the hazard",
+          "hi": "खतरे की पहचान करें",
+          "sat": "ᱵᱚᱛᱚᱨ ᱪᱤᱱᱦᱟᱹᱣ"
+        },
+        "instruction": {
+          "en": "Treat the marked zone as a simulated gas hazard. Tap the hazard marker without entering.",
+          "hi": "चिह्नित क्षेत्र को सिमुलेटेड गैस खतरा मानें। बिना प्रवेश किए खतरा मार्कर को टैप करें।",
+          "sat": "ᱱᱚᱶᱟ ᱡᱟᱭᱜᱟ ᱥᱤᱢᱩᱞᱮᱴᱮᱰ ᱜᱮᱥ ᱵᱚᱛᱚᱨ ᱢᱮᱱᱛᱮ ᱢᱟᱱᱟᱣ ᱢᱮ᱾ ᱴᱮᱯ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Raise the alarm",
-        "instruction": "Withdraw to safety and notify the control room. Tap the alarm marker.",
-        "target": "alarm"
+        "target": "alarm",
+        "title": {
+          "en": "Raise the alarm",
+          "hi": "अलार्म बजाएं",
+          "sat": "ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ"
+        },
+        "instruction": {
+          "en": "Withdraw to safety and notify the control room. Tap the alarm marker.",
+          "hi": "सुरक्षा के लिए पीछे हटें और नियंत्रण कक्ष को सूचित करें। अलार्म मार्कर को टैप करें।",
+          "sat": "ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱭᱜᱟ ᱛᱮ ᱥᱮᱱᱚᱜ ᱢᱮ ᱟᱨ ᱠᱚᱱᱴᱨᱚᱞ ᱨᱩᱢ ᱠᱷᱚᱵᱚᱨ ᱮᱢ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Check the permit",
-        "instruction": "Entry requires an authorized permit and trained personnel. Tap the permit marker.",
-        "target": "permit"
+        "target": "permit",
+        "title": {
+          "en": "Check the permit",
+          "hi": "प्रवेश परमिट जांचें",
+          "sat": "ᱯᱚᱨᱢᱤᱴ ᱪᱮᱠ"
+        },
+        "instruction": {
+          "en": "Entry requires an authorized permit and trained personnel. Tap the permit marker.",
+          "hi": "प्रवेश के लिए एक अधिकृत परमिट आवश्यक है। परमिट मार्कर को टैप करें।",
+          "sat": "ᱵᱚᱞᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱚᱛᱷᱚᱨᱟᱭᱤᱡᱽᱰ ᱯᱚᱨᱢᱤᱴ ᱞᱟᱹᱠᱛᱤᱭᱟ᱾ ᱴᱮᱯ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Test the atmosphere",
-        "instruction": "A competent person must test the atmosphere with an approved instrument. Tap the gas detector.",
-        "target": "detector"
+        "target": "detector",
+        "title": {
+          "en": "Test the atmosphere",
+          "hi": "वायुमंडल का परीक्षण करें",
+          "sat": "ᱦᱚᱭ ᱴᱮᱥᱴ"
+        },
+        "instruction": {
+          "en": "A competent person must test the atmosphere with an approved instrument. Tap the gas detector.",
+          "hi": "सक्षम व्यक्ति को स्वीकृत उपकरण से वायुमंडल का परीक्षण करना चाहिए।",
+          "sat": "ᱞᱟᱹᱠᱛᱤᱭᱟᱱ ᱦᱚᱲ ᱦᱚᱭ ᱴᱮᱥᱴ ᱥᱟᱢᱟᱱ ᱛᱮ ᱪᱮᱠ ᱢᱟ᱾ ᱴᱮᱯ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Check PPE",
-        "instruction": "Use PPE and respiratory protection specified by the permit and site risk assessment.",
-        "target": "ppe"
+        "target": "ppe",
+        "title": {
+          "en": "Check PPE",
+          "hi": "पीपीई उपकरण जांचें",
+          "sat": "PPE ᱪᱮᱠ"
+        },
+        "instruction": {
+          "en": "Use PPE and respiratory protection specified by the permit and site risk assessment.",
+          "hi": "परमिट और स्थल जोखिम मूल्यांकन द्वारा निर्दिष्ट पीपीई का उपयोग करें।",
+          "sat": "ᱯᱚᱨᱢᱤᱴ ᱞᱮᱠᱟᱛᱮ PPE ᱟᱨ ᱥᱟ processes ᱥᱟᱢᱟᱱ ᱵᱮᱣᱦᱟᱨ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Confirm the attendant",
-        "instruction": "Confirm the standby attendant, communications and rescue plan. Never attempt unplanned rescue.",
-        "target": "buddy"
+        "target": "buddy",
+        "title": {
+          "en": "Confirm the attendant",
+          "hi": "स्टैंडबाय साथी की पुष्टि करें",
+          "sat": "ᱜᱟᱛᱮ ᱪᱮᱠ"
+        },
+        "instruction": {
+          "en": "Confirm the standby attendant, communications and rescue plan. Never attempt unplanned rescue.",
+          "hi": "स्टैंडबाय अटेंडेंट, संचार और बचाव योजना की पुष्टि करें। कभी भी अनियोजित बचाव का प्रयास न करें।",
+          "sat": "ᱵᱟᱦᱨᱮ ᱨᱮ ᱛᱟᱦᱮᱸᱱ ᱜᱟᱛᱮ ᱟᱨ ᱵᱟᱧᱪᱟᱣ ᱯᱞᱟᱱ ᱪᱮᱠ ᱢᱮ᱾"
+        }
       },
       {
-        "title": "Evacuate",
-        "instruction": "On alarm, stop work and withdraw along the designated route. Tap the exit.",
-        "target": "exit"
+        "target": "exit",
+        "title": {
+          "en": "Evacuate",
+          "hi": "सुरक्षित स्थान पर जाएं",
+          "sat": "ᱚᱰᱚᱠᱚᱜ ᱢᱮ"
+        },
+        "instruction": {
+          "en": "On alarm, stop work and withdraw along the designated route. Tap the exit.",
+          "hi": "अलार्म बजने पर काम रोकें और निर्दिष्ट मार्ग से बाहर निकलें।",
+          "sat": "ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ ᱞᱮᱱ ᱠᱷᱟᱱ ᱠᱟᱹᱢᱤ ᱵᱟᱹᱜᱤ ᱠᱟᱛᱮ ᱚᱰᱚᱠᱚᱜ ᱢᱮ᱾ ᱴᱮᱯ ᱢᱮ᱾"
+        }
       }
     ],
     "questions": [
       {
         "id": "g1",
-        "topic": "Atmosphere",
-        "text": "Can this phone tell you a confined space is free of gas?",
+        "topic": {
+          "en": "Atmosphere",
+          "hi": "वायुमंडल",
+          "sat": "ᱦᱚᱭ ᱴᱮᱥᱴ"
+        },
+        "text": {
+          "en": "Can this phone tell you a confined space is free of gas?",
+          "hi": "क्या यह फोन आपको बता सकता है कि सीमित स्थान गैस से मुक्त है?",
+          "sat": "ᱪᱮᱫ ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱜᱮᱥ ᱪᱮᱠ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ?"
+        },
         "options": [
-          "Yes, using the camera",
-          "No. Approved atmospheric testing is required",
-          "Yes, if there is no smell"
+          {
+            "en": "Yes, using the camera",
+            "hi": "हाँ, कैमरे का उपयोग करके",
+            "sat": "ᱦᱮ standard, ᱠᱮᱢᱨᱟ ᱛᱮ"
+          },
+          {
+            "en": "No. Approved atmospheric testing is required",
+            "hi": "नहीं। स्वीकृत वायुमंडलीय परीक्षण आवश्यक है",
+            "sat": "ᱵᱟᱝ, ᱥᱟᱹᱨᱤ ᱦᱚᱭ ᱴᱮᱥᱴ ᱞᱟᱹᱠᱛᱤᱭᱟ"
+          },
+          {
+            "en": "Yes, if there is no smell",
+            "hi": "हाँ, यदि कोई गंध नहीं है",
+            "sat": "ᱦᱮᱸ, ᱵᱟᱥᱱᱟ ᱵᱟᱝ ᱠᱷᱟᱱ"
+          }
         ]
       },
       {
         "id": "g2",
-        "topic": "Permit",
-        "text": "What is required before confined-space entry?",
+        "topic": {
+          "en": "Permit",
+          "hi": "परमिट",
+          "sat": "ᱯᱚᱨᱢᱤᱴ"
+        },
+        "text": {
+          "en": "What is required before confined-space entry?",
+          "hi": "सीमित स्थान में प्रवेश करने से पहले क्या आवश्यक है?",
+          "sat": "ᱵᱚᱞᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱞᱟᱹᱠᱛᱤᱭᱟ?"
+        },
         "options": [
-          "Only a colleague’s permission",
-          "A completed app lesson alone",
-          "An authorized permit and all site entry controls"
+          {
+            "en": "Only a colleague’s permission",
+            "hi": "केवल किसी सहकर्मी की अनुमति",
+            "sat": "ᱜᱟᱛᱮᱭᱟᱜ ᱠᱟᱛᱷᱟ ᱮᱠᱮᱱ"
+          },
+          {
+            "en": "A completed app lesson alone",
+            "hi": "केवल एक पूर्ण ऐप पाठ",
+            "sat": "ᱮᱯ ᱴᱨᱮᱱᱤᱝ ᱮᱠᱮᱱ"
+          },
+          {
+            "en": "An authorized permit and all site entry controls",
+            "hi": "एक अधिकृत परमिट और सभी स्थल प्रवेश नियंत्रण",
+            "sat": "ᱚᱛᱷᱚᱨᱟᱭᱤᱡᱽᱰ ᱯᱚᱨᱢᱤᱴ ᱟᱨ ᱥᱟᱹᱨᱤ ᱱᱤᱭᱚᱢ"
+          }
         ]
       },
       {
         "id": "g3",
-        "topic": "Rescue",
-        "text": "A worker collapses inside a confined space. What should you do?",
+        "topic": {
+          "en": "Rescue",
+          "hi": "बचाव",
+          "sat": "ᱵᱟᱧᱪᱟᱣ"
+        },
+        "text": {
+          "en": "A worker collapses inside a confined space. What should you do?",
+          "hi": "सीमित स्थान के अंदर एक कार्यकर्ता बेहोश हो जाता है। आपको क्या करना चाहिए?",
+          "sat": "ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ ᱨᱮ ᱦᱚᱲ ᱮ ᱧᱩᱨ ᱮᱱᱟ, ᱪᱮᱫ ᱪᱤᱠᱟᱹ ᱞᱟᱹᱠᱛᱤᱭᱟ?"
+        },
         "options": [
-          "Enter immediately alone",
-          "Raise the alarm and activate the trained rescue response",
-          "Ask an untrained worker to enter"
+          {
+            "en": "Enter immediately alone",
+            "hi": "अकेले तुरंत प्रवेश करें",
+            "sat": "ᱮᱠᱞᱟ ᱵᱚᱞᱚᱱ ᱢᱮ"
+          },
+          {
+            "en": "Raise the alarm and activate the trained rescue response",
+            "hi": "अलार्म बजाएं और प्रशिक्षित बचाव प्रतिक्रिया सक्रिय करें",
+            "sat": "ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ ᱟᱨ ᱴᱨᱮᱱᱰ ᱵᱟᱧᱪᱟᱣ ᱴᱤᱢ ᱦᱚᱦᱚ"
+          },
+          {
+            "en": "Ask an untrained worker to enter",
+            "hi": "किसी अप्रशिक्षित कार्यकर्ता को प्रवेश करने के लिए कहें",
+            "sat": "ᱵᱟᱝ ᱴᱨᱮᱱᱰ ᱦᱚᱲ ᱵᱚᱞᱚᱱ ᱢᱮᱛᱟᱭ ᱢᱮ"
+          }
         ]
       },
       {
         "id": "g4",
-        "topic": "Buddy system",
-        "text": "Who remains outside as part of the entry controls?",
+        "topic": {
+          "en": "Buddy system",
+          "hi": "स्टैंडबाय अटेंडेंट",
+          "sat": "ᱛᱟᱦᱮᱸᱱ ᱜᱟᱛᱮ"
+        },
+        "text": {
+          "en": "Who remains outside as part of the entry controls?",
+          "hi": "प्रवेश नियंत्रण के भाग के रूप में बाहर कौन रहता है?",
+          "sat": "ᱵᱚᱞᱚᱱ ᱡᱚᱠᱷᱮᱡ ᱵᱟᱦᱨᱮ ᱨᱮ ᱚᱠᱚᱭ ᱛᱟᱦᱮᱸᱱᱟ?"
+        },
         "options": [
-          "An appointed standby attendant",
-          "Nobody",
-          "A visitor"
+          {
+            "en": "An appointed standby attendant",
+            "hi": "एक नियुक्त स्टैंडबाय अटेंडेंट",
+            "sat": "ᱛᱟᱦᱮᱸᱱ ᱜᱟᱛᱮ (Standby attendant)"
+          },
+          {
+            "en": "Nobody",
+            "hi": "कोई नहीं",
+            "sat": "ᱚᱠᱚᱭ ᱦᱚᱸ ᱵᱟᱝ"
+          },
+          {
+            "en": "A visitor",
+            "hi": "एक आगंतुक",
+            "sat": "ᱯᱮᱲᱟ"
+          }
         ]
       },
       {
         "id": "g5",
-        "topic": "Evacuation",
-        "text": "The gas alarm activates. What is the next action?",
+        "topic": {
+          "en": "Evacuation",
+          "hi": "निकासी",
+          "sat": "ᱚᱰᱚᱠᱚᱜ"
+        },
+        "text": {
+          "en": "The gas alarm activates. What is the next action?",
+          "hi": "गैस अलार्म सक्रिय होता है। अगली कार्रवाई क्या है?",
+          "sat": "ᱜᱮᱥ ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ ᱮᱱᱟ, ᱪᱮᱫ ᱪᱤᱠᱟᱹ ᱞᱟᱹᱠᱛᱤᱭᱟ?"
+        },
         "options": [
-          "Finish the task",
-          "Ignore it if you feel fine",
-          "Stop work and evacuate under the site plan"
+          {
+            "en": "Finish the task",
+            "hi": "कार्य पूरा करें",
+            "sat": "ᱠᱟᱹᱢᱤ ᱯᱩᱨᱟᱹᱣ ᱢᱮ"
+          },
+          {
+            "en": "Ignore it if you feel fine",
+            "hi": "यदि आप ठीक महसूस करते हैं तो इसे अनदेखा करें",
+            "sat": "ᱵᱟᱹᱜᱤ ᱠᱟ cross ᱢᱮ"
+          },
+          {
+            "en": "Stop work and evacuate under the site plan",
+            "hi": "कार्य रोकें और स्थल योजना के तहत बाहर निकलें",
+            "sat": "ᱠᱟᱹᱢᱤ ᱵᱟᱹᱜᱤ ᱠᱟᱛᱮ ᱚᱰᱚᱠᱚᱜ ᱢᱮ"
+          }
         ]
       }
     ]

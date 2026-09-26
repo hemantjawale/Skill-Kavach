@@ -13,8 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.skilkavach.data.CertificateStatus
 import com.example.skilkavach.data.CertificateVault
 import com.example.skilkavach.data.CertificateVerificationResult
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +28,7 @@ fun AdminComplianceScreen(
     var qrInputText by remember { mutableStateOf("") }
     var verificationResult by remember { mutableStateOf<CertificateVerificationResult?>(null) }
     val vault = remember { CertificateVault() }
+    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
     Scaffold(
         topBar = {
@@ -110,26 +115,34 @@ fun AdminComplianceScreen(
 
                     verificationResult?.let { res ->
                         Spacer(modifier = Modifier.height(12.dp))
+                        val (containerColor, contentColor, badgeLabel) = when (res.status) {
+                            CertificateStatus.VALID -> Triple(Color(0xFFDCFCE7), Color(0xFF166534), "STATUS: VALID")
+                            CertificateStatus.EXPIRED -> Triple(Color(0xFFFEF3C7), Color(0xFF92400E), "STATUS: EXPIRED")
+                            CertificateStatus.TAMPERED -> Triple(Color(0xFFFEE2E2), Color(0xFF991B1B), "STATUS: TAMPERED")
+                            CertificateStatus.REVOKED -> Triple(Color(0xFFFEE2E2), Color(0xFF7F1D1D), "STATUS: REVOKED")
+                            CertificateStatus.UNKNOWN -> Triple(Color(0xFFF1F5F9), Color(0xFF475569), "STATUS: UNKNOWN")
+                        }
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(
-                                    if (res.isValid) Color(0xFFDCFCE7) else Color(0xFFFEE2E2),
-                                    shape = RoundedCornerShape(8.dp)
-                                )
+                                .background(containerColor, shape = RoundedCornerShape(8.dp))
                                 .padding(12.dp)
                         ) {
-                            Column {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(
-                                    text = res.statusMessage,
+                                    text = "$badgeLabel — ${res.statusMessage}",
                                     fontWeight = FontWeight.Bold,
-                                    color = if (res.isValid) Color(0xFF166534) else Color(0xFF991B1B)
+                                    color = contentColor
                                 )
-                                if (res.workerId != "UNKNOWN") {
-                                    Text("Worker ID: ${res.workerId}", color = Color.Black)
-                                    Text("Domain: ${res.hazardDomain}", color = Color.Black)
-                                    Text("Comprehension Score: ${res.score}%", color = Color.Black)
-                                    Text("Ledger Chain Valid: ${res.isChainValid}", color = Color.Black)
+                                if (res.status != CertificateStatus.UNKNOWN) {
+                                    Text("Certificate ID: ${res.certificateId}", color = Color.Black, fontSize = 13.sp)
+                                    Text("Issuer: ${res.issuer}", color = Color.Black, fontSize = 13.sp)
+                                    Text("Worker ID: ${res.workerId}", color = Color.Black, fontSize = 13.sp)
+                                    Text("Hazard Domain: ${res.hazardDomain}", color = Color.Black, fontSize = 13.sp)
+                                    Text("Comprehension Score: ${res.score}%", color = Color.Black, fontSize = 13.sp)
+                                    Text("Issued: ${if (res.issuedAt > 0) dateFormat.format(Date(res.issuedAt)) else "N/A"}", color = Color.Black, fontSize = 13.sp)
+                                    Text("Expires: ${if (res.expiresAt > 0) dateFormat.format(Date(res.expiresAt)) else "N/A"}", color = Color.Black, fontSize = 13.sp)
+                                    Text("Hash Ledger Chain Valid: ${res.isChainValid}", color = Color.Black, fontSize = 13.sp)
                                 }
                             }
                         }

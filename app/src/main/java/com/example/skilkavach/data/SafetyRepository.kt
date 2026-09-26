@@ -44,7 +44,10 @@ class ApiFailure(val status: Int, message: String) : IOException(message)
 
 class SafetyRepository(private val context: Context) {
     private val dao =
-        Room.databaseBuilder(context, SafetyDatabase::class.java, "safety.db").build().dao()
+        Room.databaseBuilder(context, SafetyDatabase::class.java, "safety.db")
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .build()
+            .dao()
     private val vault = Vault()
     private val mutex = Mutex()
     private val client =
@@ -67,8 +70,8 @@ class SafetyRepository(private val context: Context) {
     suspend fun initialize() = mutex.withLock {
         if (state.value.initialized) return@withLock
         try {
-            session = dao.get("session")?.let { JSONObject(vault.decrypt(it.encrypted)) }
-            val snapshot = dao.get("snapshot")?.let { JSONObject(vault.decrypt(it.encrypted)) }
+            session = dao.get("session")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
+            val snapshot = dao.get("snapshot")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
             state.value =
                 LocalState(
                     snapshot,

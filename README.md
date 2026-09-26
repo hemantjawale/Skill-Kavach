@@ -97,8 +97,29 @@ APK: `app/build/outputs/apk/debug/app-debug.apk`. A physical phone needs a confi
 - Server-authorized check-in/out, working duration, and separately reviewed offline attendance claims.
 - Leave balances/requests/decisions; payroll publishing and worker payslip views.
 - Explicitly queued/received/acknowledged SOS states, offline instructions, a notification inbox and optional Firebase push delivery.
-- Staff console for workers, training assignment, assessment review, certificates, jobs, tasks, attendance, leave, payroll, emergencies and audit events.
 - PostgreSQL transactions, replay-safe operation IDs, input validation, rate limits, security headers, CI and Docker/Caddy deployment files.
+
+## SIH Demonstration APK & Production Build
+
+### Installation
+1. Download or compile the demonstration APK (`Skill-Kavach-release.apk` or `app-debug.apk`).
+2. Enable "Install from unknown sources" on your Android device if prompted.
+3. Open the downloaded file to install **Skill-Kavach**.
+4. Grant Camera permission when prompted (required for ARCore floor tracking and QR verification).
+5. Select your preferred navigation language: **English**, **Hindi (हिन्दी)**, or **Santali (ᱥᱟᱱᱛᱟᱲᱤ - Ol Chiki)**.
+6. Open **Training** → Select **Fire & Explosion Response** or **Gas Leak & Confined Space Protocol** → Start training.
+
+### Requirements
+- **OS Version**: Android 10+ (API Level 29 or higher).
+- **Hardware**: ARCore-compatible device (requires camera & Motion Tracking sensor).
+- **Camera**: Rear-facing camera with auto-focus.
+- **Storage**: Minimum 100 MB free internal storage.
+- **Network**: Internet connection optional (Full training, assessment, local scoring, and QR verification run 100% offline).
+
+### Known Limitations
+- **ARCore Device Compatibility**: Certain low-cost or non-certified devices may not support hardware plane tracking; on unsupported devices, the application gracefully provides interactive practice mode.
+- **Voice / Text-to-Speech**: Spoken audio instructions depend on device-installed TTS engines; Hindi & Santali TTS require device language pack installation.
+- **Background Synchronization**: Remote server synchronization is deferred while offline until a network connection or peer-to-peer mesh sync is established.
 
 ## Architecture decisions
 

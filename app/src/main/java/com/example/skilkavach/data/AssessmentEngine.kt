@@ -51,7 +51,7 @@ class AssessmentEngine {
 
     /**
      * Calculates behavioral score based on hesitation times and accuracy.
-     * Penalty applied for hesitation > 5000ms per step or incorrect action attempts.
+     * Penalty applied for hesitation > 4000ms per step or incorrect action attempts.
      */
     fun calculateBehavioralScore(): Float {
         if (events.isEmpty()) return 100.0f
@@ -63,7 +63,7 @@ class AssessmentEngine {
         // Accuracy penalty
         totalPoints -= (incorrectCount * 15.0f)
 
-        // Hesitation penalty (ideal reaction < 3000ms per action)
+        // Hesitation penalty (ideal reaction < 4000ms per action)
         val avgHesitation = events.map { it.hesitationMs }.average()
         if (avgHesitation > 4000) {
             val extraSeconds = ((avgHesitation - 4000) / 1000).toFloat()
@@ -71,6 +71,25 @@ class AssessmentEngine {
         }
 
         return totalPoints.coerceIn(0f, 100f)
+    }
+
+    /**
+     * Returns language-aware keywords for oral voice assessment rubric.
+     */
+    fun getRequiredKeywords(moduleId: String, lang: String): List<String> {
+        return when (moduleId) {
+            "fire" -> when (lang) {
+                "hi" -> listOf("निकास", "अलार्म", "अग्निशामक", "सुरक्षा")
+                "sat" -> listOf("ᱚᱰᱚᱠᱚᱜ", "ᱟᱞᱟᱨᱢ", "ᱥᱮᱸᱜᱮᱞ", "ᱥᱩᱨᱚᱠᱷᱟ")
+                else -> listOf("exit", "alarm", "extinguisher", "sweep")
+            }
+            "gas" -> when (lang) {
+                "hi" -> listOf("खतरा", "परमिट", "वायुमंडल", "निकासी")
+                "sat" -> listOf("ᱵᱚᱛᱚᱨ", "ᱯᱚᱨᱢᱤᱴ", "ᱦᱚᱭ", "ᱚᱰᱚᱠᱚᱜ")
+                else -> listOf("hazard", "permit", "atmosphere", "evacuate")
+            }
+            else -> listOf("safety", "alarm", "exit")
+        }
     }
 
     /**
@@ -95,7 +114,8 @@ class AssessmentEngine {
     fun computeFinalAssessment(
         quizScore: Float,
         transcript: String = "",
-        requiredKeywords: List<String> = emptyList()
+        requiredKeywords: List<String> = emptyList(),
+        lang: String = "en"
     ): FinalAssessmentResult {
         val behavioralScore = calculateBehavioralScore()
         val voiceScore = if (requiredKeywords.isNotEmpty()) {
@@ -107,7 +127,11 @@ class AssessmentEngine {
         val combinedScore = (quizScore * 0.30f) + (behavioralScore * 0.50f) + (voiceScore * 0.20f)
         val passed = combinedScore >= 80.0f
 
-        val breakdown = "Quiz: ${quizScore.toInt()}%, Behavioral: ${behavioralScore.toInt()}%, Oral: ${voiceScore.toInt()}%"
+        val breakdown = when (lang) {
+            "hi" -> "प्रश्नोत्तरी: ${quizScore.toInt()}%, व्यावहारिक: ${behavioralScore.toInt()}%, मौखिक: ${voiceScore.toInt()}%"
+            "sat" -> "ᱡᱟᱹᱥᱛᱤ: ${quizScore.toInt()}%, ᱠᱟᱹᱢᱤ: ${behavioralScore.toInt()}%, ᱨᱚᱲ: ${voiceScore.toInt()}%"
+            else -> "Quiz: ${quizScore.toInt()}%, Behavioral: ${behavioralScore.toInt()}%, Oral: ${voiceScore.toInt()}%"
+        }
 
         return FinalAssessmentResult(
             quizScore = quizScore,

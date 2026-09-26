@@ -12,4 +12,11 @@
     <string name="lbl_stress_mode">Stress Simulation Mode</string>
     <string name="lbl_hazard_diffusion">Hazard Physics Diffusion</string>
     <string name="lbl_mesh_status">P2P Mesh Relay Status</string>
+    <string name="lbl_offline_mode">Offline Operation Active</string>
+    <string name="msg_simulated_notice">Notice: This app uses AR training simulation for worker safety evaluation. It does not detect real hazards or gases.</string>
+    <string name="title_choose_language">Choose your language</string>
+    <string name="desc_choose_language">Select the language for navigation. Training content adapts to your selection.</string>
+    <string name="lang_english">English</string>
+    <string name="lang_hindi">हिन्दी (Hindi)</string>
+    <string name="lang_santali">ᱥᱟᱱᱛᱟᱲᱤ (Santali - Ol Chiki)</string>
 </resources>

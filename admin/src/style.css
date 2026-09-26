@@ -262,6 +262,92 @@ form .check {
 a {
   color: #586daf;
 }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.filter-bar select,
+.filter-bar input {
+  padding: 10px 14px;
+  font-size: 13px;
+  min-width: 150px;
+}
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  padding: 18px;
+}
+.kpi-card p {
+  font-size: 13px;
+  color: #606873;
+  margin: 0 0 6px;
+}
+.kpi-card .metric {
+  font-size: 26px;
+  font-weight: 700;
+  color: #20242c;
+}
+.compliance-banner {
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.compliance-banner.high {
+  background: #eaf5ee;
+  color: #2e7d4f;
+  border: 1px solid #c3e6cd;
+}
+.compliance-banner.moderate {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+.compliance-banner.critical {
+  background: #fcecec;
+  color: #c63d3d;
+  border: 1px solid #f8b4b4;
+}
+.origin-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+.origin-badge.online {
+  background: #e8ecf9;
+  color: #586daf;
+}
+.origin-badge.offline {
+  background: #fef3c7;
+  color: #92400e;
+}
+.origin-badge.mesh {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+.export-button {
+  background: #2e7d4f;
+  border-color: #2e7d4f;
+  color: white;
+}
 @media (max-width: 950px) {
   .shell {
     grid-template-columns: 190px 1fr;
@@ -269,7 +355,8 @@ a {
   main {
     padding: 24px;
   }
-  .metrics {
+  .metrics,
+  .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   aside {
@@ -305,17 +392,26 @@ a {
   main {
     padding: 20px;
   }
-  .metrics {
-    gap: 8px;
+  .metrics,
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
-  .metrics .panel {
+  .metrics .panel,
+  .kpi-card {
     padding: 16px;
   }
   header {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
   h1 {
-    font-size: 26px;
+    font-size: 24px;
+  }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
   .login,
   .verification {

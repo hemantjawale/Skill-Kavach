@@ -25,12 +25,14 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.skilkavach.admin.AdminComplianceScreen
 import com.example.skilkavach.ar.ArTrainingActivity
@@ -213,9 +215,11 @@ private fun SafetyApp(repo: SafetyRepository) {
     val jobs = ownRecords.filter { it.optString("kind") == "job" }
     val certs = ownRecords.filter { it.optString("kind") == "certificate" }
     val modules = repo.modules
-    val labels =
-        if (language == "hi") listOf("होम", "प्रशिक्षण", "कार्य", "गतिविधि", "प्रोफ़ाइल")
-        else listOf("Home", "Training", "Jobs", "Activity", "Profile")
+    val labels = when (language) {
+        "hi" -> listOf("होम", "प्रशिक्षण", "कार्य", "गतिविधि", "प्रोफ़ाइल")
+        "sat" -> listOf("ᱚᱲᱟᱜ", "ᱴᱨᱮᱱᱤᱝ", "ᱠᱟᱹᱢᱤ", "ᱠᱟᱹᱢᱤᱦᱚᱨᱟ", "ᱯᱨᱚᱯᱷᱟᱭᱤᱞ")
+        else -> listOf("Home", "Training", "Jobs", "Activity", "Profile")
+    }
     val tabs = listOf("Home", "Training", "Jobs", "Activity", "Profile")
     val icons =
         listOf(
@@ -229,10 +233,25 @@ private fun SafetyApp(repo: SafetyRepository) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        if (screen in tabs) "SurakshaSetu" else screen,
-                        style = MaterialTheme.typography.titleLarge,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            if (screen in tabs) "SurakshaSetu" else screen,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Surface(
+                            color = if (state.connected) Color(0xFFDCFCE7) else Color(0xFFFEF3C7),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = if (state.connected) "Online Sync" else "Offline Mode",
+                                color = if (state.connected) Color(0xFF166534) else Color(0xFF92400E),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     if (screen !in tabs)
@@ -409,25 +428,68 @@ private fun SafetyApp(repo: SafetyRepository) {
                     "Training details" -> {
                         val m = modules.firstOrNull { it.getString("id") == selected }
                         if (m != null) {
-                            Title(
-                                m.getString("title"),
-                                "${m.getInt("minutes")} min • English training content",
-                            )
-                            Text(m.getString("description"))
-                            Info(
-                                "Available offline",
-                                "Instructions, assessment questions and procedural 3D equipment are included with this app.",
-                            )
-                            Section("What you will practice")
-                            m.items("steps").forEachIndexed { i, s ->
-                                Text("${i+1}. ${s.getString("title")}")
+                            val contentLangLabel = when (language) {
+                                "hi" -> "हिंदी प्रशिक्षण सामग्री"
+                                "sat" -> "ᱥᱟᱱᱛᱟᱲᱤ ᱴᱨᱮᱱᱤᱝ"
+                                else -> "English training content"
                             }
-                            Info("Training equipment", m.getString("equipment"))
-                            Action("Start AR training") { launchTraining(selected) }
-                            Secondary("Practice without camera") { launchTraining(selected, true) }
-                            Secondary("Take assessment") { screen = "Assessment" }
+                            Title(
+                                m.localizedTitle(language),
+                                "${m.getInt("minutes")} min • $contentLangLabel",
+                            )
+                            Text(m.localizedDescription(language))
+                            Info(
+                                if (language == "hi") "सीखने का उद्देश्य"
+                                else if (language == "sat") "ᱪᱮᱫᱚᱜ ᱨᱮᱱᱟᱜ ᱩᱫᱽᱫᱮᱥ"
+                                else "Learning objective",
+                                m.localizedObjective(language),
+                            )
+                            Info(
+                                if (language == "hi") "सुरक्षा निर्देश"
+                                else if (language == "sat") "ᱥᱩᱨᱚᱠᱷᱟ ᱱᱤᱭᱚᱢ"
+                                else "Safety briefing",
+                                m.localizedSafetyBriefing(language),
+                                Color(0xFFFFF6E5),
+                            )
+                            Info(
+                                if (language == "hi") "ऑफलाइन उपलब्ध" else if (language == "sat") "ᱚᱯᱷᱞᱟᱭᱤᱱ ᱢᱮᱱᱟᱜᱼᱟ" else "Available offline",
+                                if (language == "hi") "निर्देश, मूल्यांकन प्रश्न और 3D उपकरण इस ऐप के साथ शामिल हैं।"
+                                else if (language == "sat") "ᱱᱤᱭᱚᱢ, ᱡᱟᱹᱥᱛᱤ ᱠᱩᱠᱞᱤ ᱟᱨ 3D ᱥᱟᱢᱟᱱ ᱮᱯ ᱥᱟᱶ ᱢᱮᱱᱟᱜᱼᱟ᱾"
+                                else "Instructions, assessment questions and procedural 3D equipment are included with this app.",
+                            )
+                            Section(
+                                if (language == "hi") "आप क्या अभ्यास करेंगे"
+                                else if (language == "sat") "ᱟᱢ ᱪᱮᱫ ᱯᱨᱮᱠᱴᱤᱥᱟ"
+                                else "What you will practice"
+                            )
+                            m.items("steps").forEachIndexed { i, s ->
+                                Text("${i+1}. ${s.localizedStepTitle(language)}")
+                            }
+                            Info(
+                                if (language == "hi") "प्रशिक्षण उपकरण"
+                                else if (language == "sat") "ᱴᱨᱮᱱᱤᱝ ᱥᱟᱢᱟᱱ"
+                                else "Training equipment",
+                                m.localizedEquipment(language)
+                            )
+                            Action(
+                                if (language == "hi") "एआर प्रशिक्षण शुरू करें"
+                                else if (language == "sat") "ᱮ.ᱟᱨ. ᱴᱨᱮᱱᱤᱝ ᱮᱦᱚᱵ"
+                                else "Start AR training"
+                            ) { launchTraining(selected) }
+                            Secondary(
+                                if (language == "hi") "बिना कैमरे के अभ्यास करें"
+                                else if (language == "sat") "ᱚᱯᱷᱞᱟᱭᱤᱱ ᱯᱨᱮᱠᱴᱤᱥ"
+                                else "Practice without camera"
+                            ) { launchTraining(selected, true) }
+                            Secondary(
+                                if (language == "hi") "मूल्यांकन दें"
+                                else if (language == "sat") "ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱹᱥᱛᱤ ᱮᱢ"
+                                else "Take assessment"
+                            ) { screen = "Assessment" }
                             Text(
-                                "A trainer must review practical competence before a certificate is issued.",
+                                if (language == "hi") "प्रमाणपत्र जारी होने से पहले एक प्रशिक्षक को व्यावहारिक क्षमता की समीक्षा करनी चाहिए।"
+                                else if (language == "sat") "ᱥᱟᱠᱷᱤ ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱴᱨᱮᱱᱚᱨ ᱪᱮᱠ ᱞᱟᱹᱠᱛᱤᱭᱟ᱾"
+                                else "A trainer must review practical competence before a certificate is issued.",
                                 color = Muted,
                             )
                         }
@@ -437,7 +499,7 @@ private fun SafetyApp(repo: SafetyRepository) {
                             .firstOrNull { it.getString("id") == selected }
                             ?.let { m ->
                                 key(selected) {
-                                    Assessment(m, busy) { answers ->
+                                    Assessment(m, busy, language) { answers ->
                                         run {
                                             repo.act(
                                                 "assessment.submit",
@@ -1042,28 +1104,33 @@ private fun Login(
 }
 
 @Composable
-private fun Assessment(module: JSONObject, busy: Boolean, submit: (List<Int>) -> Unit) {
+private fun Assessment(module: JSONObject, busy: Boolean, language: String = "en", submit: (List<Int>) -> Unit) {
     var answers by rememberSaveable { mutableStateOf("") }
     var selected by rememberSaveable { mutableIntStateOf(-1) }
     val list = if (answers.isEmpty()) emptyList() else answers.split(',').map { it.toInt() }
     val questions = module.items("questions")
     if (list.size >= questions.size) {
         Title(
-            "Assessment ready",
-            "Submit your answers for server scoring. Offline submissions wait for synchronization.",
+            if (language == "hi") "मूल्यांकन तैयार है" else if (language == "sat") "ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱹᱥᱛᱤ ᱥᱟᱯᱲᱟᱣ ᱮᱱᱟ" else "Assessment ready",
+            if (language == "hi") "सर्वर स्कोरिंग के लिए अपने उत्तर जमा करें।"
+            else if (language == "sat") "ᱱᱚᱶᱟ ᱡᱟᱹᱥᱛᱤ ᱚᱯᱷᱞᱟᱭᱤᱱ sync ᱞᱟᱹᱜᱤᱫ ᱥᱟᱯᱲᱟᱣ ᱮᱱᱟ᱾"
+            else "Submit your answers for server scoring. Offline submissions wait for synchronization.",
         )
-        Action("Submit assessment", !busy) { submit(list) }
+        Action(if (language == "hi") "मूल्यांकन जमा करें" else if (language == "sat") "ᱡᱟᱹᱥᱛᱤ ᱮᱢ ᱢᱮ" else "Submit assessment", !busy) { submit(list) }
         return
     }
     val q = questions[list.size]
-    Title("Question ${list.size+1} of ${questions.size}", module.getString("title"))
+    Title(
+        if (language == "hi") "प्रश्न ${list.size+1} / ${questions.size}" else if (language == "sat") "ᱠᱩᱠᱞᱤ ${list.size+1} / ${questions.size}" else "Question ${list.size+1} of ${questions.size}",
+        module.localizedTitle(language)
+    )
     LinearProgressIndicator(
         progress = { list.size.toFloat() / questions.size },
         modifier = Modifier.fillMaxWidth(),
     )
-    Text(q.getString("text"), style = MaterialTheme.typography.titleLarge)
-    val options = q.getJSONArray("options")
-    for (i in 0 until options.length()) {
+    Text(q.localizedQuestionText(language), style = MaterialTheme.typography.titleLarge)
+    val options = q.localizedQuestionOptions(language)
+    for (i in 0 until options.size) {
         OutlinedButton(
             onClick = { selected = i },
             modifier = Modifier.fillMaxWidth(),
@@ -1076,11 +1143,11 @@ private fun Assessment(module: JSONObject, busy: Boolean, submit: (List<Int>) ->
         ) {
             Row(Modifier.fillMaxWidth()) {
                 RadioButton(selected == i, onClick = null)
-                Text(options.getString(i), Modifier.padding(12.dp))
+                Text(options[i], Modifier.padding(12.dp))
             }
         }
     }
-    Action("Continue", selected >= 0) {
+    Action(if (language == "hi") "आगे बढ़ें" else if (language == "sat") "ᱞᱟᱦᱟᱜ ᱢᱮ" else "Continue", selected >= 0) {
         answers = (list + selected).joinToString(",")
         selected = -1
     }

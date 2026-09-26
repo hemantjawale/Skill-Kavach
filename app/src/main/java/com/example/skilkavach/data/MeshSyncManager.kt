@@ -123,12 +123,16 @@ class MeshSyncManager(
     private fun broadcastUnsyncedMeshItems(endpointId: String) {
         scope.launch {
             val pendingSyncItems = dao.getUnsyncedItems()
+            val certVault = CertificateVault()
             for (item in pendingSyncItems) {
-                if (item.hopCount < 5) { // Prevent infinite mesh looping (TTL max 5 hops)
+                if (item.hopCount < 5) { // Retain TTL max 5 hops
+                    val signature = certVault.computeSha256("${item.id}:${item.payloadType}:${item.payloadJson}:$workerId")
                     val meshEnvelope = JSONObject().apply {
+                        put("id", item.id)
                         put("type", item.payloadType)
                         put("json", item.payloadJson)
-                        put("id", item.id)
+                        put("senderId", workerId)
+                        put("signature", signature)
                         put("hop", item.hopCount + 1)
                     }.toString()
 
@@ -146,7 +150,36 @@ class MeshSyncManager(
                 val id = envelope.getString("id")
                 val type = envelope.getString("type")
                 val payloadJson = envelope.getString("json")
+                val senderId = envelope.getString("senderId")
+                val signature = envelope.getString("signature")
                 val hopCount = envelope.getInt("hop")
+
+                // 1. Hop limit enforcement (max 5 hops)
+                if (hopCount > 5) {
+                    Log.w("MeshSyncManager", "Dropped mesh payload $id: hop limit exceeded ($hopCount > 5)")
+                    return@launch
+                }
+
+                // 2. Signature & Integrity Check
+                val certVault = CertificateVault()
+                val expectedSig = certVault.computeSha256("$id:$type:$payloadJson:$senderId")
+                if (signature != expectedSig) {
+                    Log.w("MeshSyncManager", "Dropped mesh payload $id: payload signature validation failed")
+                    return@launch
+                }
+
+                // 3. Replay Protection & Duplicate Detection
+                val existingItem = dao.getSyncQueueItem(id)
+                if (existingItem != null) {
+                    Log.d("MeshSyncManager", "Ignored duplicate mesh payload $id")
+                    return@launch
+                }
+
+                // 4. Sensitive Data Guard (Reject raw passwords / private keys / raw biometrics)
+                if (payloadJson.contains("password") || payloadJson.contains("privateKey") || payloadJson.contains("rawBiometric")) {
+                    Log.e("MeshSyncManager", "Dropped mesh payload $id: contains unauthorized sensitive data fields")
+                    return@launch
+                }
 
                 val entity = SyncQueueEntity(
                     id = id,
@@ -154,11 +187,13 @@ class MeshSyncManager(
                     payloadJson = payloadJson,
                     synced = false,
                     createdAt = System.currentTimeMillis(),
-                    hopCount = hopCount
+                    hopCount = hopCount,
+                    sourceDeviceId = "MESH:$senderId",
+                    status = "PENDING"
                 )
 
                 dao.enqueueSyncItem(entity)
-                Log.d("MeshSyncManager", "Successfully enqueued mesh item: $id ($type)")
+                Log.d("MeshSyncManager", "Successfully verified & enqueued mesh item: $id ($type) from $senderId")
             }
         }
     }
