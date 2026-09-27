@@ -100,6 +100,7 @@
     <string name="ar_assessment_required">प्रमाणन से पहले मूल्यांकन और व्यावहारिक समीक्षा आवश्यक है।</string>
     <string name="ar_save_training">प्रशिक्षण सहेजें</string>
     <string name="ar_saving">सहेजा जा रहा है…</string>
+    <string name="ar_placement_guide">चरण 1: कैमरा को सतह वाले फर्श की ओर करें। चरण 2: फोन को धीरे-धीरे दाएं-बाएं घुमाएं। चरण 3: जब रिंग हरी हो जाए, तब उपकरण रखें पर टैप करें।</string>
     <!-- AR Fire & Explosion Module Strings (Hindi) -->
     <string name="ar_fire_cabinet_title">औद्योगिक विद्युत नियंत्रण कैबिनेट</string>
     <string name="ar_fire_escape_title">निकास मार्ग सत्यापन</string>
