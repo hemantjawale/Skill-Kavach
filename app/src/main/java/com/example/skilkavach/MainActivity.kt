@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -244,7 +245,7 @@ private fun SafetyApp(repo: SafetyRepository) {
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = if (state.connected) "Online Sync" else "Offline Mode",
+                                text = if (state.connected) stringResource(R.string.status_online) else stringResource(R.string.status_offline),
                                 color = if (state.connected) Color(0xFF166534) else Color(0xFF92400E),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
@@ -846,27 +847,27 @@ private fun SafetyApp(repo: SafetyRepository) {
                             "${user.getString("employeeId")} • ${user.getString("role")}",
                         )
                         Info("Worksite", user.getString("site"))
-                        Secondary("Certificates & skills") { screen = "Certificates" }
-                        Secondary("Training history") { screen = "Training history" }
-                        Secondary("Language") { language = "" }
-                        Secondary("Downloads") { screen = "Downloads" }
-                        Secondary("Sync status") { screen = "Sync status" }
-                        Secondary("Emergency instructions") { screen = "Emergency guidance" }
-                        Secondary("Emergency alerts") { screen = "Emergency alerts" }
-                        Secondary("Enable push notifications") {
+                        Secondary(stringResource(R.string.menu_certificates)) { screen = "Certificates" }
+                        Secondary(stringResource(R.string.menu_training_history)) { screen = "Training history" }
+                        Secondary(stringResource(R.string.menu_language)) { language = "" }
+                        Secondary(stringResource(R.string.menu_downloads)) { screen = "Downloads" }
+                        Secondary(stringResource(R.string.menu_sync_status)) { screen = "Sync status" }
+                        Secondary(stringResource(R.string.menu_emergency_instructions)) { screen = "Emergency guidance" }
+                        Secondary(stringResource(R.string.menu_emergency_alerts)) { screen = "Emergency alerts" }
+                        Secondary(stringResource(R.string.menu_enable_notifications)) {
                             if (Build.VERSION.SDK_INT >= 33)
                                 notificationPermission.launch(
                                     Manifest.permission.POST_NOTIFICATIONS
                                 )
                             else run { repo.enableNotifications() }
                         }
-                        Secondary("Sign in again") { screen = "Sign in again" }
-                        Secondary("Sign out") { logout = true }
+                        Secondary(stringResource(R.string.menu_sign_in_again)) { screen = "Sign in again" }
+                        Secondary(stringResource(R.string.menu_sign_out)) { logout = true }
                     }
                     "Downloads" -> {
                         Title(
-                            "Offline content",
-                            "Both training packs are bundled and work without an internet connection.",
+                            stringResource(R.string.title_offline_content),
+                            stringResource(R.string.desc_offline_content),
                         )
                         modules.forEach { m ->
                             Info(

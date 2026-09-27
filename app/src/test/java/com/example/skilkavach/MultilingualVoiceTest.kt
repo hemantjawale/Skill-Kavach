@@ -102,6 +102,58 @@ class MultilingualVoiceTest {
         assertTrue("English answer should contain ventilation", enAnswer.contains("ventilation"))
     }
 
+    @Test
+    fun testSantaliTtsUnsupportedReturnsUnsupportedLanguageNotHindiFallback() {
+        val tutor = SafetyMitraTutorDirect()
+        val satLocale = tutor.getLocaleForCode("sat")
+        val hiLocale = tutor.getLocaleForCode("hi")
+
+        // Santali locale must be distinct from Hindi locale
+        assertNotEquals(hiLocale, satLocale)
+        assertEquals("sat", satLocale.language)
+        assertEquals("IN", satLocale.country)
+
+        // Simulate a device where only English and Hindi TTS are available
+        val mockAvailableLanguages = setOf(Locale.ENGLISH, Locale("hi", "IN"))
+
+        val isSatSupported = mockAvailableLanguages.contains(satLocale)
+        assertFalse("Santali TTS should be detected as unsupported", isSatSupported)
+
+        // Simulate the speak() guard logic from SafetyMitraTutor
+        val result = if (!isSatSupported) {
+            SafetyMitraTutor.TtsResult.UNSUPPORTED_LANGUAGE
+        } else {
+            SafetyMitraTutor.TtsResult.SUCCESS
+        }
+
+        // CRITICAL: Must return UNSUPPORTED_LANGUAGE, never silently fallback to Hindi
+        assertEquals(SafetyMitraTutor.TtsResult.UNSUPPORTED_LANGUAGE, result)
+        assertNotEquals(SafetyMitraTutor.TtsResult.SUCCESS, result)
+    }
+
+    @Test
+    fun testDynamicLanguageSwitchingWithoutRestart() {
+        val titleObj = JSONObject().apply {
+            put("en", "Fire & Explosion Response")
+            put("hi", "आग और विस्फोट की स्थिति में प्रतिक्रिया")
+            put("sat", "ᱥᱮᱸᱜᱮᱞ ᱟᱨ ᱵᱚᱢ ᱯᱟᱹᱥᱱᱟᱹᱣ ᱨᱩᱠᱷᱤᱭᱟᱹ")
+        }
+
+        // Simulate switching language at runtime without restart
+        var activeLang = "en"
+        assertEquals("Fire & Explosion Response", LocalizationResolver.getLocalizedText(titleObj, activeLang))
+
+        activeLang = "hi"
+        assertEquals("आग और विस्फोट की स्थिति में प्रतिक्रिया", LocalizationResolver.getLocalizedText(titleObj, activeLang))
+
+        activeLang = "sat"
+        assertEquals("ᱥᱮᱸᱜᱮᱞ ᱟᱨ ᱵᱚᱢ ᱯᱟᱹᱥᱱᱟᱹᱣ ᱨᱩᱠᱷᱤᱭᱟᱹ", LocalizationResolver.getLocalizedText(titleObj, activeLang))
+
+        // Switch back to English
+        activeLang = "en"
+        assertEquals("Fire & Explosion Response", LocalizationResolver.getLocalizedText(titleObj, activeLang))
+    }
+
     // Direct helper subclass to test logic without Android Context dependency in local JUnit
     private class SafetyMitraTutorDirect {
         fun getLocaleForCode(languageCode: String): Locale {

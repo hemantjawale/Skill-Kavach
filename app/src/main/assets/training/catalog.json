@@ -60,12 +60,12 @@
         "title": {
           "en": "Choose the equipment",
           "hi": "सही उपकरण का चयन करें",
-          "sat": "ᱥᱟᱢᱟᱱ ᱪᱩ visual ᱢᱮ"
+          "sat": "ᱥᱟᱢᱟᱱ ᱪᱤᱱᱦᱟᱹᱣ ᱢᱮ"
         },
         "instruction": {
           "en": "For this simulated energized electrical cabinet, select the labelled CO₂ extinguisher. Follow site-specific instructions.",
           "hi": "इस सिमुलेटेड विद्युत कैबिनेट के लिए, CO₂ अग्निशामक यंत्र का चयन करें।",
-          "sat": "CO₂ ᱥᱮᱸᱜᱮᱞ ᱵᱩᱡᱷᱟᱹᱣ ᱥᱟᱢᱟᱱ ᱪᱩ visual ᱢᱮ᱾"
+          "sat": "CO₂ ᱥᱮᱸᱜᱮᱞ ᱵᱩᱡᱷᱟᱹᱣ ᱥᱟᱢᱟᱱ ᱪᱤᱱᱦᱟᱹᱣ ᱢᱮ᱾"
         }
       },
       {
@@ -86,12 +86,12 @@
         "title": {
           "en": "Aim",
           "hi": "आग के आधार पर निशाना लगाएं",
-          "sat": "ᱴᱟᱨ visual ᱢᱮ"
+          "sat": "ᱵᱩᱴᱟᱹ ᱛᱟᱹᱠ ᱢᱮ"
         },
         "instruction": {
           "en": "Aim the nozzle at the base of the simulated fire while keeping an escape route.",
           "hi": "निकास मार्ग बनाए रखते हुए सिमुलेटेड आग के आधार पर नोजल को लक्षित करें।",
-          "sat": "ᱥᱮᱸᱜᱮᱞ ᱨᱮᱱᱟᱜ ᱵᱩᱴᱟᱹ ᱥᱮᱫ ᱴᱟᱨ visual ᱢᱮ᱾"
+          "sat": "ᱥᱮᱸᱜᱮᱞ ᱨᱮᱱᱟᱜ ᱵᱩᱴᱟᱹ ᱥᱮᱫ ᱵᱩᱴᱟᱹ ᱛᱟᱹᱠ ᱢᱮ᱾"
         }
       },
       {
@@ -99,12 +99,12 @@
         "title": {
           "en": "Squeeze",
           "hi": "हैंडल को दबाएं",
-          "sat": "ᱞᱤ visual ᱢᱮ"
+          "sat": "ᱞᱤᱱ ᱢᱮ"
         },
         "instruction": {
           "en": "Squeeze the handle on the simulated extinguisher.",
           "hi": "सिमुलेटेड अग्निशामक के हैंडल को दबाएं।",
-          "sat": "ᱦᱮᱱᱰᱮᱞ ᱞᱤ visual ᱢᱮ᱾"
+          "sat": "ᱦᱮᱱᱰᱮᱞ ᱞᱤᱱ ᱢᱮ᱾"
         }
       },
       {
@@ -112,12 +112,12 @@
         "title": {
           "en": "Sweep",
           "hi": "झाड़ू की तरह घुमाएं",
-          "sat": "ᱜᱩᱨ visual ᱢᱮ"
+          "sat": "ᱜᱩᱨᱞᱟᱹᱣ ᱢᱮ"
         },
         "instruction": {
           "en": "Drag across the labelled Sweep marker to practice sweeping across the base of the simulated fire.",
           "hi": "सिमुलेटेड आग के आधार पर झाड़ू की तरह घुमाने का अभ्यास करें।",
-          "sat": "ᱥᱮᱸᱜᱮᱞ ᱵᱩᱴᱟᱹ ᱨᱮ ᱜᱩᱨ visual ᱢᱮ᱾"
+          "sat": "ᱥᱮᱸᱜᱮᱞ ᱵᱩᱴᱟᱹ ᱨᱮ ᱜᱩᱨᱞᱟᱹᱣ ᱢᱮ᱾"
         }
       },
       {
@@ -170,12 +170,12 @@
         "topic": {
           "en": "Equipment selection",
           "hi": "उपकरण चयन",
-          "sat": "ᱥᱟᱢᱟᱱ ᱪᱩ visual"
+          "sat": "ᱥᱟᱢᱟᱱ ᱪᱤᱱᱦᱟᱹᱣ"
         },
         "text": {
           "en": "In this electrical-cabinet scenario, which labelled extinguisher was selected?",
           "hi": "इस विद्युत-कैबिनेट परिदृश्य में, कौन सा अग्निशामक चुना गया था?",
-          "sat": "ᱵᱤᱡᱽᱞᱤ ᱥᱮᱸᱜᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱥᱟᱢᱟᱱ ᱪᱩ visual ᱮᱱᱟ?"
+          "sat": "ᱵᱤᱡᱽᱞᱤ ᱥᱮᱸᱜᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱥᱟᱢᱟᱱ ᱪᱤᱱᱦᱟᱹᱣ ᱮᱱᱟ?"
         },
         "options": [
           {
@@ -260,12 +260,12 @@
         "topic": {
           "en": "Aim",
           "hi": "लक्ष्य",
-          "sat": "ᱴᱟᱨ visual"
+          "sat": "ᱵᱩᱴᱟᱹ ᱛᱟᱹᱠ"
         },
         "text": {
           "en": "Where do you aim in the simulated PASS technique?",
           "hi": "सिमुलेटेड PASS तकनीक में आप कहां निशाना लगाते हैं?",
-          "sat": "PASS ᱨᱮ ᱚᱠᱟ ᱥᱮᱫ ᱴᱟᱨ visual ᱦᱩᱭᱩᱜᱼᱟ?"
+          "sat": "PASS ᱨᱮ ᱚᱠᱟ ᱥᱮᱫ ᱵᱩᱴᱟᱹ ᱛᱟᱹᱠ ᱦᱩᱭᱩᱜᱼᱟ?"
         },
         "options": [
           {
@@ -379,7 +379,7 @@
         "instruction": {
           "en": "Use PPE and respiratory protection specified by the permit and site risk assessment.",
           "hi": "परमिट और स्थल जोखिम मूल्यांकन द्वारा निर्दिष्ट पीपीई का उपयोग करें।",
-          "sat": "ᱯᱚᱨᱢᱤᱴ ᱞᱮᱠᱟᱛᱮ PPE ᱟᱨ ᱥᱟ processes ᱥᱟᱢᱟᱱ ᱵᱮᱣᱦᱟᱨ ᱢᱮ᱾"
+          "sat": "ᱯᱚᱨᱢᱤᱴ ᱞᱮᱠᱟᱛᱮ PPE ᱟᱨ ᱥᱟᱯᱲᱟᱣ ᱥᱟᱢᱟᱱ ᱵᱮᱣᱦᱟᱨ ᱢᱮ᱾"
         }
       },
       {
@@ -426,7 +426,7 @@
           {
             "en": "Yes, using the camera",
             "hi": "हाँ, कैमरे का उपयोग करके",
-            "sat": "ᱦᱮ standard, ᱠᱮᱢᱨᱟ ᱛᱮ"
+            "sat": "ᱦᱮᱸ ᱱᱤᱭᱚᱢ ᱞᱮᱠᱟᱛᱮ, ᱠᱮᱢᱨᱟ ᱛᱮ"
           },
           {
             "en": "No. Approved atmospheric testing is required",
@@ -551,7 +551,7 @@
           {
             "en": "Ignore it if you feel fine",
             "hi": "यदि आप ठीक महसूस करते हैं तो इसे अनदेखा करें",
-            "sat": "ᱵᱟᱹᱜᱤ ᱠᱟ cross ᱢᱮ"
+            "sat": "ᱵᱟᱹᱜᱤ ᱠᱟᱹᱢᱤ ᱢᱮ"
           },
           {
             "en": "Stop work and evacuate under the site plan",

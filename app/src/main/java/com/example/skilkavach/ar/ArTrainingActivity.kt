@@ -328,7 +328,7 @@ class ArTrainingActivity : ComponentActivity() {
                             ) {
                                 Text("⚠️ ", fontSize = 13.sp)
                                 Text(
-                                    "SIMULATED TRAINING ENVIRONMENT — Does not detect or suppress real-world fires.",
+                                    getString(R.string.ar_safety_disclaimer),
                                     color = Color(0xFFFFB74D),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium

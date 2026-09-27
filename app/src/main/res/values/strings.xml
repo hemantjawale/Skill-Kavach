@@ -137,5 +137,39 @@
 
     <!-- Safety Disclaimer -->
     <string name="ar_safety_disclaimer">⚠ Training simulation only. Does not detect real fires or replace certified safety equipment and procedures.</string>
+
+    <!-- Status Bar -->
+    <string name="status_online">Online Sync</string>
+    <string name="status_offline">Offline Mode</string>
+
+    <!-- Profile Menu -->
+    <string name="menu_certificates">Certificates &amp; skills</string>
+    <string name="menu_training_history">Training history</string>
+    <string name="menu_language">Language</string>
+    <string name="menu_downloads">Downloads</string>
+    <string name="menu_sync_status">Sync status</string>
+    <string name="menu_emergency_instructions">Emergency instructions</string>
+    <string name="menu_emergency_alerts">Emergency alerts</string>
+    <string name="menu_enable_notifications">Enable push notifications</string>
+    <string name="menu_sign_in_again">Sign in again</string>
+    <string name="menu_sign_out">Sign out</string>
+    <string name="menu_view_certificates">View certificates</string>
+    <string name="menu_view_jobs">View jobs</string>
+    <string name="menu_offline_attendance">Record offline attendance</string>
+    <string name="menu_apply_leave">Apply for leave</string>
+    <string name="menu_view_payslip">View payslip</string>
+    <string name="menu_change_language">Change language</string>
+
+    <!-- Downloads -->
+    <string name="title_offline_content">Offline content</string>
+    <string name="desc_offline_content">Both training packs are bundled and work without an internet connection.</string>
+
+    <!-- Login -->
+    <string name="login_tagline">Safety training. Safer work.</string>
+    <string name="login_register_title">Worker Self-Registration</string>
+    <string name="login_language_support_title">Language Support</string>
+    <string name="login_language_support_desc">Full English, Hindi, and Santali (Ol Chiki script) localizations are active.</string>
+
 </resources>
+
 
