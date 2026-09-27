@@ -16,6 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,6 +100,10 @@ private fun SafetyApp(repo: SafetyRepository) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("language", 0) }
     var language by rememberSaveable { mutableStateOf(prefs.getString("value", "") ?: "") }
+    var magnifiedQrUrl by remember { mutableStateOf<String?>(null) }
+    var showAudioSettings by remember { mutableStateOf(false) }
+    var voiceVolume by remember { mutableFloatStateOf(prefs.getFloat("voice_volume", 1.0f)) }
+    var sfxVolume by remember { mutableFloatStateOf(prefs.getFloat("sfx_volume", 0.8f)) }
     var screen by rememberSaveable { mutableStateOf("Home") }
     var selected by rememberSaveable { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
@@ -261,6 +267,9 @@ private fun SafetyApp(repo: SafetyRepository) {
                         }
                 },
                 actions = {
+                    IconButton(onClick = { showAudioSettings = true }) {
+                        Icon(Icons.Outlined.VolumeUp, "Sound & Voice Settings")
+                    }
                     IconButton(onClick = { screen = "Admin" }) {
                         Icon(Icons.Outlined.AdminPanelSettings, "Admin Portal")
                     }
@@ -568,16 +577,32 @@ private fun SafetyApp(repo: SafetyRepository) {
                     "Certificate QR" -> {
                         val c = certs.firstOrNull { it.getString("id") == selected }
                         if (c != null) {
+                            val qrUrl = snapshot.optString("verificationBase") + selected
                             Title("Verify certificate", user.getString("name"))
-                            Qr(snapshot.optString("verificationBase") + selected)
-                            Text(selected)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+                                    .border(BorderStroke(1.dp, Border), shape = RoundedCornerShape(12.dp))
+                                    .clickable { magnifiedQrUrl = qrUrl }
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Qr(qrUrl)
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("🔍 Tap to expand full-screen for stage scanning", fontSize = 12.sp, color = Primary, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                            Text(selected, fontSize = 12.sp, color = Muted)
+                            Secondary("Expand QR full screen") {
+                                magnifiedQrUrl = qrUrl
+                            }
                             Secondary("Open verification page") {
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse(
-                                            snapshot.optString("verificationBase") + selected
-                                        ),
+                                        Uri.parse(qrUrl)
                                     )
                                 )
                             }
@@ -1009,6 +1034,28 @@ private fun SafetyApp(repo: SafetyRepository) {
             },
             dismissButton = { TextButton(onClick = { logout = false }) { Text("Keep account") } },
         )
+    if (showAudioSettings) {
+        AudioSettingsDialog(
+            voiceVolume = voiceVolume,
+            sfxVolume = sfxVolume,
+            onVoiceChange = {
+                voiceVolume = it
+                prefs.edit().putFloat("voice_volume", it).apply()
+            },
+            onSfxChange = {
+                sfxVolume = it
+                prefs.edit().putFloat("sfx_volume", it).apply()
+            },
+            onDismiss = { showAudioSettings = false }
+        )
+    }
+    if (magnifiedQrUrl != null) {
+        QrMagnifierDialog(
+            url = magnifiedQrUrl!!,
+            workerName = user.optString("name", "Worker Certificate"),
+            onDismiss = { magnifiedQrUrl = null }
+        )
+    }
 }
 
 @Composable
@@ -1069,6 +1116,41 @@ private fun Login(
         } else {
             Text("Sign in with the employee account provided by your organization.")
             if (challenge.isEmpty()) {
+                Section("SIH Evaluator — Quick Demo Accounts")
+                Text("Select a pre-seeded worker profile for instant evaluator sign in:", color = Muted, fontSize = 12.sp)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            org = "JH-MINING"
+                            employee = "JH-MIN-8042"
+                            email = "ramesh.tudu@jharkhand.gov.in"
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("👤 Ramesh Tudu (Santali • Dhanbad Coal Mine)", fontSize = 12.sp)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            org = "JH-STEEL"
+                            employee = "JH-STL-9120"
+                            email = "sita.murmu@jharkhand.gov.in"
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("👤 Sita Murmu (Hindi • Jamshedpur Steel)", fontSize = 12.sp)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            org = "JH-HEC"
+                            employee = "JH-MAN-7011"
+                            email = "anil.kumar@jharkhand.gov.in"
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("👤 Anil Kumar (English • Ranchi HEC Complex)", fontSize = 12.sp)
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
                 Field("Organization ID", org, { org = it })
                 Field("Employee ID", employee, { employee = it })
                 Field("Registered email address", email, { email = it.trim().take(254) })
@@ -1430,3 +1512,101 @@ private fun formatTime(value: String) = runCatching {
 
 private fun money(paise: Long) =
     NumberFormat.getCurrencyInstance(Locale.forLanguageTag("en-IN")).format(paise / 100.0)
+
+@Composable
+private fun AudioSettingsDialog(
+    voiceVolume: Float,
+    sfxVolume: Float,
+    onVoiceChange: (Float) -> Unit,
+    onSfxChange: (Float) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Sound & Voice Settings") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text("Adjust volume levels for live AR training and SafetyMitra voice guidance.", fontSize = 12.sp, color = Muted)
+                
+                Column {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("SafetyMitra Voice Guidance", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        Text("${(voiceVolume * 100).toInt()}%", fontWeight = FontWeight.Bold, color = Primary, fontSize = 13.sp)
+                    }
+                    Slider(
+                        value = voiceVolume,
+                        onValueChange = onVoiceChange,
+                        valueRange = 0f..1f,
+                        steps = 10
+                    )
+                }
+                
+                Column {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Ambient Industrial SFX", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        Text("${(sfxVolume * 100).toInt()}%", fontWeight = FontWeight.Bold, color = Primary, fontSize = 13.sp)
+                    }
+                    Slider(
+                        value = sfxVolume,
+                        onValueChange = onSfxChange,
+                        valueRange = 0f..1f,
+                        steps = 10
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Save Settings")
+            }
+        }
+    )
+}
+
+@Composable
+private fun QrMagnifierDialog(
+    url: String,
+    workerName: String,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier.padding(16.dp).fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text("Official QR Certificate", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(workerName, style = MaterialTheme.typography.bodyMedium, color = Muted)
+                
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(2.dp, Primary),
+                    color = Color.White,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Qr(url)
+                }
+                
+                Text(
+                    "ECDSA P-256 Digital Signature • SHA-256 Self-Hash",
+                    fontSize = 11.sp,
+                    color = Success,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Close Full Screen")
+                }
+            }
+        }
+    }
+}

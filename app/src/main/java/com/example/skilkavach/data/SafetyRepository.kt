@@ -70,6 +70,9 @@ class SafetyRepository(private val context: Context) {
     suspend fun initialize() = mutex.withLock {
         if (state.value.initialized) return@withLock
         try {
+            if (dao.getAllWorkers().isEmpty()) {
+                dao.insertWorkers(DEFAULT_SEEDED_WORKERS)
+            }
             session = dao.get("session")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
             val snapshot = dao.get("snapshot")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
             state.value =
@@ -90,6 +93,13 @@ class SafetyRepository(private val context: Context) {
                     initialized = true,
                     storageProblem = true,
                 )
+        }
+    }
+
+    suspend fun getSeededWorkers(): List<WorkerEntity> = withContext(Dispatchers.IO) {
+        dao.getAllWorkers().ifEmpty {
+            dao.insertWorkers(DEFAULT_SEEDED_WORKERS)
+            DEFAULT_SEEDED_WORKERS
         }
     }
 

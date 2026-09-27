@@ -189,12 +189,49 @@ interface SafetyDao {
     @Query("SELECT * FROM assessment_results WHERE workerId = :workerId ORDER BY evaluatedAt DESC")
     suspend fun getWorkerAssessments(workerId: String): List<AssessmentResultEntity>
 
+    // Worker Pre-Seeded Profiles
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertWorkers(workers: List<WorkerEntity>)
+
+    @Query("SELECT * FROM workers ORDER BY createdAt ASC")
+    suspend fun getAllWorkers(): List<WorkerEntity>
+
     @Transaction
     suspend fun clear() {
         clearCache()
         clearOutbox()
     }
 }
+
+val DEFAULT_SEEDED_WORKERS = listOf(
+    WorkerEntity(
+        id = "worker-sat-01",
+        name = "Ramesh Tudu",
+        siteId = "Jharia Coalfield, Dhanbad",
+        role = "MINER",
+        preferredLanguage = "sat",
+        biometricEmbeddingHash = "hash-sat-8042",
+        createdAt = 1700000000000L
+    ),
+    WorkerEntity(
+        id = "worker-hi-02",
+        name = "Sita Murmu",
+        siteId = "Tata Steel Works, Jamshedpur",
+        role = "PLANT_OPERATOR",
+        preferredLanguage = "hi",
+        biometricEmbeddingHash = "hash-hi-9120",
+        createdAt = 1700000000000L
+    ),
+    WorkerEntity(
+        id = "worker-en-03",
+        name = "Anil Kumar",
+        siteId = "HEC Industrial Complex, Ranchi",
+        role = "SAFETY_INSPECTOR",
+        preferredLanguage = "en",
+        biometricEmbeddingHash = "hash-en-7011",
+        createdAt = 1700000000000L
+    )
+)
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {

@@ -45,6 +45,8 @@ class SafetyMitraTutor(private val context: Context) {
         return availability >= TextToSpeech.LANG_AVAILABLE
     }
 
+    var voiceVolume: Float = 1.0f
+
     /**
      * Speaks the given instruction or warning text in the specified language.
      * Returns TtsResult status for UI handling.
@@ -64,10 +66,13 @@ class SafetyMitraTutor(private val context: Context) {
 
         return try {
             engine.language = targetLocale
+            val params = android.os.Bundle().apply {
+                putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, voiceVolume.coerceIn(0.0f, 1.0f))
+            }
             val result = engine.speak(
                 text,
                 TextToSpeech.QUEUE_FLUSH,
-                null,
+                params,
                 "safety_mitra_${System.currentTimeMillis()}"
             )
             if (result == TextToSpeech.SUCCESS) TtsResult.SUCCESS else TtsResult.ERROR
