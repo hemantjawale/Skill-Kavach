@@ -1,4 +1,6 @@
 import java.net.URI
+import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android.application)
@@ -36,12 +38,36 @@ android {
 
     signingConfigs {
         create("release") {
-            val ksFile = file("release-key.jks")
-            if (ksFile.exists()) {
+            val keystorePath = providers.environmentVariable("RELEASE_KEYSTORE_PATH")
+                .orElse(providers.gradleProperty("RELEASE_KEYSTORE_PATH"))
+                .orNull ?: "release-key.jks"
+            val ksFile = file(keystorePath)
+
+            val storePass = providers.environmentVariable("RELEASE_KEYSTORE_PASSWORD")
+                .orElse(providers.gradleProperty("RELEASE_KEYSTORE_PASSWORD"))
+                .orNull
+            val alias = providers.environmentVariable("RELEASE_KEY_ALIAS")
+                .orElse(providers.gradleProperty("RELEASE_KEY_ALIAS"))
+                .orNull
+            val keyPass = providers.environmentVariable("RELEASE_KEY_PASSWORD")
+                .orElse(providers.gradleProperty("RELEASE_KEY_PASSWORD"))
+                .orNull
+
+            val releasePropsFile = file("release-key.properties")
+            val releaseProps = Properties()
+            if (releasePropsFile.exists()) {
+                FileInputStream(releasePropsFile).use { releaseProps.load(it) }
+            }
+
+            val finalStorePass = storePass ?: releaseProps.getProperty("storePassword")
+            val finalAlias = alias ?: releaseProps.getProperty("keyAlias")
+            val finalKeyPass = keyPass ?: releaseProps.getProperty("keyPassword")
+
+            if (ksFile.exists() && !finalStorePass.isNullOrBlank() && !finalAlias.isNullOrBlank() && !finalKeyPass.isNullOrBlank()) {
                 storeFile = ksFile
-                storePassword = "sih2026pass"
-                keyAlias = "sih2026key"
-                keyPassword = "sih2026pass"
+                storePassword = finalStorePass
+                keyAlias = finalAlias
+                keyPassword = finalKeyPass
             }
         }
     }
@@ -51,7 +77,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+            val relConfig = signingConfigs.getByName("release")
+            signingConfig = if (relConfig.storeFile != null && relConfig.storeFile!!.exists()) {
+                relConfig
+            } else {
+                signingConfigs.getByName("debug")
+            }
             optimization {
                 enable = true
             }

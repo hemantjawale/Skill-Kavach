@@ -54,10 +54,10 @@ The signed release APK will be generated at:
 ## 4. Release Artifact & SHA-256 Checksum
 
 * **Artifact Path**: `app/build/outputs/apk/release/app-release.apk`
-* **File Size**: `7,172,774 bytes` (~7.17 MB)
+* **File Size**: `6,913,500 bytes` (~6.9 MB)
 * **SHA-256 Checksum**:
   ```
-  708fb87804726f93909092d63d7e204e22a9b6474f3bb163a0757ad93660800f
+  4fc79c2b3e547552655ee0da5e9534b698a5c9439759a4bccbc32e96e8452fcf
   ```
 * **Signature Verification**: Verified via `apksigner` (v2 Signature Scheme valid).
 
