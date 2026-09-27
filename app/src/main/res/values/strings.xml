@@ -104,7 +104,19 @@
     <string name="ar_assessment_required">Assessment and practical review required before certification.</string>
     <string name="ar_save_training">Save training</string>
     <string name="ar_saving">Saving…</string>
-    <string name="ar_placement_guide">Step 1: Point camera at textured floor. Step 2: Move phone slowly side-to-side. Step 3: When ring turns green, tap Place Equipment.</string>
+    <string name="ar_placement_guide">Step 1: Point camera at floor. Step 2: Move phone slowly. Step 3: Tap Place Equipment.</string>
+
+    <!-- AR 3-Step Onboarding & Non-Technical Feedback -->
+    <string name="ar_onboarding_step1">Step 1: Point camera towards the floor</string>
+    <string name="ar_onboarding_step2">Step 2: Move phone slowly to detect surface</string>
+    <string name="ar_onboarding_step3">Step 3: Surface detected! Tap to place environment</string>
+    <string name="ar_feedback_move_slowly">Move your phone slowly.</string>
+    <string name="ar_feedback_flat_surface">Point at a flat surface.</string>
+    <string name="ar_feedback_surface_detected">Surface detected. Tap to place.</string>
+    <string name="ar_feedback_tap_place">Tap to place training environment.</string>
+    <string name="ar_feedback_placed">Equipment anchored safely. Follow instructions below.</string>
+    <string name="ar_feedback_tracking_lost">Tracking paused. Point camera at flat surface in well-lit area.</string>
+    <string name="ar_unsupported_fallback">AR mode unavailable on this device. Practice mode activated.</string>
 
     <!-- AR Fire & Explosion Module Strings -->
     <string name="ar_fire_cabinet_title">Industrial Electrical Control Cabinet</string>

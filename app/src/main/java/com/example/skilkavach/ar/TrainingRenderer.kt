@@ -170,6 +170,7 @@ class TrainingRenderer(
         private set
     @Volatile var isPinPulled: Boolean = false
         private set
+    val isPlaced: Boolean get() = anchor != null
 
     fun reposition() { resetRequested = true }
     fun placeEquipment() { placeRequested = true }

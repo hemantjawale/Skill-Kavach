@@ -100,7 +100,19 @@
     <string name="ar_assessment_required">ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱟᱹᱥᱛᱤ ᱟᱨ ᱠᱟᱹᱢᱤ ᱪᱮᱠ ᱫᱚᱨᱠᱟᱨ᱾</string>
     <string name="ar_save_training">ᱴᱨᱮᱱᱤᱝ ᱥᱮᱵ ᱢᱮ</string>
     <string name="ar_saving">ᱥᱮᱵ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…</string>
-    <string name="ar_placement_guide">ᱠᱟᱹᱢᱤ 1: ᱠᱮᱢᱨᱟ ᱞᱟᱛᱟᱨ ᱥᱮᱫ ᱚᱝ ᱢᱮ᱾ ᱠᱟᱹᱢᱤ 2: ᱯᱷᱚᱱ ᱫᱚ ᱞᱮᱸᱜᱟ–ᱡᱚᱡᱚᱢ ᱥᱮᱫ ᱦᱤᱞᱟᱹᱣ ᱢᱮ᱾ ᱠᱟᱹᱢᱤ 3: ᱡᱚᱠᱷᱚᱱ ᱨᱤᱝ ᱦᱟᱹᱨᱤᱭᱟᱹᱲᱚᱜᱼᱟ, ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱢᱮ ᱨᱮ ᱛᱟᱯ ᱢᱮ᱾</string>
+    <string name="ar_placement_guide">ᱫᱷᱟᱯ 1: ᱠᱮᱢᱨᱟ ᱞᱟᱛᱟᱨ ᱚᱛ ᱥᱮᱫ ᱚᱝ ᱢᱮ᱾ ᱫᱷᱟᱯ 2: ᱯᱷᱚᱱ ᱵᱟᱹᱭ-ᱵᱟᱹᱭ ᱛᱮ ᱦᱤᱞᱟᱹᱣ ᱢᱮ᱾ ᱫᱷᱟᱯ 3: ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱯ ᱢᱮ᱾</string>
+
+    <!-- AR 3-Step Onboarding & Non-Technical Feedback -->
+    <string name="ar_onboarding_step1">ᱫᱷᱟᱯ 1: ᱠᱮᱢᱨᱟ ᱞᱟᱛᱟᱨ ᱚᱛ ᱥᱮᱫ ᱚᱝ ᱢᱮ</string>
+    <string name="ar_onboarding_step2">ᱫᱷᱟᱯ 2: ᱡᱟᱭᱜᱟ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱯᱷᱚᱱ ᱫᱚ ᱵᱟᱹᱭ-ᱵᱟᱹᱭ ᱛᱮ ᱦᱤᱞᱟᱹᱣ ᱢᱮ</string>
+    <string name="ar_onboarding_step3">ᱫᱷᱟᱯ 3: ᱡᱟᱭᱜᱟ ᱧᱟᱢ ᱮᱱᱟ! ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱯ ᱢᱮ</string>
+    <string name="ar_feedback_move_slowly">ᱟᱢᱟᱜ ᱯᱷᱚᱱ ᱵᱟᱹᱭ-ᱵᱟᱹᱭ ᱛᱮ ᱦᱤᱞᱟᱹᱣ ᱢᱮ᱾</string>
+    <string name="ar_feedback_flat_surface">ᱥᱟᱯᱷᱟ ᱚᱛ ᱥᱮᱫ ᱚᱝ ᱢᱮ᱾</string>
+    <string name="ar_feedback_surface_detected">ᱡᱟᱭᱜᱟ ᱧᱟᱢ ᱮᱱᱟ᱾ ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱯ ᱢᱮ᱾</string>
+    <string name="ar_feedback_tap_place">ᱴᱨᱮᱱᱤᱝ ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱯ ᱢᱮ᱾</string>
+    <string name="ar_feedback_placed">ᱥᱟᱢᱟᱱ ᱱᱟᱯᱟᱭ ᱛᱮ ᱫᱚᱦᱚ ᱮᱱᱟ᱾ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱯᱟᱸᱡᱟᱭ ᱢᱮ᱾</string>
+    <string name="ar_feedback_tracking_lost">ᱴᱨᱮᱠᱤᱝ ᱛᱤᱝᱜᱩ ᱮᱱᱟ᱾ ᱢᱟᱨᱥᱟᱞ ᱡᱟᱭᱜᱟ ᱨᱮ ᱚᱛ ᱥᱮᱫ ᱧᱮᱞ ᱢᱮ᱾</string>
+    <string name="ar_unsupported_fallback">ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱨᱮ AR ᱵᱟᱹᱱᱩᱜᱼᱟ᱾ ᱯᱨᱮᱠᱴᱤᱥ ᱢᱚᱰ ᱪᱟᱹᱞᱩ ᱮᱱᱟ᱾</string>
     <!-- AR Fire & Explosion Module Strings (Santali Ol Chiki) -->
     <string name="ar_fire_cabinet_title">ᱵᱤᱡᱽᱞᱤ ᱠᱚᱱᱴᱨᱚᱞ ᱠᱮᱵᱤᱱᱮᱴ</string>
     <string name="ar_fire_escape_title">ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱪᱮᱠ</string>

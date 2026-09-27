@@ -351,32 +351,106 @@ class ArTrainingActivity : ComponentActivity() {
                                     .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                // Placement controls
+                                // Placement Onboarding & Controls (non-technical feedback)
                                 if (!practice) {
-                                    if (status.isNotEmpty()) {
-                                        Text(status, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
-                                    }
-                                    Text(
-                                        getString(R.string.ar_placement_guide),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF888888),
-                                    )
-                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        OutlinedButton(
-                                            onClick = { renderer?.placeEquipment() },
-                                            enabled = session != null,
-                                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4FC3F7))
-                                        ) { Text(getString(R.string.ar_place_equipment), fontSize = 12.sp) }
-                                        OutlinedButton(
-                                            onClick = { renderer?.autoPlaceInFront() },
-                                            enabled = session != null,
-                                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4FC3F7))
-                                        ) { Text(getString(R.string.ar_auto_place), fontSize = 12.sp) }
-                                        OutlinedButton(
-                                            onClick = { renderer?.reposition() },
-                                            enabled = session != null,
-                                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4FC3F7))
-                                        ) { Text(getString(R.string.ar_reposition), fontSize = 12.sp) }
+                                    val isPlaced = renderer?.isPlaced == true
+                                    val isReady = renderer?.labels?.placementReady == true
+
+                                    if (!isPlaced) {
+                                        // 3-Step Visual Guided Onboarding Card
+                                        Column(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .background(Color(0xFF232733), RoundedCornerShape(10.dp))
+                                                .border(1.dp, Color(0xFF4FC3F7), RoundedCornerShape(10.dp))
+                                                .padding(12.dp),
+                                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Text(
+                                                "📱 " + getString(R.string.title_choose_language).let { "AR Setup Guide" },
+                                                color = Color(0xFF4FC3F7),
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 14.sp
+                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = if (isReady) "✓ " + getString(R.string.ar_onboarding_step1)
+                                                           else "• " + getString(R.string.ar_onboarding_step1),
+                                                    color = if (isReady) Color(0xFF81C784) else Color.White,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = if (!isReady) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            }
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = if (isReady) "✓ " + getString(R.string.ar_onboarding_step2)
+                                                           else "• " + getString(R.string.ar_onboarding_step2),
+                                                    color = if (isReady) Color(0xFF81C784) else Color(0xFFFFB74D),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = if (isReady) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            }
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = "• " + getString(R.string.ar_onboarding_step3),
+                                                    color = if (isReady) Color(0xFF81C784) else Color(0xFFAAAAAA),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = if (isReady) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            }
+                                            if (status.isNotEmpty()) {
+                                                Text(status, color = Color(0xFFE0E0E0), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                            }
+                                        }
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Button(
+                                                onClick = { renderer?.placeEquipment() },
+                                                enabled = session != null,
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = if (isReady) Color(0xFF66BB6A) else Color(0xFF4FC3F7)
+                                                ),
+                                                modifier = Modifier.weight(1f).defaultMinSize(minHeight = 48.dp)
+                                            ) {
+                                                Text(getString(R.string.ar_place_equipment), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                            }
+                                            OutlinedButton(
+                                                onClick = { renderer?.autoPlaceInFront() },
+                                                enabled = session != null,
+                                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4FC3F7)),
+                                                modifier = Modifier.defaultMinSize(minHeight = 48.dp)
+                                            ) {
+                                                Text(getString(R.string.ar_auto_place), fontSize = 12.sp)
+                                            }
+                                        }
+                                    } else {
+                                        // Placed & Anchored state
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text("🔒 ", fontSize = 14.sp)
+                                                Text(
+                                                    getString(R.string.ar_feedback_placed),
+                                                    color = Color(0xFF81C784),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                            OutlinedButton(
+                                                onClick = { renderer?.reposition() },
+                                                enabled = session != null,
+                                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFFB74D)),
+                                                modifier = Modifier.defaultMinSize(minHeight = 44.dp)
+                                            ) {
+                                                Text(getString(R.string.ar_reposition), fontSize = 11.sp)
+                                            }
+                                        }
                                     }
                                 }
 
