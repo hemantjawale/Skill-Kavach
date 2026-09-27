@@ -85,6 +85,9 @@ class FireEffectRenderer(private val maxParticles: Int = 85) {
             } else if (u_Layer == 5) {
                 // Extinguisher agent cloud: soft dense powder droplet
                 alpha = smoothstep(0.5, 0.05, dist) * 0.75;
+            } else if (u_Layer == 6) {
+                // Heat Shimmer: subtle refractive distortion ring around hottest region
+                alpha = smoothstep(0.48, 0.10, dist) * 0.25;
             } else {
                 // Fire flames: medium soft with dynamic edge turbulence
                 float turbulence = sin(dist * 22.0 + u_Flicker * 6.28) * 0.06;
@@ -100,6 +103,13 @@ class FireEffectRenderer(private val maxParticles: Int = 85) {
             gl_FragColor = vec4(u_Color.rgb * flickerMod, u_Color.a * alpha);
         }
     """.trimIndent()
+
+    /** Returns dynamic flickering light intensity for environment ambient lighting. */
+    fun getDynamicFireLightIntensity(fireIntensity: Float): Float {
+        if (fireIntensity <= 0.01f) return 0f
+        val flicker = sin(timeSeconds * 12f) * cos(timeSeconds * 7.5f)
+        return (fireIntensity * (0.85f + 0.15f * flicker)).coerceIn(0f, 1.2f)
+    }
 
     fun initialize() {
         val vShader = compileShader(GL_VERTEX_SHADER, vertexShaderSrc)

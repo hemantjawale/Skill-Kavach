@@ -314,6 +314,28 @@ class ArTrainingActivity : ComponentActivity() {
                             }
                         }
 
+                        // Safety Disclaimer Banner (Task 9)
+                        Surface(
+                            color = Color(0xD92C1802.toInt()),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("⚠️ ", fontSize = 13.sp)
+                                Text(
+                                    "SIMULATED TRAINING ENVIRONMENT — Does not detect or suppress real-world fires.",
+                                    color = Color(0xFFFFB74D),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
                         Spacer(Modifier.weight(1f))
 
                         // Bottom panel — instructions + controls
