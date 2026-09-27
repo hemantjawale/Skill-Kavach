@@ -1,26 +1,5 @@
-# 3D Asset Credits & Model Specifications
+# AR artwork and geometry
 
-The 3D assets used in the Fire & Explosion Response AR Module are low-poly industrial equipment models optimized for native Android real-time AR rendering (minSdk 29, GLES 2.0/3.0 / Filament).
+The active renderer is EquipmentRenderer.kt. It generates original geometry and vector textures at runtime: 64-segment equipment bodies, torus safety rings, composite equipment, and 1024×1024 sign/label textures with mipmaps. No third-party downloaded artwork is used by this renderer.
 
-## Model Manifest & Licensing
-
-### 1. Fire Extinguisher (`fire_extinguisher.glb`)
-- **Description**: Red CO₂ Industrial Fire Extinguisher with safety pin, squeeze handle, and pressure gauge.
-- **Triangle Count**: ~1,420 triangles
-- **Texture**: 1024x1024 diffuse & metallic roughness map
-- **License**: CC-BY 4.0 / Open Standard Low Poly Asset
-- **Source**: Sourced / authored for SurakshaSetu safety training
-
-### 2. Emergency Exit Sign (`exit_sign.glb`)
-- **Description**: Illuminated green ISO 7010 emergency escape exit sign.
-- **Triangle Count**: ~420 triangles
-- **Texture**: 512x512 emissive & diffuse map
-- **License**: CC-0 / Standard ISO 7010 Iconography
-- **Source**: Sourced / authored for SurakshaSetu safety training
-
-### 3. Industrial Fire Alarm Pull Station (`fire_alarm.glb`)
-- **Description**: Wall-mounted red emergency fire alarm break-glass pull station.
-- **Triangle Count**: ~680 triangles
-- **Texture**: 512x512 industrial red metallic texture
-- **License**: CC-BY 4.0 / Open Standard Asset
-- **Source**: Sourced / authored for SurakshaSetu safety training
+The small GLB files in this directory are legacy placeholders and are not loaded. Earlier triangle-count, texture-resolution, source and license descriptions for those files were not verifiable and have been removed. The generated signs are training illustrations, not certified ISO safety-sign assets.

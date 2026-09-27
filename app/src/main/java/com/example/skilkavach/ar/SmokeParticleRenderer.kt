@@ -2,162 +2,123 @@ package com.example.skilkavach.ar
 
 import android.opengl.GLES20.*
 import android.opengl.Matrix
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
-import kotlin.math.sin
-import kotlin.math.cos
+import android.os.SystemClock
+import kotlin.math.*
 
-data class Particle(
-    var x: Float = 0f,
-    var y: Float = 0f,
-    var z: Float = 0f,
-    var vx: Float = 0f,
-    var vy: Float = 0.005f,
-    var vz: Float = 0f,
-    var scale: Float = 0.1f,
-    var alpha: Float = 0.8f,
-    var life: Float = 1.0f,
-    var maxLife: Float = 2.0f,
-    var phase: Float = 0f
-)
-
-class SmokeParticleRenderer(
-    private val maxParticles: Int = 30
-) {
-    private val particles = Array(maxParticles) { Particle() }
+/** Soft, camera-facing procedural flame tongues and turbulent smoke, timed in seconds. */
+class SmokeParticleRenderer(private val maxParticles: Int = 48) {
     private var program = 0
-    private var vertexBuffer: FloatBuffer? = null
-    private var colorBuffer: FloatBuffer? = null
-
-    // Simple quad vertices (-0.5 to 0.5)
-    private val quadCoords = floatArrayOf(
-        -0.5f,  0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f
-    )
+    private val quad = TrainingRenderer.floats(floatArrayOf(-1f,-1f,1f,-1f,-1f,1f,1f,1f))
+    private val model = FloatArray(16)
+    private val mvp = FloatArray(16)
+    private val vp = FloatArray(16)
+    private val start = SystemClock.elapsedRealtime()
+    private var time = 0f
+    private var x = 0f
+    private var y = 0f
+    private var z = 0f
+    private var density = 1f
+    private var position = 0
+    private var matrix = 0
+    private var age = 0
+    private var seed = 0
+    private var smoke = 0
+    private var opacity = 0
 
     fun initialize() {
-        val vertexShader = loadShader(GL_VERTEX_SHADER, """
-            attribute vec3 a_Position;
-            uniform mat4 u_MVP;
-            uniform float u_Scale;
-            void main() {
-                gl_Position = u_MVP * vec4(a_Position * u_Scale, 1.0);
-            }
-        """.trimIndent())
-
-        val fragmentShader = loadShader(GL_FRAGMENT_SHADER, """
+        fun shader(type: Int, source: String): Int {
+            val id = glCreateShader(type)
+            glShaderSource(id, source); glCompileShader(id)
+            val ok = IntArray(1); glGetShaderiv(id, GL_COMPILE_STATUS, ok, 0)
+            check(ok[0] != 0) { glGetShaderInfoLog(id) }
+            return id
+        }
+        val vertex = shader(GL_VERTEX_SHADER, """
+            attribute vec2 p; uniform mat4 mvp; varying vec2 uv;
+            void main(){ uv=p; gl_Position=mvp*vec4(p,0.,1.); }
+        """)
+        val fragment = shader(GL_FRAGMENT_SHADER, """
             precision mediump float;
-            uniform vec4 u_Color;
-            void main() {
-                gl_FragColor = u_Color;
+            varying vec2 uv;
+            uniform float age, seed, smoke, opacity;
+            float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+            float noise(vec2 p){
+                vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+                return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),
+                           mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);
             }
-        """.trimIndent())
-
-        program = glCreateProgram().also {
-            glAttachShader(it, vertexShader)
-            glAttachShader(it, fragmentShader)
-            glLinkProgram(it)
-        }
-
-        val bb = ByteBuffer.allocateDirect(quadCoords.size * 4)
-        bb.order(ByteOrder.nativeOrder())
-        vertexBuffer = bb.asFloatBuffer().apply {
-            put(quadCoords)
-            position(0)
-        }
+            void main(){
+                float n=noise(uv*3.2+vec2(seed, -age*3.));
+                float detail=noise(uv*7.+vec2(seed*2.,-age*5.));
+                float fade=smoothstep(0.,.12,age)*(1.-smoothstep(.55,1.,age));
+                float envelope=1.-smoothstep(.65,1.,length(uv));
+                if(smoke>.5){
+                    float a=envelope*(.45+.55*n)*fade*opacity*.19;
+                    gl_FragColor=vec4(mix(vec3(.12,.13,.15),vec3(.42,.43,.45),detail),a);
+                }else{
+                    float height=uv.y*.5+.5;
+                    float width=mix(.75,.08,height);
+                    float bend=(n-.5)*.32*height;
+                    float edge=1.-smoothstep(width*.25,width,abs(uv.x+bend));
+                    float a=edge*envelope*fade*(.65+.35*detail)*opacity*.75;
+                    float heat=clamp((1.-height)*.85+edge*.3,0.,1.);
+                    vec3 color=mix(vec3(1.,.10,.008),vec3(1.,.62,.06),heat);
+                    color=mix(color,vec3(1.,.94,.65),smoothstep(.85,1.,heat));
+                    gl_FragColor=vec4(color,a);
+                }
+            }
+        """)
+        program = glCreateProgram()
+        glAttachShader(program,vertex);glAttachShader(program,fragment);glLinkProgram(program)
+        val ok=IntArray(1);glGetProgramiv(program,GL_LINK_STATUS,ok,0)
+        check(ok[0]!=0){glGetProgramInfoLog(program)}
+        glDeleteShader(vertex);glDeleteShader(fragment)
+        position=glGetAttribLocation(program,"p");matrix=glGetUniformLocation(program,"mvp")
+        age=glGetUniformLocation(program,"age");seed=glGetUniformLocation(program,"seed")
+        smoke=glGetUniformLocation(program,"smoke");opacity=glGetUniformLocation(program,"opacity")
     }
 
-    fun update(hazardX: Float, hazardY: Float, hazardZ: Float, density: Float = 1.0f) {
-        val timeSec = System.currentTimeMillis() / 1000f
-
-        for (i in 0 until maxParticles) {
-            val p = particles[i]
-            if (p.life <= 0f) {
-                // Respawn particle at hazard origin with slight random offsets
-                p.x = hazardX + (Math.random().toFloat() - 0.5f) * 0.2f
-                p.y = hazardY + 0.05f
-                p.z = hazardZ + (Math.random().toFloat() - 0.5f) * 0.2f
-                p.vx = (Math.random().toFloat() - 0.5f) * 0.002f
-                p.vy = 0.004f + Math.random().toFloat() * 0.004f
-                p.vz = (Math.random().toFloat() - 0.5f) * 0.002f
-                p.scale = 0.08f + Math.random().toFloat() * 0.04f
-                p.maxLife = 1.5f + Math.random().toFloat() * 1.5f
-                p.life = p.maxLife
-                p.phase = Math.random().toFloat() * 6.28f
-            } else {
-                p.life -= 0.016f // ~60fps step
-                p.y += p.vy
-                p.x += p.vx + sin(timeSec * 2.0f + p.phase) * 0.001f
-                p.z += p.vz + cos(timeSec * 2.0f + p.phase) * 0.001f
-                p.scale += 0.002f // Expand as it rises
-                p.alpha = (p.life / p.maxLife) * density * 0.7f
-            }
-        }
+    fun update(hazardX: Float, hazardY: Float, hazardZ: Float, density: Float = 1f) {
+        x=hazardX;y=hazardY;z=hazardZ;this.density=density.coerceIn(0f,1f)
+        time=((SystemClock.elapsedRealtime()-start)/1000.0 % 3600).toFloat()
     }
 
     fun draw(viewMatrix: FloatArray, projectionMatrix: FloatArray) {
-        if (program == 0 || vertexBuffer == null) return
-
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glUseProgram(program)
-
-        val posHandle = glGetAttribLocation(program, "a_Position")
-        val mvpHandle = glGetUniformLocation(program, "u_MVP")
-        val scaleHandle = glGetUniformLocation(program, "u_Scale")
-        val colorHandle = glGetUniformLocation(program, "u_Color")
-
-        glEnableVertexAttribArray(posHandle)
-        glVertexAttribPointer(posHandle, 3, GL_FLOAT, false, 0, vertexBuffer)
-
-        val modelMatrix = FloatArray(16)
-        val mvpMatrix = FloatArray(16)
-        val viewProjection = FloatArray(16)
-        Matrix.multiplyMM(viewProjection, 0, projectionMatrix, 0, viewMatrix, 0)
-
-        for (p in particles) {
-            if (p.life <= 0f) continue
-
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, p.x, p.y, p.z)
-
-            // Billboard rotation: Orient quad to face camera
-            modelMatrix[0] = viewMatrix[0]
-            modelMatrix[1] = viewMatrix[4]
-            modelMatrix[2] = viewMatrix[8]
-            modelMatrix[4] = viewMatrix[1]
-            modelMatrix[5] = viewMatrix[5]
-            modelMatrix[6] = viewMatrix[9]
-            modelMatrix[8] = viewMatrix[2]
-            modelMatrix[9] = viewMatrix[6]
-            modelMatrix[10] = viewMatrix[10]
-
-            Matrix.multiplyMM(mvpMatrix, 0, viewProjection, 0, modelMatrix, 0)
-
-            glUniformMatrix4fv(mvpHandle, 1, false, mvpMatrix, 0)
-            glUniform1f(scaleHandle, p.scale)
-
-            // Fire / Smoke color gradient (orange-red at base, dark grey at top)
-            val isFirePhase = p.y < 0.25f
-            val r = if (isFirePhase) 1.0f else 0.4f
-            val g = if (isFirePhase) 0.4f else 0.4f
-            val b = if (isFirePhase) 0.1f else 0.4f
-
-            glUniform4f(colorHandle, r, g, b, p.alpha.coerceIn(0f, 1f))
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+        if(program==0)return
+        Matrix.multiplyMM(vp,0,projectionMatrix,0,viewMatrix,0)
+        glEnable(GL_BLEND);glDepthMask(false);glUseProgram(program)
+        glEnableVertexAttribArray(position);quad.position(0)
+        glVertexAttribPointer(position,2,GL_FLOAT,false,0,quad)
+        glUniform1f(opacity,density)
+        // Smoke first, then luminous flames. Neither writes opaque rectangular depth.
+        for(pass in 0..1) {
+            val isSmoke=pass==0
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+            glUniform1f(smoke,if(isSmoke)1f else 0f)
+            for(i in 0 until maxParticles/2) {
+                val phase=i*.618034f
+                val life=if(isSmoke)3.6f else 1.35f
+                val t=(time/life+phase)%1f
+                val angle=i*2.39996f
+                val radius=if(isSmoke).09f+t*.16f else .10f
+                val px=x+cos(angle)*radius+sin(time*1.4f+i)*t*.035f
+                val py=y+.1f+t*(if(isSmoke)1.0f else .40f)
+                val pz=z+sin(angle)*radius
+                Matrix.setIdentityM(model,0)
+                model[0]=viewMatrix[0];model[1]=viewMatrix[4];model[2]=viewMatrix[8]
+                model[4]=viewMatrix[1];model[5]=viewMatrix[5];model[6]=viewMatrix[9]
+                model[8]=viewMatrix[2];model[9]=viewMatrix[6];model[10]=viewMatrix[10]
+                model[12]=px;model[13]=py;model[14]=pz
+                val size=if(isSmoke).15f+t*.26f else .09f*(1f-t*.5f)
+                Matrix.scaleM(model,0,size,if(isSmoke)size else .20f,1f)
+                Matrix.multiplyMM(mvp,0,vp,0,model,0)
+                glUniformMatrix4fv(matrix,1,false,mvp,0)
+                glUniform1f(age,t);glUniform1f(seed,i*7.13f)
+                glDrawArrays(GL_TRIANGLE_STRIP,0,4)
+            }
         }
-
-        glDisableVertexAttribArray(posHandle)
-        glDisable(GL_BLEND)
-    }
-
-    private fun loadShader(type: Int, shaderCode: String): Int {
-        return glCreateShader(type).also { shader ->
-            glShaderSource(shader, shaderCode)
-            glCompileShader(shader)
-        }
+        glDisableVertexAttribArray(position);glDepthMask(true)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);glDisable(GL_BLEND)
     }
 }
+

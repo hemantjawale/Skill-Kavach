@@ -32,6 +32,7 @@ class MarkerLabels(context: Context) : View(context) {
     @Volatile var markers: List<ScreenMarker> = emptyList()
     @Volatile var placementVisible = true
     @Volatile var placementReady = false
+    @Volatile var activeTarget: String? = null
     private val paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             textSize = 14 * resources.displayMetrics.scaledDensity
@@ -50,7 +51,7 @@ class MarkerLabels(context: Context) : View(context) {
         }
         markers.forEach { m ->
             val width = paint.measureText(m.label) + 24
-            paint.color = 0xEEFFFFFF.toInt()
+            paint.color = if (m.id == activeTarget) 0xFFB9F6CA.toInt() else 0xEEFFFFFF.toInt()
             canvas.drawRoundRect(
                 m.x - width / 2,
                 m.y - 24,
@@ -74,7 +75,13 @@ class TrainingRenderer(
     private val markers: List<Marker>,
     private val onStatus: (String) -> Unit,
     private val onHit: (String) -> Unit,
+    private val onPlaced: (Boolean) -> Unit = {},
 ) : GLSurfaceView.Renderer {
+    @Volatile private var pinAnimationStart = 0L
+    @Volatile private var pinRemoved = false
+    fun animatePinPull() { pinAnimationStart = android.os.SystemClock.elapsedRealtime() }
+    fun restorePinState(removed: Boolean) { pinRemoved = removed }
+    fun setActiveTarget(target: String?) { labels.activeTarget = target }
     @Volatile private var resetRequested = false
     @Volatile private var placeRequested = false
     @Volatile private var autoPlaceRequested = false
@@ -83,7 +90,7 @@ class TrainingRenderer(
     fun autoPlaceInFront() { autoPlaceRequested = true }
 
     private var cameraProgram = 0
-    private var objectProgram = 0
+    private val equipment = EquipmentRenderer()
     private var texture = 0
     private var width = 1
     private var height = 1
@@ -121,7 +128,7 @@ class TrainingRenderer(
         anchor = null
     }
 
-    private val smokeRenderer = SmokeParticleRenderer(maxParticles = 30)
+    private val smokeRenderer = SmokeParticleRenderer(maxParticles = 48)
     private val diffusionSimulator = HazardDiffusionSimulator(width = 10, height = 10)
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -131,11 +138,7 @@ class TrainingRenderer(
                 "attribute vec2 p; attribute vec2 uv; varying vec2 t; void main(){gl_Position=vec4(p,0.,1.);t=uv;}",
                 "#extension GL_OES_EGL_image_external : require\nprecision mediump float; uniform samplerExternalOES camera; varying vec2 t; void main(){gl_FragColor=texture2D(camera,t);}",
             )
-        objectProgram =
-            program(
-                "attribute vec3 p; attribute vec3 n; uniform mat4 mvp; varying float light; void main(){gl_Position=mvp*vec4(p,1.);light=.5+.5*max(dot(normalize(n),normalize(vec3(.4,1.,.6))),0.);}",
-                "precision mediump float; uniform vec4 color; varying float light; void main(){gl_FragColor=vec4(color.rgb*light,color.a);}",
-            )
+        equipment.initialize()
         val ids = IntArray(1)
         glGenTextures(1, ids, 0)
         texture = ids[0]
@@ -180,6 +183,8 @@ class TrainingRenderer(
             if (resetRequested) {
                 anchor?.detach()
                 anchor = null
+                onPlaced(false)
+                labels.markers = emptyList()
                 resetRequested = false
             }
             labels.placementVisible = anchor == null
@@ -202,22 +207,28 @@ class TrainingRenderer(
                     autoPlaceRequested = false
                     val camPose = camera.pose
                     val forward = camPose.zAxis
+                    val horizontal = hypot(forward[0], forward[2])
+                    if (horizontal < .2f) {
+                        status("Hold the phone upright to auto-place equipment 2.5 m ahead.")
+                        return
+                    }
                     val autoPose = Pose.makeTranslation(
-                        camPose.tx() - forward[0] * 1.5f,
-                        camPose.ty() - forward[1] * 1.5f - 0.5f,
-                        camPose.tz() - forward[2] * 1.5f
+                        camPose.tx() - forward[0] / horizontal * 2.5f,
+                        camPose.ty() - 1.2f,
+                        camPose.tz() - forward[2] / horizontal * 2.5f
                     )
-                    anchor = s.createAnchor(autoPose)
+                    anchor = s.createAnchor(facingCamera(autoPose, camPose))
+                    onPlaced(true)
                     labels.placementVisible = false
                     status("Equipment placed via Auto-place in front of camera.")
                     return
                 }
                 labels.placementReady = frame.hitTest(width / 2f, height / 2f).any { hit ->
                     val plane = hit.trackable
-                    plane is Plane && plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING && plane.isPoseInPolygon(hit.hitPose)
+                    plane is Plane && plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING && plane.isPoseInPolygon(hit.hitPose) && placementDistance(hit.hitPose, camera.pose) in 1.8f..4f
                 }
                 labels.postInvalidate()
-                status(if (labels.placementReady) "Green ring: floor detected. Tap Place equipment." else "Red ring: point at a textured floor and move slowly until it turns green.")
+                status(if (labels.placementReady) "Green ring: floor 1.8–4 m away. Tap Place equipment." else "Aim at a textured floor 1.8–4 m ahead. Move slowly until the ring turns green.")
                 if (touch != null)
                     anchor =
                         frame
@@ -226,9 +237,11 @@ class TrainingRenderer(
                                 val plane = hit.trackable
                                 plane is Plane &&
                                     plane.type == Plane.Type.HORIZONTAL_UPWARD_FACING &&
-                                    plane.isPoseInPolygon(hit.hitPose)
+                                    plane.isPoseInPolygon(hit.hitPose) &&
+                                    placementDistance(hit.hitPose, camera.pose) in 1.8f..4f
                             }
-                            ?.createAnchor()
+                            ?.let { s.createAnchor(facingCamera(it.hitPose, camera.pose)) }
+                if (anchor != null) onPlaced(true)
                 return
             }
             val a = anchor!!
@@ -243,10 +256,10 @@ class TrainingRenderer(
                     (camera.pose.tx() - a.pose.tx()).pow(2) +
                         (camera.pose.tz() - a.pose.tz()).pow(2)
                 )
-            if (distance < 0.4f || distance > 4f) {
+            if (distance < 1.2f || distance > 5f) {
                 labels.markers = emptyList()
                 labels.postInvalidate()
-                status("Keep the phone 0.4–4 m from the virtual equipment.")
+                status("Keep the phone 1.2–5 m from the equipment. Use Reposition if needed.")
                 return
             }
             status("Equipment placed. Follow the instruction and tap the labelled object.")
@@ -262,9 +275,12 @@ class TrainingRenderer(
                 val mvp = FloatArray(16)
                 Matrix.multiplyMM(mv, 0, view, 0, model, 0)
                 Matrix.multiplyMM(mvp, 0, projection, 0, mv, 0)
-                drawMesh(marker, mvp)
+                val elapsed = if (pinAnimationStart == 0L) 0f else
+                    ((android.os.SystemClock.elapsedRealtime() - pinAnimationStart) / 1400f).coerceIn(0f,1f)
+                val pull = if (pinRemoved) 1f else elapsed * elapsed * (3f - 2f * elapsed)
+                equipment.draw(marker.id, mvp, pull)
                 val clip = FloatArray(4)
-                Matrix.multiplyMV(clip, 0, mvp, 0, floatArrayOf(0f, 0.24f, 0f, 1f), 0)
+                Matrix.multiplyMV(clip, 0, mvp, 0, floatArrayOf(0f, 0.53f, 0f, 1f), 0)
                 if (clip[3] > 0 && abs(clip[0] / clip[3]) < 1 && abs(clip[1] / clip[3]) < 1)
                     projected +=
                         ScreenMarker(
@@ -276,12 +292,15 @@ class TrainingRenderer(
             }
             // Update hazard diffusion and render camera-facing smoke/fire particles at hazard origin
             diffusionSimulator.step()
-            val hazardMarker = markers.firstOrNull { it.id == "base" || it.id == "extinguisher" }
-            val hzX = a.pose.tx() + (hazardMarker?.x ?: 0f)
-            val hzY = a.pose.ty()
-            val hzZ = a.pose.tz() + (hazardMarker?.z ?: 0f)
-            smokeRenderer.update(hzX, hzY, hzZ, density = 1.0f)
-            smokeRenderer.draw(view, projection)
+            val hazardMarker = markers.firstOrNull { it.id == "base" }
+            val hazardPose = a.pose.compose(Pose.makeTranslation(hazardMarker?.x ?: 0f, 0f, hazardMarker?.z ?: 0f))
+            val hzX = hazardPose.tx()
+            val hzY = hazardPose.ty()
+            val hzZ = hazardPose.tz()
+            if (markers.any { it.id == "base" }) {
+                smokeRenderer.update(hzX, hzY, hzZ, density = 1.0f)
+                smokeRenderer.draw(view, projection)
+            }
 
             labels.markers = projected
             labels.postInvalidate()
@@ -301,244 +320,14 @@ class TrainingRenderer(
         } catch (_: com.google.ar.core.exceptions.SessionPausedException) {}
     }
 
-    private val cube =
-        floats(
-            floatArrayOf(
-                -.10f,
-                0f,
-                .10f,
-                .10f,
-                0f,
-                .10f,
-                .10f,
-                .20f,
-                .10f,
-                -.10f,
-                0f,
-                .10f,
-                .10f,
-                .20f,
-                .10f,
-                -.10f,
-                .20f,
-                .10f,
-                -.10f,
-                0f,
-                -.10f,
-                -.10f,
-                .20f,
-                -.10f,
-                .10f,
-                .20f,
-                -.10f,
-                -.10f,
-                0f,
-                -.10f,
-                .10f,
-                .20f,
-                -.10f,
-                .10f,
-                0f,
-                -.10f,
-                -.10f,
-                .20f,
-                -.10f,
-                -.10f,
-                .20f,
-                .10f,
-                .10f,
-                .20f,
-                .10f,
-                -.10f,
-                .20f,
-                -.10f,
-                .10f,
-                .20f,
-                .10f,
-                .10f,
-                .20f,
-                -.10f,
-                -.10f,
-                0f,
-                -.10f,
-                -.10f,
-                0f,
-                .10f,
-                -.10f,
-                .20f,
-                .10f,
-                -.10f,
-                0f,
-                -.10f,
-                -.10f,
-                .20f,
-                .10f,
-                -.10f,
-                .20f,
-                -.10f,
-                .10f,
-                0f,
-                -.10f,
-                .10f,
-                .20f,
-                -.10f,
-                .10f,
-                .20f,
-                .10f,
-                .10f,
-                0f,
-                -.10f,
-                .10f,
-                .20f,
-                .10f,
-                .10f,
-                0f,
-                .10f,
-            )
-        )
-    private val cylinder =
-        floats(
-            buildList<Float> {
-                    for (i in 0 until 24) {
-                        val a = i * 2 * PI / 24
-                        val b = (i + 1) * 2 * PI / 24
-                        val x = cos(a).toFloat() * .08f
-                        val z = sin(a).toFloat() * .08f
-                        val x2 = cos(b).toFloat() * .08f
-                        val z2 = sin(b).toFloat() * .08f
-                        addAll(
-                            listOf(
-                                x,
-                                0f,
-                                z,
-                                x2,
-                                0f,
-                                z2,
-                                x2,
-                                .28f,
-                                z2,
-                                x,
-                                0f,
-                                z,
-                                x2,
-                                .28f,
-                                z2,
-                                x,
-                                .28f,
-                                z,
-                                0f,
-                                .28f,
-                                0f,
-                                x,
-                                .28f,
-                                z,
-                                x2,
-                                .28f,
-                                z2,
-                            )
-                        )
-                    }
-                }
-                .toFloatArray()
-        )
-    private val cubeNormals by lazy { normals(cube) }
-    private val cylinderNormals by lazy { normals(cylinder) }
+    private fun placementDistance(point: Pose, camera: Pose): Float =
+        hypot(point.tx() - camera.tx(), point.tz() - camera.tz())
 
-    private fun normals(mesh: FloatBuffer): FloatBuffer {
-        val out = FloatArray(mesh.capacity())
-        for (i in 0 until mesh.capacity() step 9) {
-            val ax = mesh[i + 3] - mesh[i]
-            val ay = mesh[i + 4] - mesh[i + 1]
-            val az = mesh[i + 5] - mesh[i + 2]
-            val bx = mesh[i + 6] - mesh[i]
-            val by = mesh[i + 7] - mesh[i + 1]
-            val bz = mesh[i + 8] - mesh[i + 2]
-            val nx = ay * bz - az * by
-            val ny = az * bx - ax * bz
-            val nz = ax * by - ay * bx
-            for (v in 0..2) {
-                out[i + v * 3] = nx
-                out[i + v * 3 + 1] = ny
-                out[i + v * 3 + 2] = nz
-            }
-        }
-        return floats(out)
-    }
-
-    private fun drawMesh(m: Marker, matrix: FloatArray) {
-        val black = floatArrayOf(.12f, .14f, .17f, 1f)
-        val yellow = floatArrayOf(.95f, .7f, .12f, 1f)
-        val white = floatArrayOf(.94f, .96f, .98f, 1f)
-        fun part(
-            mesh: FloatBuffer,
-            color: FloatArray,
-            x: Float = 0f,
-            y: Float = 0f,
-            z: Float = 0f,
-            sx: Float = 1f,
-            sy: Float = 1f,
-            sz: Float = 1f,
-        ) {
-            val transform = matrix.copyOf()
-            Matrix.translateM(transform, 0, x, y, z)
-            Matrix.scaleM(transform, 0, sx, sy, sz)
-            glUseProgram(objectProgram)
-            attribute(objectProgram, "p", mesh, 3)
-            attribute(objectProgram, "n", if (mesh === cube) cubeNormals else cylinderNormals, 3)
-            glUniformMatrix4fv(glGetUniformLocation(objectProgram, "mvp"), 1, false, transform, 0)
-            glUniform4fv(glGetUniformLocation(objectProgram, "color"), 1, color, 0)
-            glDrawArrays(GL_TRIANGLES, 0, mesh.capacity() / 3)
-        }
-        when (m.id) {
-            "extinguisher" -> {
-                part(cylinder, m.color)
-                part(cube, white, y = .09f, z = .073f, sx = .55f, sy = .5f, sz = .1f)
-                part(cylinder, black, y = .28f, sx = .3f, sy = .2f, sz = .3f)
-                part(cube, black, x = .04f, y = .32f, sx = .8f, sy = .12f, sz = .2f)
-                part(cube, black, x = .12f, y = .12f, sx = .15f, sy = 1f, sz = .2f)
-            }
-            "detector" -> {
-                part(cube, yellow, sx = .8f, sy = 1.1f, sz = .5f)
-                part(cube, black, y = .10f, z = .05f, sx = .6f, sy = .45f, sz = .08f)
-                part(cube, white, x = -.03f, y = .03f, z = .05f, sx = .12f, sy = .12f, sz = .08f)
-            }
-            "exit" -> {
-                part(cube, m.color, sx = 1.3f, sy = 1.1f, sz = .15f)
-                part(cube, white, y = .08f, z = .02f, sx = .9f, sy = .16f, sz = .06f)
-                part(cube, white, x = .055f, y = .04f, z = .02f, sx = .16f, sy = .55f, sz = .06f)
-            }
-            "permit" -> {
-                part(cube, white, sx = 1f, sy = 1.4f, sz = .08f)
-                for (i in 0..3) part(
-                    cube,
-                    black,
-                    y = .03f + i * .055f,
-                    z = .011f,
-                    sx = .75f,
-                    sy = .045f,
-                    sz = .02f,
-                )
-            }
-            "pin" -> {
-                part(cylinder, yellow, sx = .2f, sy = .8f, sz = .2f)
-                part(cube, yellow, y = .19f, sx = .55f, sy = .15f, sz = .1f)
-            }
-            "handle" -> {
-                part(cube, black, sx = 1.3f, sy = .18f, sz = .25f)
-                part(cube, m.color, y = .07f, sx = 1.3f, sy = .16f, sz = .25f)
-            }
-            "buddy" -> {
-                part(cylinder, m.color, sx = .55f, sy = .55f, sz = .55f)
-                part(cylinder, white, y = .17f, sx = .45f, sy = .3f, sz = .45f)
-            }
-            "base",
-            "hazard",
-            "sweep" -> {
-                part(cylinder, yellow, sx = 1.8f, sy = .07f, sz = 1.8f)
-                part(cylinder, m.color, y = .02f, sx = .7f, sy = .6f, sz = .7f)
-            }
-            else -> part(cube, m.color)
-        }
+    // Face the front row toward the worker; subsequent rows extend away from them.
+    private fun facingCamera(point: Pose, camera: Pose): Pose {
+        val yaw = atan2(camera.tx() - point.tx(), camera.tz() - point.tz())
+        return Pose(floatArrayOf(point.tx(), point.ty(), point.tz()),
+            floatArrayOf(0f, sin(yaw / 2), 0f, cos(yaw / 2)))
     }
 
     private fun attribute(program: Int, name: String, data: FloatBuffer, size: Int) {

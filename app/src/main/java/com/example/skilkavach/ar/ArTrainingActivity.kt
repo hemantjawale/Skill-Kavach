@@ -21,6 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.skilkavach.SafetyApplication
 import com.example.skilkavach.data.items
 import com.google.ar.core.*
@@ -38,11 +41,30 @@ class ArTrainingActivity : ComponentActivity() {
     private var step by mutableIntStateOf(0)
     private var practice by mutableStateOf(false)
     private var busy by mutableStateOf(false)
+    private var showDemo by mutableStateOf(true)
+    private var fullScreen by mutableStateOf(false)
+    private var equipmentPlaced by mutableStateOf(false)
+    private var actionAnimating = false
     private var installRequested = false
     private var speech: TextToSpeech? = null
     private var speechReady = false
     private val started = SystemClock.elapsedRealtime()
     private var previousDuration = 0
+    private var demoOpenedAt = started
+    private var demoMillis = 0L
+    private fun closeDemo() {
+        demoMillis += SystemClock.elapsedRealtime() - demoOpenedAt
+        showDemo = false
+    }
+    private fun openDemo() {
+        demoOpenedAt = SystemClock.elapsedRealtime()
+        showDemo = true
+    }
+    private fun trainingElapsedSeconds(): Int {
+        val now = SystemClock.elapsedRealtime()
+        val tutorial = demoMillis + if (showDemo) now - demoOpenedAt else 0L
+        return previousDuration + ((now - started - tutorial).coerceAtLeast(0L) / 1000).toInt()
+    }
     private lateinit var module: JSONObject
     private val repo
         get() = (application as SafetyApplication).repository
@@ -57,6 +79,8 @@ class ArTrainingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        showDemo = savedInstanceState?.getBoolean("showDemo") ?: true
+        fullScreen = savedInstanceState?.getBoolean("fullScreen") ?: false
         module =
             repo.modules.firstOrNull { it.getString("id") == intent.getStringExtra("moduleId") }
                 ?: run {
@@ -85,7 +109,14 @@ class ArTrainingActivity : ComponentActivity() {
                 colorScheme =
                     lightColorScheme(primary = Color(0xFF586DAF), background = Color(0xFFF7F8FA))
             ) {
+                if (showDemo) ArInteractionDemo { closeDemo() }
                 val steps = module.items("steps")
+                LaunchedEffect(fullScreen, practice) {
+                    val controller = WindowCompat.getInsetsController(window, window.decorView)
+                    controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    if (fullScreen && !practice) controller.hide(WindowInsetsCompat.Type.systemBars())
+                    else controller.show(WindowInsetsCompat.Type.systemBars())
+                }
                 Box(Modifier.fillMaxSize().background(Color(0xFFF7F8FA)).systemBarsPadding()) {
                     if (!practice)
                         AndroidView(
@@ -96,8 +127,8 @@ class ArTrainingActivity : ComponentActivity() {
                                     Marker(
                                         target,
                                         target.replaceFirstChar { it.uppercase() },
-                                        (i % 3 - 1) * .48f,
-                                        (i / 3) * -.48f,
+                                        (i % 3 - 1) * .60f,
+                                        (i / 3) * -.60f,
                                         if (target == "exit") floatArrayOf(.18f, .55f, .3f, 1f)
                                         else if (target in listOf("hazard", "base", "extinguisher"))
                                             floatArrayOf(.8f, .22f, .15f, 1f)
@@ -112,6 +143,7 @@ class ArTrainingActivity : ComponentActivity() {
                                         markers,
                                         { s -> runOnUiThread { status = s } },
                                         { target -> runOnUiThread { select(target) } },
+                                        { placed -> runOnUiThread { equipmentPlaced = placed } },
                                     )
                                 renderer = r
                                 val surface =
@@ -131,11 +163,22 @@ class ArTrainingActivity : ComponentActivity() {
                                 }
                             },
                             modifier = Modifier.fillMaxSize(),
+                            update = {
+                                renderer?.setActiveTarget(steps.getOrNull(step)?.getString("target"))
+                                renderer?.restorePinState(steps.take(step).any { it.getString("target") == "pin" })
+                            },
                         )
                     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
                         Surface(color = Color.White) {
-                            Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                                TextButton(onClick = { finish() }) { Text("Close training") }
+                            Column(Modifier.fillMaxWidth().padding(if (fullScreen && !practice) 4.dp else 16.dp)) {
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    TextButton(onClick = { finish() }) { Text("Close training") }
+                                    if (!practice) TextButton(onClick = { fullScreen = !fullScreen }) {
+                                        Text(if (fullScreen) "Exit fullscreen" else "Fullscreen")
+                                    }
+                                    OutlinedButton(onClick = { openDemo() }) { Text("Demo") }
+                                }
+                                if (!fullScreen || practice) {
                                 Text(
                                     module.getString("title"),
                                     style = MaterialTheme.typography.titleMedium,
@@ -149,32 +192,40 @@ class ArTrainingActivity : ComponentActivity() {
                                     progress = { step.toFloat() / steps.size },
                                     modifier = Modifier.fillMaxWidth(),
                                 )
+                                }
                             }
                         }
                         Surface(color = Color.White) {
                             Column(
                                 Modifier.fillMaxWidth()
-                                    .heightIn(max = 300.dp)
+                                    .heightIn(max = if (fullScreen && !practice) 180.dp else 340.dp)
                                     .verticalScroll(rememberScrollState())
                                     .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 if (!practice) {
+                                    if (!equipmentPlaced) {
                                     Text(status, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                                    Text("Step 1: Point camera at textured floor • Step 2: Move phone slowly side-to-side • Step 3: When ring turns green, tap Place Equipment.", style = MaterialTheme.typography.bodySmall)
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        OutlinedButton(onClick = { renderer?.placeEquipment() }, enabled = session != null) { Text("Place equipment") }
-                                        OutlinedButton(onClick = { renderer?.autoPlaceInFront() }, enabled = session != null) { Text("Auto-place in front of me") }
-                                        OutlinedButton(onClick = { renderer?.reposition() }, enabled = session != null) { Text("Reposition") }
+                                        OutlinedButton(onClick = { renderer?.placeEquipment() }, enabled = session != null, modifier = Modifier.weight(1f)) { Text("Place equipment") }
+                                        OutlinedButton(onClick = { renderer?.autoPlaceInFront() }, enabled = session != null, modifier = Modifier.weight(1f)) { Text("Auto-place • 2.5 m") }
+                                    }
+                                    } else {
+                                        if (!status.startsWith("Equipment placed")) Text(status, style = MaterialTheme.typography.bodySmall)
                                     }
                                 }
                                 if (step < steps.size) {
                                     val current = steps[step]
                                     Text(
-                                        current.getString("title"),
-                                        style = MaterialTheme.typography.titleLarge,
+                                        "Step ${step + 1}: ${current.getString("title")}",
+                                        style = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(current.getString("instruction"))
+                                    if (!practice && equipmentPlaced) Text(
+                                        if (current.getString("target") == "sweep") "Now: drag sideways and finish on the green Sweep label."
+                                        else "Now: tap the green ${current.getString("target").replaceFirstChar { it.uppercase() }} label above the object.",
+                                        color = Color(0xFF08774B),
+                                    )
                                     TextButton(
                                         onClick = {
                                             if (speechReady)
@@ -231,10 +282,7 @@ class ArTrainingActivity : ComponentActivity() {
                                         enabled = !busy,
                                         onClick = {
                                             val duration =
-                                                previousDuration +
-                                                    ((SystemClock.elapsedRealtime() - started) /
-                                                            1000)
-                                                        .toInt()
+                                                trainingElapsedSeconds()
                                             if (duration < 30) {
                                                 feedback =
                                                     "Take time to review the procedure. Minimum practice duration is 30 seconds."
@@ -287,6 +335,7 @@ class ArTrainingActivity : ComponentActivity() {
                                     }
                                 }
                                 if (feedback.isNotEmpty()) Text(feedback, color = Color(0xFF586DAF))
+                                if (!practice && equipmentPlaced) TextButton(onClick = { renderer?.reposition() }) { Text("Reposition equipment") }
                             }
                         }
                     }
@@ -309,13 +358,25 @@ class ArTrainingActivity : ComponentActivity() {
         }
     }
 
-    private fun select(target: String) {
+    private fun select(target: String, animationFinished: Boolean = false) {
+        if (!animationFinished && (showDemo || actionAnimating)) return
         val steps = module.items("steps")
         if (step >= steps.size) return
         val currentStep = steps[step]
         val expectedTarget = currentStep.getString("target")
 
         if (target == expectedTarget) {
+            if (target == "pin" && !practice && !animationFinished) {
+                actionAnimating = true
+                feedback = "Pulling the safety pin — watch the ring slide out of the valve."
+                renderer?.animatePinPull()
+                lifecycleScope.launch {
+                    kotlinx.coroutines.delay(1400)
+                    actionAnimating = false
+                    select(target, animationFinished = true)
+                }
+                return
+            }
             triggerHaptic(if (target == "sweep") 150L else 50L)
             assessmentEngine.logAction(stepIndex = step, target = target, actionType = "TAP", isCorrect = true)
             step++
@@ -335,8 +396,7 @@ class ArTrainingActivity : ComponentActivity() {
                         module.getString("id"),
                         completedStep,
                         if (practice) "PRACTICE" else "AR",
-                        previousDuration +
-                            ((SystemClock.elapsedRealtime() - started) / 1000).toInt(),
+                        trainingElapsedSeconds(),
                     )
                 }
                     .onFailure {
@@ -394,6 +454,12 @@ class ArTrainingActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         resumeAr()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("showDemo", showDemo)
+        outState.putBoolean("fullScreen", fullScreen)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onPause() {
