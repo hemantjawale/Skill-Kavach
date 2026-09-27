@@ -35,6 +35,7 @@ export function createApp(db, config) {
       limit: 120,
       standardHeaders: "draft-8",
       legacyHeaders: false,
+      message: { error: "Too many requests. Please wait before trying again." },
     }),
   );
   app.get("/health", async (req, res) => {
@@ -46,6 +47,7 @@ export function createApp(db, config) {
     limit: 30,
     standardHeaders: "draft-8",
     legacyHeaders: false,
+    message: { error: "Too many sign-in attempts. Please wait before trying again." },
   });
   app.post("/api/auth/request", authLimit, async (req, res) =>
     res.json(await auth.request(req.body)),
@@ -382,6 +384,7 @@ export function createApp(db, config) {
             }
           : {}),
       });
+    if (status === 429) res.set("Retry-After", "60");
     res.status(status).json({ error: message });
   });
   return app;

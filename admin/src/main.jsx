@@ -36,8 +36,17 @@ async function request(path, body, retry = true) {
     await refreshPending;
     return request(path, body, false);
   }
-  const result = await r.json();
-  if (!r.ok) throw Error(result.error ?? "Unable to complete this request.");
+  const result = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const error = Error(result.error ?? (r.status === 429
+      ? "Too many attempts. Please wait before trying again."
+      : "Unable to complete this request."));
+    error.status = r.status;
+    const retryAfter = r.headers.get("Retry-After");
+    error.retrySeconds = Math.max(1, Math.ceil(Number(retryAfter) ||
+      (retryAfter ? (Date.parse(retryAfter) - Date.now()) / 1000 : 60) || 60));
+    throw error;
+  }
   return result;
 }
 const friendly = (value) => String(value ?? "").replaceAll("_", " ");
@@ -74,18 +83,19 @@ function Field({
     </label>
   );
 }
-function Form({ title, children, submit, label = "Save", busy }) {
+function Form({ title, children, submit, label = "Save", busy, disabled = false }) {
   return (
     <section className="panel">
       <h2>{title}</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (busy || disabled) return;
           submit(Object.fromEntries(new FormData(e.currentTarget)));
         }}
       >
         {children}
-        <button disabled={busy}>{busy ? "Saving…" : label}</button>
+        <button disabled={busy || disabled}>{busy ? "Please wait…" : label}</button>
       </form>
     </section>
   );
@@ -111,19 +121,35 @@ function App() {
     [notice, setNotice] = useState(""),
     [audit, setAudit] = useState([]);
   const [verification, setVerification] = useState(null);
+  const [retryAt, setRetryAt] = useState(0);
+  const [now, setNow] = useState(Date.now());
+  const remaining = Math.max(0, Math.ceil((retryAt - now) / 1000));
+  const running = useRef(false);
+  useEffect(() => {
+    if (!retryAt) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [retryAt]);
   const verifyId = location.pathname.startsWith("/verify/")
     ? location.pathname.split("/").pop()
     : null;
   async function run(fn) {
+    if (running.current) return;
+    running.current = true;
     setBusy(true);
     setError("");
     setNotice("");
     try {
       await fn();
     } catch (e) {
+      if (e.status === 429) {
+        setNow(Date.now());
+        setRetryAt(Date.now() + e.retrySeconds * 1000);
+      }
       setError(e.message);
       if (!session) setData(null);
     } finally {
+      running.current = false;
       setBusy(false);
     }
   }
@@ -207,7 +233,8 @@ function App() {
           <Form
             title="Sign in"
             busy={busy}
-            label="Send verification code"
+            disabled={remaining > 0}
+            label={remaining > 0 ? `Try again in ${remaining}s` : "Send verification code"}
             submit={(p) =>
               run(async () => {
                 const r = await request("auth/request", {
@@ -215,6 +242,8 @@ function App() {
                   portal: "manager",
                 });
                 setChallenge(r.challengeId);
+                setNow(Date.now());
+                setRetryAt(Date.now() + 60000);
               })
             }
           >
@@ -276,9 +305,10 @@ function App() {
             <button
               type="button"
               className="secondary"
+              disabled={busy || remaining > 0}
               onClick={() => setChallenge("")}
             >
-              Request another code
+              {remaining > 0 ? `Request another code in ${remaining}s` : "Request another code"}
             </button>
           </Form>
         )}

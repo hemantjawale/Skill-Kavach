@@ -718,3 +718,16 @@ test("created employee persists, appears in the admin directory and can request 
   assert.equal(destinations.get(otp.body.challengeId), payload.email);
   await api.post("/api/workers").set(auth).send(payload).expect(409);
 });
+
+test("OTP cooldown returns a retry interval and keeps the first code usable", async () => {
+  await db.query("DELETE FROM auth_throttles");
+  const body = { organization: "o1", employeeId: "admin", email: "admin@example.test", portal: "manager" };
+  const first = await api.post("/api/auth/request").send(body).expect(200);
+  const second = await api.post("/api/auth/request").send(body).expect(429);
+  assert.equal(second.headers["retry-after"], "60");
+  assert.match(second.body.error, /one minute/);
+  await api.post("/api/auth/verify").send({
+    challengeId: first.body.challengeId,
+    code: codes.get(first.body.challengeId),
+  }).expect(200);
+});
