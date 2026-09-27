@@ -34,6 +34,7 @@
     <string name="ar_incorrect_target">ᱵᱷᱩᱞ ᱞᱚᱠᱷᱚ᱾ ᱪᱟᱨᱚᱱ %1$d: %2$s᱾ %3$s ᱢᱟᱨᱠᱚᱨ ᱫᱟᱵᱟᱣ ᱢᱮ᱾</string>
     <string name="ar_incorrect_aim">ᱥᱮᱸᱜᱮᱞ ᱨᱮᱭᱟᱜ ᱛᱚᱞᱟ ᱛᱟᱹᱠ ᱱᱤᱥᱟᱱ ᱠᱚᱨᱟᱣ ᱢᱮ, ᱪᱮᱛᱟᱱ ᱵᱟᱝ᱾</string>
     <string name="ar_voice_unavailable">ᱨᱚᱲ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ᱾ ᱪᱮᱛᱟᱱ ᱨᱮᱭᱟᱜ ᱱᱤᱭᱚᱢ ᱯᱟᱲᱦᱟᱣ ᱢᱮ᱾</string>
+    <string name="ar_voice_unavailable_sat">ᱱᱚᱶᱟ ᱰᱤᱵᱷᱟᱭᱤᱥ ᱨᱮ ᱥᱟᱱᱛᱟᱲᱤ ᱞᱟᱹᱜᱤᱫ ᱨᱚᱲ ᱵᱟᱹᱱᱩᱜᱼᱟ᱾ ᱥᱟᱱᱛᱟᱲᱤ ᱚᱞ ᱟᱨ ᱠᱮᱯᱥᱚᱱ ᱫᱮᱠᱷᱟᱣ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ᱾</string>
     <string name="ar_progress_not_saved">ᱯᱨᱚᱜᱨᱮᱥ ᱵᱟᱝ ᱥᱮᱵ ᱦᱩᱭᱮᱱᱟ᱾ ᱥᱠᱨᱤᱱ ᱡᱷᱤᱡ ᱫᱚᱦᱚ ᱢᱮ ᱟᱨ ᱫᱩᱦᱨᱟ ᱠᱚᱨᱟᱣ ᱢᱮ᱾</string>
     <string name="ar_min_duration">ᱯᱨᱚᱥᱮᱥ ᱪᱮᱠ ᱢᱮ᱾ ᱠᱚᱢᱥᱮᱠᱚᱢ ᱯᱨᱮᱠᱴᱤᱥ 30 ᱥᱮᱠᱮᱱᱰ᱾</string>
 
@@ -75,6 +76,16 @@
     <string name="ar_sample_next">ᱫᱚᱥᱟᱨ ᱛᱟᱞᱟ ᱪᱮᱠ ᱢᱮ</string>
     <string name="ar_alarm_raised">ᱵᱚᱞᱚᱱ ᱢᱟᱱᱟ! ᱵᱤᱥ H₂S ᱜᱮᱥ ᱧᱟᱢᱮᱱᱟ᱾ ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ ᱮᱱᱟ᱾</string>
     <string name="ar_evacuate_guide">ᱦᱚᱭ ᱥᱟᱢᱱᱮ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱛᱮ ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱣᱨᱟ ᱡᱟᱭᱜᱟ ᱛᱮ ᱫᱟᱹᱲ ᱢᱮ᱾</string>
+    <string name="ar_ack_hazard">ᱵᱚᱛᱚᱨ ᱵᱟᱰᱟᱭ ᱟᱨ ᱥᱤᱢᱟᱹ ᱪᱤᱱᱦᱟᱹᱣ</string>
+    <string name="ar_sound_alarm">🚨 ᱟᱯᱟᱛᱠᱟᱞᱤᱱ ᱥᱟᱭᱤᱴ ᱟᱞᱟᱨᱢ ᱥᱟᱰᱮ</string>
+    <string name="ar_confirm_test">✓ ᱦᱚᱭ ᱴᱮᱥᱴ ᱨᱤᱰᱤᱝ ᱴᱷᱟᱹᱣᱠᱟᱹ</string>
+    <string name="ar_attendant_rule">ᱢᱩᱬᱩᱛ ᱱᱤᱭᱚᱢ: ᱛᱟᱦᱮᱸᱱ ᱜᱟᱛᱮ ᱵᱟᱝ ᱴᱨᱮᱱᱰ ᱵᱟᱧᱪᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ ᱨᱮ ᱵᱟᱝ ᱵᱚᱞᱚᱱ ᱢᱟ!</string>
+    <string name="ar_complete_evac">✓ ᱢᱟᱥᱴᱚᱨ ᱯᱚᱭᱮᱱᱴ ᱛᱮ ᱥᱩᱨᱚᱠᱷᱤᱛ ᱚᱰᱚᱠᱚᱜ ᱯᱩᱨᱟᱹᱣ</string>
+    <string name="ar_ventilate_action">💨 ᱢᱮᱠᱟᱱᱤᱠᱟᱞ ᱵᱷᱮᱱᱴᱤᱞᱮᱥᱚᱱ ᱪᱟᱹᱞᱩ</string>
+    <string name="ar_ventilating">ᱪᱮᱢᱵᱚᱨ ᱵᱷᱮᱱᱴᱤᱞᱮᱴ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ...</string>
+    <string name="ar_retest_atmosphere">ᱦᱚᱭ ᱟᱨᱦᱚᱸ ᱴᱮᱥᱴ</string>
+    <string name="ar_detector_sampling">ᱦᱚᱭ ᱴᱮᱥᱴ ᱦᱟᱛᱟᱣ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ...</string>
+    <string name="ar_detector_alarm">ᱜᱚ गंभीर ᱟᱞᱟᱨᱢ — ᱟᱹᱰᱤ ᱵᱚᱛᱚᱨ ᱧᱟᱢ ᱮᱱᱟ!</string>
 
     <string name="ar_close_training">ᱴᱨᱮᱱᱤᱝ ᱵᱚᱸᱫ ᱠᱚᱨᱟᱣ ᱢᱮ</string>
     <string name="ar_practice_mode">ᱯᱨᱮᱠᱴᱤᱥ ᱢᱚᱰ — AR ᱵᱟᱝ</string>
@@ -89,6 +100,34 @@
     <string name="ar_assessment_required">ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱟᱹᱥᱛᱤ ᱟᱨ ᱠᱟᱹᱢᱤ ᱪᱮᱠ ᱫᱚᱨᱠᱟᱨ᱾</string>
     <string name="ar_save_training">ᱴᱨᱮᱱᱤᱝ ᱥᱮᱵ ᱢᱮ</string>
     <string name="ar_saving">ᱥᱮᱵ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…</string>
-    <string name="ar_placement_guide">ᱪᱟᱨᱚᱱ 1: ᱠᱮᱢᱨᱟ ᱯᱟᱴᱟ ᱛᱟᱹᱠ ᱠᱚᱨᱟᱣ ᱢᱮ᱾ ᱪᱟᱨᱚᱱ 2: ᱯᱷᱚᱱ ᱟᱹᱥᱛᱮ ᱦᱤᱞᱟᱣ ᱢᱮ᱾ ᱪᱟᱨᱚᱱ 3: ᱦᱟᱹᱨᱤᱭᱟᱹ ᱜᱚᱞ ᱫᱮᱠᱷᱟᱣ ᱵᱟᱫ ᱥᱟᱢᱟᱱ ᱫᱚᱦᱚ ᱢᱮ ᱫᱟᱵᱟᱣ ᱢᱮ᱾</string>
+    <!-- AR Fire & Explosion Module Strings (Santali Ol Chiki) -->
+    <string name="ar_fire_cabinet_title">ᱵᱤᱡᱽᱞᱤ ᱠᱚᱱᱴᱨᱚᱞ ᱠᱮᱵᱤᱱᱮᱴ</string>
+    <string name="ar_fire_escape_title">ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱪᱮᱠ</string>
+    <string name="ar_fire_escape_desc">ᱥᱮᱸᱜᱮᱞ ᱥᱮᱱᱚᱜ ᱢᱟᱲᱟᱝ ᱛᱟᱭᱚᱢ ᱨᱮ ᱥᱟᱯᱷᱟ ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱫᱚᱦᱚᱭ ᱢᱮ᱾ ᱦᱚᱨ ᱟᱞᱚᱢ ᱮᱥᱮᱫ ᱚᱪᱚᱭᱟ᱾</string>
+    <string name="ar_fire_escape_confirm">ᱚᱰᱚᱠᱚᱜ ᱦᱚᱨ ᱥᱟᱹᱠᱷᱤ ᱢᱮ</string>
+    <string name="ar_fire_alarm_title">ᱟᱯᱚᱛᱠᱟᱞᱤᱱ ᱯᱷᱟᱭᱟᱨ ᱟᱞᱟᱨᱢ</string>
+    <string name="ar_fire_alarm_desc">ᱥᱮᱸᱜᱮᱞ ᱤᱬᱤᱡ ᱢᱟᱲᱟᱝ ᱠᱚᱱᱴᱨᱚᱞ ᱨᱩᱢ ᱟᱨ ᱡᱚᱛᱚ ᱠᱟᱹᱢᱤᱭᱟᱹ ᱠᱷᱚᱵᱚᱨ ᱮᱢᱟᱠᱚ ᱢᱮ᱾</string>
+    <string name="ar_fire_alarm_confirm">ᱯᱷᱟᱭᱟᱨ ᱟᱞᱟᱨᱢ ᱚᱨ ᱢᱮ</string>
+    <string name="ar_fire_extinguisher_title">ABC ᱥᱮᱸᱜᱮᱞ ᱤᱬᱤᱡ ᱥᱟᱢᱟᱱ</string>
+    <string name="ar_fire_ext_check1">ᱯᱨᱮᱥᱟᱨ ᱜᱮᱡᱽ ᱦᱟᱹᱨᱤᱭᱟᱹᱲ ᱡᱟᱭᱜᱟ ᱨᱮ (100–195 psi)</string>
+    <string name="ar_fire_ext_check2">ᱥᱤᱞ ᱴᱷᱤᱠ ᱢᱮᱱᱟᱜᱼᱟ ᱟᱨ ᱪᱮᱠ ᱴᱮᱜᱽ ᱱᱟᱶᱟ ᱜᱮᱭᱟ</string>
+    <string name="ar_fire_ext_check3">ᱱᱚᱡᱚᱞ ᱥᱟᱯᱷᱟ ᱢᱮᱱᱟᱜᱼᱟ</string>
+    <string name="ar_fire_ext_confirm">ᱥᱟᱢᱟᱱ ᱪᱮᱠ ᱠᱟᱛᱮ ᱦᱟᱛᱟᱣ ᱢᱮ</string>
+    <string name="ar_fire_pass_pin_title">PASS ᱫᱷᱟᱯ 1: ᱯᱤᱱ ᱚᱨ ᱢᱮ (PULL)</string>
+    <string name="ar_fire_pass_pin_desc">ᱥᱤᱞ ᱨᱟᱹᱯᱩᱫ ᱞᱟᱹᱜᱤᱫ ᱥᱩᱨᱚᱠᱷᱟ ᱯᱤᱱ ᱡᱩᱨ ᱛᱮ ᱚᱨ ᱚᱰᱚᱠ ᱢᱮ᱾</string>
+    <string name="ar_fire_pass_pin_confirm">ᱯᱤᱱ ᱚᱨ ᱢᱮ ᱟᱨ ᱥᱤᱞ ᱨᱟᱹᱯᱩᱫ ᱢᱮ</string>
+    <string name="ar_fire_pass_aim_title">PASS ᱫᱷᱟᱯ 2: ᱥᱮᱸᱜᱮᱞ ᱵᱩᱴᱟᱹ ᱛᱟᱹᱠ ᱢᱮ (AIM)</string>
+    <string name="ar_fire_pass_aim_desc">6–8 ᱯᱷᱩᱴ ᱥᱟᱺᱜᱤᱧ ᱨᱮ ᱛᱤᱸᱜᱩᱱ ᱢᱮ᱾ ᱥᱮᱸᱜᱮᱞ ᱪᱮᱛᱟᱱ ᱵᱟᱝ, ᱵᱩᱴᱟᱹ ᱥᱮᱫ ᱱᱚᱡᱚᱞ ᱛᱟᱹᱠ ᱢᱮ᱾</string>
+    <string name="ar_fire_pass_aim_confirm">ᱥᱮᱸᱜᱮᱞ ᱵᱩᱴᱟᱹ ᱛᱟᱹᱠ ᱢᱮ</string>
+    <string name="ar_fire_pass_squeeze_title">PASS ᱫᱷᱟᱯ 3: ᱞᱤᱵᱷᱟᱨ ᱞᱤᱱ ᱢᱮ (SQUEEZE)</string>
+    <string name="ar_fire_pass_squeeze_desc">ᱜᱮᱥ ᱟᱨ ᱯᱟᱣᱰᱟᱨ ᱚᱰᱚᱠ ᱞᱟᱹᱜᱤᱫ ᱦᱮᱱᱰᱮᱞ ᱞᱤᱵᱷᱟᱨ ᱟᱹᱥᱛᱮ ᱛᱮ ᱞᱤᱱ ᱢᱮ᱾</string>
+    <string name="ar_fire_pass_squeeze_confirm">ᱚᱰᱚᱠ ᱞᱟᱹᱜᱤᱫ ᱞᱤᱵᱷᱟᱨ ᱞᱤᱱ ᱢᱮ</string>
+    <string name="ar_fire_pass_sweep_title">PASS ᱫᱷᱟᱯ 4: ᱜᱩᱨᱞᱟᱹᱣ ᱢᱮ (SWEEP)</string>
+    <string name="ar_fire_pass_sweep_desc">ᱥᱮᱸᱜᱮᱞ ᱵᱩᱴᱟᱹ ᱨᱮ ᱞᱮᱸᱜᱟ–ᱡᱚᱡᱚᱢ ᱟᱹᱪᱩᱨ ᱠᱟᱛᱮ ᱥᱮᱸᱜᱮᱞ ᱯᱩᱨᱟᱹ ᱤᱬᱤᱡ ᱢᱮ᱾</string>
+    <string name="ar_fire_pass_sweep_confirm">ᱞᱮᱸᱜᱟ–ᱡᱚᱡᱚᱢ ᱜᱩᱨᱞᱟᱹᱣ ᱢᱮ</string>
+    <string name="ar_fire_evacuate_title">ᱥᱩᱨᱚᱠᱷᱟ ᱚᱰᱚᱠᱚᱜ ᱟᱨ ᱡᱟᱣᱨᱟ ᱡᱟᱭᱜᱟ</string>
+    <string name="ar_fire_evacuate_desc">ᱥᱮᱸᱜᱮᱞ ᱤᱬᱤᱡ ᱮᱱᱟ᱾ ᱛᱟᱭᱚᱢ ᱥᱮᱫ ᱥᱮᱱ ᱠᱟᱛᱮ ᱥᱩᱨᱚᱠᱷᱟ ᱡᱟᱣᱨᱟ ᱡᱟᱭᱜᱟ ᱛᱮ ᱥᱮᱱᱚᱜ ᱢᱮ᱾</string>
+    <string name="ar_fire_evacuate_confirm">ᱡᱟᱣᱨᱟ ᱡᱟᱭᱜᱟ ᱛᱮ ᱥᱮᱱᱚᱜ ᱢᱮ</string>
+
     <string name="ar_safety_disclaimer">⚠ ᱠᱷᱟᱞᱤ ᱴᱨᱮᱱᱤᱝ ᱥᱤᱢᱩᱞᱮᱥᱚᱱ᱾ ᱥᱟᱹᱨᱤ ᱥᱮᱸᱜᱮᱞ ᱵᱟᱝ ᱪᱮᱠᱟ ᱟᱨ ᱥᱟᱹᱨᱤ ᱥᱟᱢᱟᱱ ᱨᱮᱭᱟᱜ ᱵᱚᱫᱚᱞ ᱵᱟᱝᱼᱟ᱾</string>
 </resources>

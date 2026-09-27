@@ -36,6 +36,7 @@
     <string name="ar_incorrect_target">Incorrect target. Step %1$d: %2$s. Tap the %3$s marker.</string>
     <string name="ar_incorrect_aim">Aim at the base of the fire, not the top.</string>
     <string name="ar_voice_unavailable">Voice is unavailable. Read the instruction above.</string>
+    <string name="ar_voice_unavailable_sat">Voice audio unavailable for Santali on this device. Displaying Santali visual text and captions.</string>
     <string name="ar_progress_not_saved">Progress could not be saved. Keep this screen open and retry.</string>
     <string name="ar_min_duration">Take time to review the procedure. Minimum practice is 30 seconds.</string>
 
@@ -78,6 +79,16 @@
     <string name="ar_sample_next">Sample Next Stratified Depth</string>
     <string name="ar_alarm_raised">ENTRY PROHIBITED! Toxic H₂S detected. Site alarm activated.</string>
     <string name="ar_evacuate_guide">Withdraw upwind along designated evacuation route to muster point.</string>
+    <string name="ar_ack_hazard">Acknowledge Hazard &amp; Mark Perimeter</string>
+    <string name="ar_sound_alarm">🚨 Sound Emergency Site Alarm</string>
+    <string name="ar_confirm_test">✓ Confirm Atmospheric Test Reading</string>
+    <string name="ar_attendant_rule">CARDINAL RULE: Attendant must NEVER enter confined space for an unplanned rescue!</string>
+    <string name="ar_complete_evac">✓ Complete Safe Evacuation to Muster Point</string>
+    <string name="ar_ventilate_action">💨 Activate Mechanical Blower Ventilation</string>
+    <string name="ar_ventilating">Ventilating Chamber...</string>
+    <string name="ar_retest_atmosphere">Retest Atmosphere</string>
+    <string name="ar_detector_sampling">SENSING ATMOSPHERE...</string>
+    <string name="ar_detector_alarm">CRITICAL ALARM — HIGH HAZARD DETECTED!</string>
 
     <!-- AR Training UI -->
     <string name="ar_close_training">Close training</string>
@@ -94,6 +105,35 @@
     <string name="ar_save_training">Save training</string>
     <string name="ar_saving">Saving…</string>
     <string name="ar_placement_guide">Step 1: Point camera at textured floor. Step 2: Move phone slowly side-to-side. Step 3: When ring turns green, tap Place Equipment.</string>
+
+    <!-- AR Fire & Explosion Module Strings -->
+    <string name="ar_fire_cabinet_title">Industrial Electrical Control Cabinet</string>
+    <string name="ar_fire_escape_title">Escape Route Verification</string>
+    <string name="ar_fire_escape_desc">Ensure an unobstructed exit path is behind you before approaching a fire. Never allow flames to block your retreat.</string>
+    <string name="ar_fire_escape_confirm">Confirm Clear Escape Route</string>
+    <string name="ar_fire_alarm_title">Emergency Fire Alarm Station</string>
+    <string name="ar_fire_alarm_desc">Alert control room and all personnel immediately before attempting fire suppression.</string>
+    <string name="ar_fire_alarm_confirm">Pull Fire Alarm Station</string>
+    <string name="ar_fire_extinguisher_title">Class ABC Multi-Purpose Extinguisher</string>
+    <string name="ar_fire_ext_check1">Pressure gauge pointer in GREEN operable zone (100–195 psi)</string>
+    <string name="ar_fire_ext_check2">Tamper seal intact and inspection tag current</string>
+    <string name="ar_fire_ext_check3">Discharge nozzle clear of blockages</string>
+    <string name="ar_fire_ext_confirm">Inspect &amp; Equip Extinguisher</string>
+    <string name="ar_fire_pass_pin_title">PASS Step 1: PULL Safety Pin</string>
+    <string name="ar_fire_pass_pin_desc">Firmly pull the metal ring-pin to break the plastic tamper seal and unlock the operating lever.</string>
+    <string name="ar_fire_pass_pin_confirm">Pull Pin &amp; Break Seal</string>
+    <string name="ar_fire_pass_aim_title">PASS Step 2: AIM at Base of Fire</string>
+    <string name="ar_fire_pass_aim_desc">Stand 6–8 feet back. Aim nozzle at the BASE of the burning fuel/cables, not into the leaping flames above.</string>
+    <string name="ar_fire_pass_aim_confirm">Aim Nozzle at Fire Base</string>
+    <string name="ar_fire_pass_squeeze_title">PASS Step 3: SQUEEZE Operating Lever</string>
+    <string name="ar_fire_pass_squeeze_desc">Squeeze the operating lever slowly and evenly to discharge pressurized extinguishing agent.</string>
+    <string name="ar_fire_pass_squeeze_confirm">Squeeze Lever to Discharge</string>
+    <string name="ar_fire_pass_sweep_title">PASS Step 4: SWEEP Side to Side</string>
+    <string name="ar_fire_pass_sweep_desc">Sweep nozzle slowly from side to side across the base of the fire until all flames are fully extinguished.</string>
+    <string name="ar_fire_pass_sweep_confirm">Execute Side-to-Side Sweep</string>
+    <string name="ar_fire_evacuate_title">Safe Evacuation &amp; Muster</string>
+    <string name="ar_fire_evacuate_desc">Fire extinguished. Back away while watching for re-ignition. Evacuate along designated route to muster point.</string>
+    <string name="ar_fire_evacuate_confirm">Complete Evacuation to Muster Point</string>
 
     <!-- Safety Disclaimer -->
     <string name="ar_safety_disclaimer">⚠ Training simulation only. Does not detect real fires or replace certified safety equipment and procedures.</string>

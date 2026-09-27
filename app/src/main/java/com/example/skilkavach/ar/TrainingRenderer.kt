@@ -167,10 +167,18 @@ class TrainingRenderer(
         private set
     @Volatile var alarmActive: Boolean = false
         private set
+    @Volatile var isPinPulled: Boolean = false
+        private set
 
     fun reposition() { resetRequested = true }
     fun placeEquipment() { placeRequested = true }
     fun autoPlaceInFront() { autoPlaceRequested = true }
+    fun pullPin() {
+        if (!isPinPulled) {
+            isPinPulled = true
+            buildScene()
+        }
+    }
     fun suppressFire() { if (fireState == FireState.ACTIVE) fireState = FireState.SUPPRESSING }
     fun extinguishFire() { fireState = FireState.EXTINGUISHED }
     fun triggerAlarm() { alarmActive = true }
@@ -201,7 +209,7 @@ class TrainingRenderer(
     private val lightColor = floatArrayOf(1f, 0.97f, 0.92f)
 
     // Hazard effects
-    private val fireEffect = FireEffectRenderer(maxParticles = 60)
+    private val fireEffect = FireEffectRenderer(maxParticles = 85)
     private val gasEffect = GasEffectRenderer(maxParticles = 75)
     val diffusionSimulator = HazardDiffusionSimulator(width = 10, height = 10)
     private var suppressionProgress = 0f  // 0 = full fire, 1 = fully extinguished
@@ -471,6 +479,12 @@ class TrainingRenderer(
                 x = 0.55f, y = 0.0f, z = -0.45f,
                 scale = 1.0f, rotationY = 0f
             )
+            elements += SceneElement(
+                id = "blower_companion", label = "",
+                model = IndustrialMeshes.ventilationBlower(),
+                x = 0.55f, y = 0.0f, z = -1.05f,
+                scale = 1.0f, rotationY = -45f
+            )
         } else {
             /**
              * Spatial arrangement for an industrial fire training scenario:
@@ -490,7 +504,7 @@ class TrainingRenderer(
 
                 when (marker.id) {
                     "extinguisher" -> {
-                        model = IndustrialMeshes.fireExtinguisher()
+                        model = IndustrialMeshes.fireExtinguisher(isPinPulled)
                         px = -0.35f; py = 0f; pz = 0.25f; scale = 1f; rotY = 25f
                     }
                     "pin" -> {
@@ -521,7 +535,11 @@ class TrainingRenderer(
                         model = IndustrialMeshes.fireAlarm()
                         px = -0.55f; py = 1.1f; pz = -0.4f; scale = 1f; rotY = 20f
                     }
-                    "base", "hazard", "sweep" -> {
+                    "base", "hazard" -> {
+                        model = IndustrialMeshes.electricalCabinetFire()
+                        px = 0.30f; py = 0.0f; pz = -0.35f; scale = 1f; rotY = -25f
+                    }
+                    "sweep" -> {
                         model = IndustrialMeshes.hazardZone()
                         px = 0.30f; py = 0.005f; pz = -0.35f; scale = 1f; rotY = 0f
                     }
@@ -582,6 +600,8 @@ class TrainingRenderer(
                 resetRequested = false
                 fireState = FireState.ACTIVE
                 suppressionProgress = 0f
+                isPinPulled = false
+                buildScene()
             }
 
             labels.placementVisible = anchor == null
@@ -704,7 +724,9 @@ class TrainingRenderer(
                         val fireX = 0.30f; val fireZ = -0.35f
                         val dx = elem.x - fireX; val dz = elem.z - fireZ
                         val dist = sqrt(dx * dx + dz * dz)
-                        (1f - suppressionProgress) * (0.3f / (dist + 0.3f)).coerceAtMost(0.4f)
+                        val now = System.currentTimeMillis()
+                        val flicker = 0.82f + 0.18f * (sin(now * 0.018) * 0.6 + cos(now * 0.031) * 0.4).toFloat()
+                        (1f - suppressionProgress) * flicker * (0.35f / (dist + 0.3f)).coerceAtMost(0.45f)
                     }
                     else -> 0f
                 }
@@ -713,12 +735,14 @@ class TrainingRenderer(
                 drawCompositeModel(elem.model, model, glow)
 
                 // Contact shadow for floor-level objects
-                if (elem.y < 0.1f && elem.id !in listOf("base", "hazard", "sweep")) {
+                if (elem.y < 0.1f && elem.id !in listOf("sweep")) {
                     val shadowRadius = when (elem.id) {
                         "tripod_companion" -> 0.60f
                         "ppe" -> 0.32f
                         "buddy" -> 0.22f
                         "permit" -> 0.20f
+                        "base", "hazard" -> 0.42f
+                        "extinguisher" -> 0.18f
                         else -> (elem.model.height * elem.scale * 0.55f).coerceIn(0.12f, 0.45f)
                     }
                     drawContactShadow(anchorWorld, elem.x, elem.z, shadowRadius)
@@ -753,19 +777,32 @@ class TrainingRenderer(
                 val sourceWorldY = a.pose.ty() + 0f
                 val sourceWorldZ = a.pose.tz() + (-1.20f)
 
-                gasEffect.update(sourceWorldX, sourceWorldY, sourceWorldZ, concentration = 0.85f)
-                gasEffect.draw(view, projection, sourceWorldX, sourceWorldY, sourceWorldZ, concentration = 0.85f)
+                val liveConcentration = diffusionSimulator.getConcentrationAt(sourceWorldX, sourceWorldY, sourceWorldZ)
+                gasEffect.update(sourceWorldX, sourceWorldY, sourceWorldZ, concentration = liveConcentration)
+                gasEffect.draw(view, projection, sourceWorldX, sourceWorldY, sourceWorldZ, concentration = liveConcentration)
             } else {
                 if (fireState != FireState.EXTINGUISHED || suppressionProgress < 1f) {
                     diffusionSimulator.step()
-                    val fireWorldX = a.pose.tx() + 0.30f
-                    val fireWorldY = a.pose.ty()
-                    val fireWorldZ = a.pose.tz() + (-0.35f)
+                    // Faulted conduit / breaker fire origin on the electrical cabinet
+                    val fireWorldX = a.pose.tx() + 0.40f
+                    val fireWorldY = a.pose.ty() + 0.62f
+                    val fireWorldZ = a.pose.tz() + (-0.33f)
+
+                    // Extinguisher nozzle world position
+                    val nozzleWorldX = a.pose.tx() - 0.305f
+                    val nozzleWorldY = a.pose.ty() + 0.22f
+                    val nozzleWorldZ = a.pose.tz() + 0.25f
+
+                    val isDischarging = fireState == FireState.SUPPRESSING
 
                     fireEffect.update(
                         fireWorldX, fireWorldY, fireWorldZ,
                         fireIntensity = 1f - suppressionProgress,
-                        smokeIntensity = if (fireState == FireState.SUPPRESSING) 1.5f else 0.5f + suppressionProgress * 0.5f
+                        smokeIntensity = if (isDischarging) 1.6f else 0.5f + suppressionProgress * 0.6f,
+                        isDischarging = isDischarging,
+                        nozzleX = nozzleWorldX,
+                        nozzleY = nozzleWorldY,
+                        nozzleZ = nozzleWorldZ
                     )
                     fireEffect.draw(view, projection)
                 }

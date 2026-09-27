@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,18 +26,77 @@ import java.util.Locale
 fun AdminComplianceScreen(
     onClose: () -> Unit
 ) {
+    val context = LocalContext.current
+    val lang = remember { context.getSharedPreferences("language", 0).getString("value", "en") ?: "en" }
+
     var qrInputText by remember { mutableStateOf("") }
     var verificationResult by remember { mutableStateOf<CertificateVerificationResult?>(null) }
     val vault = remember { CertificateVault() }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
+    val portalTitle = when (lang) {
+        "hi" -> "पर्यवेक्षक अनुपालन पोर्टल"
+        "sat" -> "ᱥᱩᱯᱚᱨᱵᱷᱟᱭᱤᱡᱚᱨ ᱪᱮᱠ ᱯᱚᱨᱴᱟᱞ"
+        else -> "Supervisor Compliance Portal"
+    }
+    val closeLabel = when (lang) {
+        "hi" -> "बंद करें"
+        "sat" -> "ᱵᱚᱸᱫ"
+        else -> "Close"
+    }
+    val heatmapTitle = when (lang) {
+        "hi" -> "साइट अनुपालन हीटमैप"
+        "sat" -> "ᱥᱟᱭᱤᱴ ᱪᱮᱠ ᱦᱤᱴᱢᱮᱯ"
+        else -> "Site Compliance Heatmap"
+    }
+    val riskTitle = when (lang) {
+        "hi" -> "पूर्वानुमानित जोखिम चेतावनी"
+        "sat" -> "ᱵᱚᱛᱚᱨ ᱦᱩᱥᱤᱭᱟᱹᱨ ᱠᱷᱚᱵᱚᱨ"
+        else -> "Predictive Risk Alert"
+    }
+    val riskMsg = when (lang) {
+        "hi" -> "कोयला खदान #3 में नाइट शिफ्ट के दौरान गैस और सीमित स्थान क्षेत्र में 36% झिझक दर दिखाई देती है। सक्रिय ड्रिल की सिफारिश की जाती है।"
+        "sat" -> "ᱠᱳᱭᱞᱟ ᱠᱷᱟᱫᱟᱱ #3 ᱨᱮ ᱧᱤᱸᱫᱟᱹ ᱠᱟᱹᱢᱤ ᱡᱚᱠᱷᱮᱡ ᱜᱮᱥ ᱟᱨ ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ ᱨᱮ 36% ᱵᱚᱛᱚᱨ ᱧᱮᱞᱚᱜ ᱠᱟᱱᱟ᱾ ᱴᱨᱮᱱᱤᱝ ᱞᱟᱹᱠᱛᱤᱭᱟ᱾"
+        else -> "Gas & Confined Space domain shows 36% hesitation rate during Night Shift at Coal Pit #3. Proactive drill recommended."
+    }
+    val qrTitle = when (lang) {
+        "hi" -> "त्वरित क्यूआर प्रमाणपत्र सत्यापनकर्ता"
+        "sat" -> "ᱞᱚᱜᱚᱱ QR ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱪᱮᱠ"
+        else -> "Instant QR Certificate Verifier"
+    }
+    val qrHint = when (lang) {
+        "hi" -> "हस्ताक्षरित क्यूआर जेएसओएन पेलोड चिपकाएं/स्कैन करें"
+        "sat" -> "QR ᱠᱳᱰ ᱱᱚᱸᱰᱮ ᱞᱟᱴᱷᱟ/ᱥᱠᱮᱱ ᱢᱮ"
+        else -> "Paste/Scan Signed QR JSON Payload"
+    }
+    val verifyBtn = when (lang) {
+        "hi" -> "ऑफलाइन क्रिप्टोग्राफिक रूप से सत्यापित करें"
+        "sat" -> "ᱚᱯᱷᱞᱟᱭᱤᱱ ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱪᱮᱠ"
+        else -> "Cryptographically Verify Offline"
+    }
+    val pendingTitle = when (lang) {
+        "hi" -> "लंबित कार्यकर्ता स्व-पंजीकरण"
+        "sat" -> "ᱛᱟᱺᱜᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱠᱟᱹᱢᱤᱭᱟᱹ ᱧᱩᱛᱩᱢ ᱚᱞ"
+        else -> "Pending Worker Self-Registrations"
+    }
+    val pendingDesc = when (lang) {
+        "hi" -> "ओटीपी लॉगिन एक्सेस सक्षम करने के लिए कार्यकर्ता खातों को स्वीकृत करें।"
+        "sat" -> "OTP ᱞᱚᱜᱤᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱹᱢᱤᱭᱟᱹ ᱧᱩᱛᱩᱢ ᱥᱟᱹᱠᱷᱤ ᱢᱮ᱾"
+        else -> "Approve worker accounts to enable OTP login access."
+    }
+    val overdueTitle = when (lang) {
+        "hi" -> "बकाया पुनः प्रमाणन (जीवंत प्रमाणपत्र)"
+        "sat" -> "ᱫᱩᱦᱨᱟ ᱥᱟᱴᱤᱯᱷᱤᱠᱮᱴ ᱞᱟᱹᱠᱛᱤ (Living Certificates)"
+        else -> "Overdue Recertifications (Living Certificates)"
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Supervisor Compliance Portal", fontWeight = FontWeight.Bold) },
+                title = { Text(portalTitle, fontWeight = FontWeight.Bold) },
                 actions = {
                     TextButton(onClick = onClose) {
-                        Text("Close", color = MaterialTheme.colorScheme.primary)
+                        Text(closeLabel, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             )
@@ -56,16 +116,28 @@ fun AdminComplianceScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Site Compliance Heatmap", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(heatmapTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        HeatmapItem("Fire Safety", "92%", Color(0xFF22C55E))
-                        HeatmapItem("Gas/Confined", "64%", Color(0xFFEF4444))
-                        HeatmapItem("Electrical", "88%", Color(0xFF22C55E))
-                        HeatmapItem("Machinery", "76%", Color(0xFFF59E0B))
+                        HeatmapItem(
+                            when (lang) { "hi" -> "अग्नि सुरक्षा"; "sat" -> "ᱥᱮᱸᱜᱮᱞ ᱨᱩᱠᱷᱤᱭᱟᱹ"; else -> "Fire Safety" },
+                            "92%", Color(0xFF22C55E)
+                        )
+                        HeatmapItem(
+                            when (lang) { "hi" -> "गैस/सीमित स्थान"; "sat" -> "ᱜᱮᱥ ᱥᱩᱢᱩᱝ ᱡᱟᱭᱜᱟ"; else -> "Gas/Confined" },
+                            "64%", Color(0xFFEF4444)
+                        )
+                        HeatmapItem(
+                            when (lang) { "hi" -> "विद्युत सुरक्षा"; "sat" -> "ᱵᱤᱡᱽᱞᱤ ᱨᱩᱠᱷᱤᱭᱟᱹ"; else -> "Electrical" },
+                            "88%", Color(0xFF22C55E)
+                        )
+                        HeatmapItem(
+                            when (lang) { "hi" -> "मशीनरी"; "sat" -> "ᱢᱮᱥᱤᱱ"; else -> "Machinery" },
+                            "76%", Color(0xFFF59E0B)
+                        )
                     }
                 }
             }
@@ -76,13 +148,9 @@ fun AdminComplianceScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Predictive Risk Alert", color = Color(0xFF991B1B), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(riskTitle, color = Color(0xFF991B1B), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        "Gas & Confined Space domain shows 36% hesitation rate during Night Shift at Coal Pit #3. Proactive drill recommended.",
-                        color = Color(0xFF7F1D1D),
-                        fontSize = 14.sp
-                    )
+                    Text(riskMsg, color = Color(0xFF7F1D1D), fontSize = 14.sp)
                 }
             }
 
@@ -93,12 +161,12 @@ fun AdminComplianceScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Instant QR Certificate Verifier", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(qrTitle, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = qrInputText,
                         onValueChange = { qrInputText = it },
-                        label = { Text("Paste/Scan Signed QR JSON Payload") },
+                        label = { Text(qrHint) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -110,7 +178,7 @@ fun AdminComplianceScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Cryptographically Verify Offline")
+                        Text(verifyBtn)
                     }
 
                     verificationResult?.let { res ->
@@ -157,13 +225,13 @@ fun AdminComplianceScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Pending Worker Self-Registrations", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(pendingTitle, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Approve worker accounts to enable OTP login access.", color = Color.Gray, fontSize = 12.sp)
+                    Text(pendingDesc, color = Color.Gray, fontSize = 12.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    PendingApprovalItem("Vikas Kumar (EMP002)", "+919876543211", "Coal Pit #2")
+                    PendingApprovalItem("Vikas Kumar (EMP002)", "+919876543211", "Coal Pit #2", lang)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    PendingApprovalItem("Anita Tudu (EMP003)", "+919876543212", "Mica Unit #1")
+                    PendingApprovalItem("Anita Tudu (EMP003)", "+919876543212", "Mica Unit #1", lang)
                 }
             }
 
@@ -174,7 +242,7 @@ fun AdminComplianceScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Overdue Recertifications (Living Certificates)", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(overdueTitle, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     OverdueWorkerItem("Ramesh Oraon (EMP089)", "Mica Plant #2", "Gas Safety", "Confidence 42%")
                     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -209,9 +277,14 @@ fun OverdueWorkerItem(name: String, site: String, domain: String, confidence: St
 }
 
 @Composable
-fun PendingApprovalItem(name: String, phone: String, site: String) {
+fun PendingApprovalItem(name: String, phone: String, site: String, lang: String = "en") {
     var approved by remember { mutableStateOf(false) }
     var rejected by remember { mutableStateOf(false) }
+
+    val approveBtn = when (lang) { "hi" -> "स्वीकृत करें"; "sat" -> "ᱥᱟᱹᱠᱷᱤ"; else -> "Approve" }
+    val rejectBtn = when (lang) { "hi" -> "अस्वीकृत करें"; "sat" -> "ᱵᱟᱹᱜᱤ"; else -> "Reject" }
+    val approvedLabel = when (lang) { "hi" -> "स्वीकृत ✓"; "sat" -> "ᱥᱟᱹᱠᱷᱤ ᱮᱱᱟ ✓"; else -> "Approved ✓" }
+    val rejectedLabel = when (lang) { "hi" -> "अस्वीकृत ✗"; "sat" -> "ᱵᱟᱹᱜᱤ ᱮᱱᱟ ✗"; else -> "Rejected ✗" }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -223,9 +296,9 @@ fun PendingApprovalItem(name: String, phone: String, site: String) {
             Text("$site • $phone", color = Color.Gray, fontSize = 12.sp)
         }
         if (approved) {
-            Text("Approved ✓", color = Color(0xFF166534), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text(approvedLabel, color = Color(0xFF166534), fontWeight = FontWeight.Bold, fontSize = 13.sp)
         } else if (rejected) {
-            Text("Rejected ✗", color = Color(0xFF991B1B), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text(rejectedLabel, color = Color(0xFF991B1B), fontWeight = FontWeight.Bold, fontSize = 13.sp)
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Button(
@@ -233,13 +306,13 @@ fun PendingApprovalItem(name: String, phone: String, site: String) {
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF166534))
                 ) {
-                    Text("Approve", fontSize = 12.sp)
+                    Text(approveBtn, fontSize = 12.sp)
                 }
                 OutlinedButton(
                     onClick = { rejected = true },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Text("Reject", fontSize = 12.sp, color = Color(0xFF991B1B))
+                    Text(rejectBtn, fontSize = 12.sp, color = Color(0xFF991B1B))
                 }
             }
         }

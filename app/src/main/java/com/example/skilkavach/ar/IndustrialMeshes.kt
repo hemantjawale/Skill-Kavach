@@ -203,158 +203,365 @@ object IndustrialMeshes {
 
     // ── Composite industrial equipment ──────────────────────────────
 
+    // ── Composite industrial equipment ──────────────────────────────
+
+    data class ScaleVerification(
+        val name: String,
+        val expectedHeightMeters: Float,
+        val detectedHeightMeters: Float,
+        val status: String
+    )
+
+    /**
+     * Calibration & Scale Verification report for development testing.
+     * Ensures all industrial models adhere to real-world physics convention (1 unit = 1 meter).
+     */
+    fun verifyRealWorldScale(): Map<String, ScaleVerification> {
+        val models = mapOf(
+            "Fire Extinguisher" to (0.50f to fireExtinguisher().height),
+            "Electrical Cabinet Fire" to (0.65f to electricalCabinetFire().height),
+            "Fire Alarm Pull Station" to (0.18f to fireAlarm().height),
+            "Emergency Exit Sign" to (0.16f to exitSign().height),
+            "Confined Space Hatch" to (0.70f to confinedSpaceHatch().height),
+            "Multi-Gas Detector" to (0.14f to gasDetector().height),
+            "Rescue Tripod" to (1.75f to rescueTripod().height),
+            "Standby Attendant" to (1.72f to buddyFigure().height),
+            "Ventilation Blower Fan" to (0.65f to ventilationBlower().height)
+        )
+        return models.mapValues { (name, pair) ->
+            val (expected, detected) = pair
+            val pass = abs(expected - detected) <= 0.06f
+            ScaleVerification(name, expected, detected, if (pass) "PASS" else "FAIL")
+        }
+    }
+
     /**
      * Detailed fire extinguisher: ~0.50m tall, 0.15m diameter body.
-     * Components: body, valve, handle, lever, hose, nozzle, gauge, label area, base ring.
+     * Components: cylinder body, base dome, operating instructions band, pressure gauge,
+     * valve assembly, squeeze handle, safety ring-pin with plastic tamper seal,
+     * reinforced discharge hose, and flared discharge nozzle.
+     *
+     * @param isPinPulled When true, the safety pin is displaced and broken seal dangles down.
      */
-    fun fireExtinguisher(): CompositeModel {
+    fun fireExtinguisher(isPinPulled: Boolean = false): CompositeModel {
         val parts = mutableListOf<ModelPart>()
 
-        // Main body — red cylinder
+        // Main body — red cylinder with industrial gloss coat
         parts += ModelPart(
             "body", cylinder(0.075f, 0.40f, 32),
-            Material(0.78f, 0.12f, 0.10f, metallic = 0.3f, roughness = 0.55f)
+            Material(0.80f, 0.10f, 0.08f, metallic = 0.35f, roughness = 0.50f)
         )
         // Body bottom cap — slight dome
         parts += ModelPart(
             "body_base", translate(sphere(0.075f, 8, 16), 0f, 0f, 0f),
-            Material(0.78f, 0.12f, 0.10f, metallic = 0.3f, roughness = 0.55f),
+            Material(0.80f, 0.10f, 0.08f, metallic = 0.35f, roughness = 0.50f),
             scaleY = 0.3f
         )
-        // Label band — white rectangle area on body
+        // Upper neck collar — conical transition
         parts += ModelPart(
-            "label", translate(box(0.055f, 0.06f, 0.003f), 0f, 0.18f, 0.077f),
-            Material(0.92f, 0.92f, 0.90f, metallic = 0.0f, roughness = 0.9f)
+            "neck", translate(cone(0.075f, 0.04f, 24), 0f, 0.40f, 0f),
+            Material(0.80f, 0.10f, 0.08f, metallic = 0.35f, roughness = 0.50f)
         )
-        // Pressure gauge — small disc on side
+        // Operating instruction band — high-contrast white/black PASS label
         parts += ModelPart(
-            "gauge", translate(cylinder(0.018f, 0.008f, 16), 0.077f, 0.32f, 0f),
-            Material(0.90f, 0.90f, 0.88f, metallic = 0.5f, roughness = 0.3f)
+            "label_band", translate(box(0.058f, 0.075f, 0.003f), 0f, 0.18f, 0.077f),
+            Material(0.95f, 0.95f, 0.93f, metallic = 0.0f, roughness = 0.85f)
         )
-        // Gauge face (green)
+        // PASS icon indicator rows on label
         parts += ModelPart(
-            "gauge_face", translate(disc(0.015f, 0f, 16), 0.085f, 0.324f, 0f),
-            Material(0.2f, 0.7f, 0.2f, metallic = 0f, roughness = 0.8f)
+            "pass_text_row", translate(box(0.045f, 0.010f, 0.001f), 0f, 0.20f, 0.081f),
+            Material(0.12f, 0.12f, 0.12f, metallic = 0.0f, roughness = 0.9f)
         )
-        // Valve assembly — black cylinder on top
+        // Pressure gauge — brass stem and circular casing
         parts += ModelPart(
-            "valve", translate(cylinder(0.030f, 0.06f, 24), 0f, 0.40f, 0f),
-            Material(0.15f, 0.15f, 0.15f, metallic = 0.6f, roughness = 0.35f)
-        )
-        // Handle — lever on top (interactive target for SQUEEZE)
-        parts += ModelPart(
-            "handle_base", translate(box(0.035f, 0.008f, 0.015f), 0f, 0.46f, 0f),
-            Material(0.12f, 0.12f, 0.12f, metallic = 0.7f, roughness = 0.3f)
+            "gauge_stem", translate(cylinder(0.007f, 0.015f, 12), 0.065f, 0.41f, 0f),
+            Material(0.85f, 0.70f, 0.25f, metallic = 0.8f, roughness = 0.3f)
         )
         parts += ModelPart(
-            "handle_lever", translate(box(0.045f, 0.006f, 0.012f), 0.02f, 0.475f, 0f),
-            Material(0.10f, 0.10f, 0.10f, metallic = 0.8f, roughness = 0.25f)
+            "gauge_casing", translate(cylinder(0.018f, 0.010f, 16), 0.078f, 0.41f, 0f),
+            Material(0.90f, 0.90f, 0.90f, metallic = 0.7f, roughness = 0.25f)
         )
-        // Safety pin — yellow ring + shaft (interactive target for PULL)
+        // Gauge face (green operable center zone flanked by red recharge/overcharge)
         parts += ModelPart(
-            "pin_shaft", translate(cylinder(0.004f, 0.035f, 12), -0.035f, 0.455f, 0f),
-            Material(0.85f, 0.75f, 0.15f, metallic = 0.7f, roughness = 0.3f)
+            "gauge_face_green", translate(disc(0.014f, 0f, 16), 0.088f, 0.415f, 0f),
+            Material(0.15f, 0.75f, 0.22f, metallic = 0f, roughness = 0.7f)
         )
+        // Valve assembly — heavy brass/black valve body
         parts += ModelPart(
-            "pin_ring", translate(disc(0.012f, 0.007f, 16), -0.035f, 0.49f, 0f),
-            Material(0.85f, 0.75f, 0.15f, metallic = 0.7f, roughness = 0.3f)
+            "valve", translate(cylinder(0.026f, 0.055f, 24), 0f, 0.41f, 0f),
+            Material(0.18f, 0.18f, 0.20f, metallic = 0.7f, roughness = 0.30f)
         )
-        // Hose — thin dark cylinder curving from valve
+        // Carry handle (lower fixed arm)
         parts += ModelPart(
-            "hose", translate(cylinder(0.010f, 0.20f, 12), 0.04f, 0.30f, 0f),
-            Material(0.08f, 0.08f, 0.08f, metallic = 0.0f, roughness = 0.85f)
+            "handle_base", translate(box(0.040f, 0.007f, 0.016f), 0f, 0.455f, 0f),
+            Material(0.15f, 0.15f, 0.17f, metallic = 0.75f, roughness = 0.25f)
         )
-        // Nozzle — cone at end of hose (interactive target for AIM)
+        // Operating lever (upper squeeze arm)
         parts += ModelPart(
-            "nozzle", translate(cone(0.014f, 0.04f, 12), 0.04f, 0.26f, 0f),
-            Material(0.12f, 0.12f, 0.12f, metallic = 0.5f, roughness = 0.4f)
+            "handle_lever", translate(box(0.050f, 0.006f, 0.014f), 0.025f, 0.472f, 0f),
+            Material(0.12f, 0.12f, 0.14f, metallic = 0.80f, roughness = 0.22f)
         )
-        // Base ring — black rubber foot
+
+        // Safety pin & tamper seal logic
+        if (!isPinPulled) {
+            // Safety pin shaft (brass/steel) through valve
+            parts += ModelPart(
+                "pin_shaft", translate(cylinder(0.004f, 0.038f, 12), -0.032f, 0.455f, 0f),
+                Material(0.90f, 0.78f, 0.20f, metallic = 0.85f, roughness = 0.20f)
+            )
+            // Pull ring on end of pin
+            parts += ModelPart(
+                "pin_ring", translate(disc(0.014f, 0.008f, 16), -0.032f, 0.493f, 0f),
+                Material(0.90f, 0.78f, 0.20f, metallic = 0.85f, roughness = 0.20f)
+            )
+            // Plastic tamper seal loop (bright safety yellow/red)
+            parts += ModelPart(
+                "tamper_seal", translate(box(0.006f, 0.014f, 0.006f), -0.018f, 0.460f, 0.008f),
+                Material(0.95f, 0.25f, 0.15f, metallic = 0.0f, roughness = 0.60f)
+            )
+        } else {
+            // Broken tamper seal flag dangling down
+            parts += ModelPart(
+                "broken_seal", translate(box(0.004f, 0.025f, 0.004f), -0.018f, 0.440f, 0.008f),
+                Material(0.95f, 0.25f, 0.15f, metallic = 0.0f, roughness = 0.60f)
+            )
+        }
+
+        // Reinforced flexible discharge hose
         parts += ModelPart(
-            "base_ring", translate(disc(0.08f, 0.065f, 32), 0f, 0.001f, 0f),
-            Material(0.06f, 0.06f, 0.06f, metallic = 0f, roughness = 0.95f)
+            "hose", translate(cylinder(0.011f, 0.24f, 12), 0.045f, 0.26f, 0f),
+            Material(0.08f, 0.08f, 0.09f, metallic = 0.0f, roughness = 0.85f)
+        )
+        // Flared discharge nozzle / horn
+        parts += ModelPart(
+            "nozzle", translate(cone(0.016f, 0.045f, 16), 0.045f, 0.22f, 0f),
+            Material(0.14f, 0.14f, 0.15f, metallic = 0.5f, roughness = 0.40f)
+        )
+        // Heavy-duty rubberized boot base
+        parts += ModelPart(
+            "base_ring", translate(disc(0.082f, 0.062f, 32), 0f, 0.002f, 0f),
+            Material(0.06f, 0.06f, 0.07f, metallic = 0f, roughness = 0.95f)
         )
 
         return CompositeModel(parts, height = 0.50f)
     }
 
     /**
+     * Believable Industrial Electrical Control Cabinet Fire Source:
+     * - Height: 0.65m, Width: 0.50m, Depth: 0.35m (Real-world scale).
+     * - Dark carbon-painted steel enclosure with plinth base.
+     * - Recessed front access door with perimeter beveled frame.
+     * - High-voltage warning yellow triangle placard with black lightning bolt.
+     * - Rotary isolator / safety disconnect switch on door.
+     * - Stamped ventilation louvers.
+     * - Overhead industrial conduit pipe entries.
+     * - Charred, blackened arcing failure zone on top-right where electrical fire originated.
+     * - Circular scorch mark burn decal on the floor beneath the burning equipment.
+     */
+    fun electricalCabinetFire(): CompositeModel {
+        val parts = mutableListOf<ModelPart>()
+
+        // 1. Scorch mark floor burn decal beneath cabinet
+        parts += ModelPart(
+            "scorch_decal", disc(0.48f, 0f, 32),
+            Material(0.08f, 0.07f, 0.06f, metallic = 0f, roughness = 0.98f, alpha = 0.65f)
+        )
+        parts += ModelPart(
+            "scorch_inner", disc(0.28f, 0f, 24),
+            Material(0.04f, 0.04f, 0.04f, metallic = 0f, roughness = 0.99f, alpha = 0.85f)
+        )
+
+        // 2. Plinth channel footer / base (height 0.06m)
+        parts += ModelPart(
+            "plinth", translate(box(0.24f, 0.03f, 0.16f), 0f, 0.03f, 0f),
+            Material(0.12f, 0.13f, 0.15f, metallic = 0.7f, roughness = 0.40f)
+        )
+
+        // 3. Main NEMA-style electrical enclosure body (height 0.55m, total top y = 0.61m)
+        parts += ModelPart(
+            "cabinet_body", translate(box(0.23f, 0.275f, 0.15f), 0f, 0.335f, 0f),
+            Material(0.24f, 0.26f, 0.28f, metallic = 0.60f, roughness = 0.42f)
+        )
+
+        // 4. Front door panel with beveled recess
+        parts += ModelPart(
+            "door_panel", translate(box(0.21f, 0.255f, 0.005f), 0f, 0.335f, 0.155f),
+            Material(0.28f, 0.30f, 0.32f, metallic = 0.55f, roughness = 0.45f)
+        )
+
+        // 5. High-voltage caution placard (yellow triangle plate)
+        parts += ModelPart(
+            "hazard_placard", translate(box(0.055f, 0.050f, 0.002f), -0.06f, 0.42f, 0.161f),
+            Material(0.95f, 0.78f, 0.06f, metallic = 0.1f, roughness = 0.60f)
+        )
+        // High voltage lightning bolt symbol in center
+        parts += ModelPart(
+            "lightning_symbol", translate(box(0.015f, 0.030f, 0.001f), -0.06f, 0.42f, 0.163f),
+            Material(0.08f, 0.08f, 0.08f, metallic = 0.0f, roughness = 0.80f)
+        )
+
+        // 6. Rotary main disconnect switch / emergency power isolator handle
+        parts += ModelPart(
+            "isolator_base", translate(cylinder(0.022f, 0.008f, 16), 0.12f, 0.42f, 0.158f),
+            Material(0.92f, 0.80f, 0.10f, metallic = 0.2f, roughness = 0.50f)
+        )
+        parts += ModelPart(
+            "isolator_handle", translate(box(0.030f, 0.008f, 0.012f), 0.12f, 0.42f, 0.168f),
+            Material(0.85f, 0.12f, 0.10f, metallic = 0.3f, roughness = 0.40f)
+        )
+
+        // 7. Ventilation louvers (stamped cooling slots on side)
+        for (i in 0..2) {
+            parts += ModelPart(
+                "louver_l_$i", translate(box(0.002f, 0.004f, 0.07f), -0.233f, 0.46f - i * 0.025f, 0f),
+                Material(0.10f, 0.10f, 0.12f, metallic = 0.7f, roughness = 0.3f)
+            )
+            parts += ModelPart(
+                "louver_r_$i", translate(box(0.002f, 0.004f, 0.07f), 0.233f, 0.46f - i * 0.025f, 0f),
+                Material(0.10f, 0.10f, 0.12f, metallic = 0.7f, roughness = 0.3f)
+            )
+        }
+
+        // 8. Top electrical conduits (steel feed pipes entering cabinet)
+        parts += ModelPart(
+            "conduit_hub_1", translate(cylinder(0.022f, 0.015f, 16), -0.10f, 0.61f, 0f),
+            Material(0.65f, 0.68f, 0.72f, metallic = 0.85f, roughness = 0.25f)
+        )
+        parts += ModelPart(
+            "conduit_pipe_1", translate(cylinder(0.016f, 0.10f, 16), -0.10f, 0.625f, 0f),
+            Material(0.65f, 0.68f, 0.72f, metallic = 0.85f, roughness = 0.25f)
+        )
+
+        // 9. Faulted arcing conduit hub on top-right where electrical fire originated
+        parts += ModelPart(
+            "conduit_hub_fault", translate(cylinder(0.025f, 0.015f, 16), 0.10f, 0.61f, 0.02f),
+            Material(0.12f, 0.11f, 0.10f, metallic = 0.2f, roughness = 0.90f)
+        )
+        // Charred, melted cable insulation and arc scorch marks around fault opening
+        parts += ModelPart(
+            "charred_area", translate(box(0.065f, 0.008f, 0.060f), 0.10f, 0.612f, 0.02f),
+            Material(0.05f, 0.05f, 0.04f, metallic = 0.0f, roughness = 0.98f)
+        )
+        // Red glowing ember heat in the damaged electrical junction
+        parts += ModelPart(
+            "electrical_ember_core", translate(sphere(0.020f, 8, 12), 0.10f, 0.625f, 0.02f),
+            Material(1.0f, 0.35f, 0.05f, metallic = 0f, roughness = 0.2f, emissive = 0.8f)
+        )
+
+        return CompositeModel(parts, height = 0.65f)
+    }
+
+    /**
      * Emergency exit sign: ISO 7010 green illuminated sign.
-     * Mounted at specified height, ~0.30m × 0.15m face.
+     * Mounted at specified height, ~0.32m × 0.16m face with dual backup emergency floodlights.
      */
     fun exitSign(): CompositeModel {
         val parts = mutableListOf<ModelPart>()
-        // Main panel — green emissive
+        // Brushed aluminum frame housing
         parts += ModelPart(
-            "panel", translate(box(0.15f, 0.075f, 0.012f), 0f, 0f, 0f),
-            Material(0.05f, 0.55f, 0.20f, metallic = 0f, roughness = 0.6f, emissive = 0.5f)
+            "housing_frame", translate(box(0.165f, 0.082f, 0.018f), 0f, 0f, 0f),
+            Material(0.70f, 0.72f, 0.75f, metallic = 0.75f, roughness = 0.30f)
         )
-        // White running figure area
+        // Main panel — bright green emissive acrylic
         parts += ModelPart(
-            "icon", translate(box(0.04f, 0.05f, 0.001f), -0.03f, 0.005f, 0.013f),
-            Material(0.92f, 0.95f, 0.92f, metallic = 0f, roughness = 0.8f, emissive = 0.4f)
+            "panel", translate(box(0.150f, 0.072f, 0.005f), 0f, 0f, 0.015f),
+            Material(0.05f, 0.60f, 0.22f, metallic = 0f, roughness = 0.5f, emissive = 0.65f)
         )
-        // Arrow indicator
+        // White ISO 7010 running figure
         parts += ModelPart(
-            "arrow", translate(box(0.035f, 0.018f, 0.001f), 0.06f, 0f, 0.013f),
-            Material(0.92f, 0.95f, 0.92f, metallic = 0f, roughness = 0.8f, emissive = 0.4f)
+            "icon", translate(box(0.038f, 0.048f, 0.001f), -0.04f, 0.004f, 0.018f),
+            Material(0.95f, 0.98f, 0.95f, metallic = 0f, roughness = 0.8f, emissive = 0.55f)
         )
-        // Mounting bracket top
+        // White directional arrow
         parts += ModelPart(
-            "bracket", translate(box(0.008f, 0.04f, 0.025f), 0f, 0.075f, -0.013f),
-            Material(0.7f, 0.7f, 0.7f, metallic = 0.6f, roughness = 0.4f)
+            "arrow", translate(box(0.032f, 0.018f, 0.001f), 0.05f, 0f, 0.018f),
+            Material(0.95f, 0.98f, 0.95f, metallic = 0f, roughness = 0.8f, emissive = 0.55f)
         )
-        return CompositeModel(parts, height = 0.15f)
+        // Dual emergency backup floodlight swivels on top corners
+        parts += ModelPart(
+            "lamp_l", translate(cylinder(0.018f, 0.025f, 16), -0.14f, 0.095f, 0f),
+            Material(0.85f, 0.85f, 0.85f, metallic = 0.4f, roughness = 0.3f, emissive = 0.2f)
+        )
+        parts += ModelPart(
+            "lamp_r", translate(cylinder(0.018f, 0.025f, 16), 0.14f, 0.095f, 0f),
+            Material(0.85f, 0.85f, 0.85f, metallic = 0.4f, roughness = 0.3f, emissive = 0.2f)
+        )
+        // Ceiling mounting suspension bracket
+        parts += ModelPart(
+            "bracket", translate(box(0.010f, 0.050f, 0.022f), 0f, 0.095f, 0f),
+            Material(0.60f, 0.60f, 0.62f, metallic = 0.7f, roughness = 0.4f)
+        )
+        return CompositeModel(parts, height = 0.16f)
     }
 
     /**
-     * Industrial fire alarm pull station: red box with pull handle.
-     * ~0.14m × 0.14m × 0.06m.
+     * Industrial fire alarm pull station: red cast-aluminum box with dual action pull lever,
+     * status LED, overhead alarm horn/strobe combination, and conduit fitting.
      */
     fun fireAlarm(): CompositeModel {
         val parts = mutableListOf<ModelPart>()
-        // Housing — red metal box
+        // Back mounting plate
         parts += ModelPart(
-            "housing", translate(box(0.065f, 0.070f, 0.030f), 0f, 0f, 0f),
-            Material(0.82f, 0.10f, 0.08f, metallic = 0.4f, roughness = 0.5f)
+            "mount_plate", translate(box(0.072f, 0.082f, 0.004f), 0f, 0f, -0.015f),
+            Material(0.35f, 0.35f, 0.38f, metallic = 0.6f, roughness = 0.4f)
         )
-        // Face plate — slightly lighter
+        // Housing — heavy red industrial powder coat
         parts += ModelPart(
-            "face", translate(box(0.055f, 0.060f, 0.002f), 0f, 0f, 0.031f),
-            Material(0.88f, 0.15f, 0.12f, metallic = 0.3f, roughness = 0.55f)
+            "housing", translate(box(0.065f, 0.072f, 0.025f), 0f, 0f, 0f),
+            Material(0.85f, 0.10f, 0.08f, metallic = 0.40f, roughness = 0.45f)
         )
-        // Pull handle — white T-bar
+        // Face plate — slightly raised with chamfer
         parts += ModelPart(
-            "pull_bar", translate(box(0.030f, 0.008f, 0.008f), 0f, -0.025f, 0.039f),
-            Material(0.90f, 0.90f, 0.88f, metallic = 0.2f, roughness = 0.6f)
+            "face", translate(box(0.056f, 0.062f, 0.003f), 0f, 0f, 0.026f),
+            Material(0.88f, 0.14f, 0.12f, metallic = 0.30f, roughness = 0.50f)
         )
-        // Status indicator light — small dome on top
+        // "PULL DOWN" T-bar handle (white metal)
         parts += ModelPart(
-            "indicator", translate(sphere(0.010f, 8, 12), 0f, 0.072f, 0.020f),
-            Material(0.9f, 0.1f, 0.1f, metallic = 0f, roughness = 0.3f, emissive = 0.0f)
+            "pull_bar", translate(box(0.032f, 0.009f, 0.008f), 0f, -0.022f, 0.034f),
+            Material(0.92f, 0.92f, 0.90f, metallic = 0.30f, roughness = 0.50f)
         )
-        // Label area — white rectangle
+        // High-intensity white alarm strobe unit mounted directly above pull station
         parts += ModelPart(
-            "label", translate(box(0.040f, 0.020f, 0.001f), 0f, 0.020f, 0.033f),
-            Material(0.92f, 0.92f, 0.90f, metallic = 0f, roughness = 0.9f)
+            "strobe_lens", translate(cylinder(0.022f, 0.035f, 16), 0f, 0.095f, 0.008f),
+            Material(0.95f, 0.95f, 0.98f, metallic = 0.1f, roughness = 0.2f, emissive = 0.3f)
         )
-        return CompositeModel(parts, height = 0.14f)
+        // Conduit pipe extending upwards
+        parts += ModelPart(
+            "conduit", translate(cylinder(0.010f, 0.08f, 12), 0f, 0.13f, 0f),
+            Material(0.65f, 0.65f, 0.68f, metallic = 0.8f, roughness = 0.3f)
+        )
+        // Status indicator LED
+        parts += ModelPart(
+            "indicator", translate(sphere(0.007f, 8, 12), 0.038f, 0.055f, 0.027f),
+            Material(0.1f, 0.9f, 0.2f, metallic = 0f, roughness = 0.3f, emissive = 0.5f)
+        )
+        // Instruction placard
+        parts += ModelPart(
+            "label", translate(box(0.042f, 0.018f, 0.001f), 0f, 0.020f, 0.028f),
+            Material(0.95f, 0.95f, 0.92f, metallic = 0f, roughness = 0.9f)
+        )
+        return CompositeModel(parts, height = 0.18f)
     }
 
     /**
-     * Hazard zone floor marker: concentric warning rings.
+     * Hazard zone floor marker: concentric warning rings with floor scorch gradient.
      */
     fun hazardZone(): CompositeModel {
         val parts = mutableListOf<ModelPart>()
-        // Outer warning ring — yellow
+        // Outer warning perimeter ring — yellow caution
         parts += ModelPart(
-            "outer_ring", disc(0.35f, 0.30f, 48),
-            Material(0.90f, 0.70f, 0.05f, metallic = 0f, roughness = 0.9f, alpha = 0.6f)
+            "outer_ring", disc(0.42f, 0.35f, 48),
+            Material(0.92f, 0.72f, 0.05f, metallic = 0f, roughness = 0.9f, alpha = 0.65f)
         )
-        // Inner danger zone — red
+        // Carbon scorch mark — heat damage on floor
         parts += ModelPart(
-            "inner_zone", disc(0.30f, 0f, 48),
-            Material(0.85f, 0.15f, 0.10f, metallic = 0f, roughness = 0.9f, alpha = 0.4f)
+            "scorch_mark", disc(0.35f, 0.22f, 48),
+            Material(0.12f, 0.10f, 0.09f, metallic = 0f, roughness = 0.98f, alpha = 0.70f)
+        )
+        // Inner intense combustion zone — dark charred core
+        parts += ModelPart(
+            "inner_char", disc(0.22f, 0f, 32),
+            Material(0.06f, 0.05f, 0.05f, metallic = 0f, roughness = 0.99f, alpha = 0.85f)
         )
         return CompositeModel(parts, height = 0.01f)
     }
@@ -1052,6 +1259,54 @@ object IndustrialMeshes {
         )
 
         return CompositeModel(parts, height = 0.20f)
+    }
+
+    /**
+     * Portable Industrial Confined Space Ventilation Blower & Ducting.
+     * ~0.65m total height (blower housing + elevated handle + duct curve).
+     * Features: Heavy-duty powder-coated yellow fan housing, cast motor body,
+     * intake grille, discharge collar, accordion ventilation hose extending to sump.
+     */
+    fun ventilationBlower(): CompositeModel {
+        val parts = mutableListOf<ModelPart>()
+
+        // Main cylindrical fan housing (safety yellow powder coat)
+        parts += ModelPart(
+            "blower_casing", translate(cylinder(0.22f, 0.38f, 24), 0f, 0.25f, 0f),
+            Material(0.92f, 0.75f, 0.08f, metallic = 0.25f, roughness = 0.35f)
+        )
+
+        // Heavy-duty cast iron motor housing behind fan
+        parts += ModelPart(
+            "blower_motor", translate(cylinder(0.12f, 0.22f, 16), 0f, 0.25f, -0.25f),
+            Material(0.20f, 0.22f, 0.24f, metallic = 0.85f, roughness = 0.45f)
+        )
+
+        // Intake wire safety grille
+        parts += ModelPart(
+            "blower_grille", translate(disc(0.21f, 0.05f, 16), 0f, 0.25f, -0.19f),
+            Material(0.15f, 0.15f, 0.15f, metallic = 0.90f, roughness = 0.30f)
+        )
+
+        // Flexible accordion ventilation ducting (yellow/orange PVC fabric)
+        parts += ModelPart(
+            "flexible_duct", translate(cylinder(0.18f, 0.60f, 18), 0.18f, 0.25f, 0.35f),
+            Material(0.95f, 0.55f, 0.05f, metallic = 0.05f, roughness = 0.65f)
+        )
+
+        // Steel tubular carry handle on top
+        parts += ModelPart(
+            "carry_handle", translate(box(0.04f, 0.10f, 0.26f), 0f, 0.48f, 0f),
+            Material(0.12f, 0.12f, 0.12f, metallic = 0.50f, roughness = 0.70f)
+        )
+
+        // Rubber vibration isolator mounting feet (4 corners)
+        parts += ModelPart(
+            "mounting_feet", translate(box(0.36f, 0.05f, 0.36f), 0f, 0.025f, 0f),
+            Material(0.10f, 0.10f, 0.10f, metallic = 0.0f, roughness = 0.90f)
+        )
+
+        return CompositeModel(parts, height = 0.65f)
     }
 
 

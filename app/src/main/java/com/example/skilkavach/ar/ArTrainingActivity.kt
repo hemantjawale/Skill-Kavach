@@ -137,16 +137,21 @@ class ArTrainingActivity : ComponentActivity() {
             }
         }
 
-        // TTS initialization
+        // TTS initialization with strict language checks
         speech = TextToSpeech(this) { code ->
             speechReady = code == TextToSpeech.SUCCESS
             if (speechReady) {
-                val locale = when (currentLang) {
+                val targetLocale = when (currentLang) {
+                    "sat" -> Locale("sat", "IN")
                     "hi" -> Locale("hi", "IN")
-                    "sat" -> Locale("hi", "IN") // Santali fallback to closest available
                     else -> Locale.ENGLISH
                 }
-                speech?.language = locale
+                val avail = speech?.isLanguageAvailable(targetLocale) ?: TextToSpeech.LANG_NOT_SUPPORTED
+                if (avail >= TextToSpeech.LANG_AVAILABLE) {
+                    speech?.language = targetLocale
+                } else if (currentLang == "sat") {
+                    feedback = getString(R.string.ar_voice_unavailable_sat)
+                }
             }
         }
 
@@ -370,12 +375,25 @@ class ArTrainingActivity : ComponentActivity() {
                                     TextButton(
                                         onClick = {
                                             if (speechReady && voiceEnabled) {
-                                                speech?.speak(
-                                                    current.localizedStepInstruction(lang),
-                                                    TextToSpeech.QUEUE_FLUSH,
-                                                    null,
-                                                    "step",
-                                                )
+                                                val targetLocale = when (currentLang) {
+                                                    "sat" -> Locale("sat", "IN")
+                                                    "hi" -> Locale("hi", "IN")
+                                                    else -> Locale.ENGLISH
+                                                }
+                                                val avail = speech?.isLanguageAvailable(targetLocale) ?: TextToSpeech.LANG_NOT_SUPPORTED
+                                                if (avail >= TextToSpeech.LANG_AVAILABLE) {
+                                                    speech?.language = targetLocale
+                                                    speech?.speak(
+                                                        current.localizedStepInstruction(lang),
+                                                        TextToSpeech.QUEUE_FLUSH,
+                                                        null,
+                                                        "step",
+                                                    )
+                                                } else if (currentLang == "sat") {
+                                                    feedback = getString(R.string.ar_voice_unavailable_sat)
+                                                } else {
+                                                    feedback = getString(R.string.ar_voice_unavailable)
+                                                }
                                             } else {
                                                 feedback = getString(R.string.ar_voice_unavailable)
                                             }
@@ -410,7 +428,7 @@ class ArTrainingActivity : ComponentActivity() {
                                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA000)),
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
-                                                        Text("Acknowledge Hazard & Mark Perimeter", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                        Text(getString(R.string.ar_ack_hazard), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                                     }
                                                 }
                                             }
@@ -434,7 +452,7 @@ class ArTrainingActivity : ComponentActivity() {
                                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
-                                                        Text("🚨 Sound Emergency Site Alarm", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                        Text(getString(R.string.ar_sound_alarm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                                     }
                                                 }
                                             }
@@ -514,13 +532,10 @@ class ArTrainingActivity : ComponentActivity() {
                                                                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
                                                             ) {
                                                                 Text(
-                                                                    when (lvl) {
-                                                                        HazardDiffusionSimulator.SamplingLevel.TOP -> "Top"
-                                                                        HazardDiffusionSimulator.SamplingLevel.MIDDLE -> "Mid"
-                                                                        HazardDiffusionSimulator.SamplingLevel.BOTTOM -> "Bottom"
-                                                                    },
-                                                                    fontSize = 11.sp,
-                                                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                                                                    title,
+                                                                    fontSize = 10.sp,
+                                                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                                                    maxLines = 1
                                                                 )
                                                             }
                                                         }
@@ -548,12 +563,32 @@ class ArTrainingActivity : ComponentActivity() {
                                                             )
                                                         }
                                                     }
+                                                    // Mechanical Ventilation Toggle Button
+                                                    OutlinedButton(
+                                                        onClick = {
+                                                            gasSimulator.isVentilated = true
+                                                            liveReadings = gasSimulator.getStratifiedSample(samplingLevel)
+                                                            triggerHaptic(60L)
+                                                            runCatching { toneGen?.startTone(ToneGenerator.TONE_PROP_BEEP2, 100) }
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        colors = ButtonDefaults.outlinedButtonColors(
+                                                            containerColor = if (gasSimulator.isVentilated) Color(0xFF0288D1) else Color(0xFF1E2B38),
+                                                            contentColor = Color.White
+                                                        )
+                                                    ) {
+                                                        Text(
+                                                            if (gasSimulator.isVentilated) getString(R.string.ar_ventilating) else getString(R.string.ar_ventilate_action),
+                                                            fontSize = 11.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
                                                     Button(
                                                         onClick = { select("detector") },
                                                         colors = ButtonDefaults.buttonColors(containerColor = if (liveReadings.isAlarm) Color(0xFFD32F2F) else Color(0xFF00E676)),
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
-                                                        Text("✓ Confirm Atmospheric Test Reading", color = if (liveReadings.isAlarm) Color.White else Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                        Text(getString(R.string.ar_confirm_test), color = if (liveReadings.isAlarm) Color.White else Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                                     }
                                                 }
                                             }
@@ -605,7 +640,7 @@ class ArTrainingActivity : ComponentActivity() {
                                                         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
                                                     ) {
                                                         Text(
-                                                            "CARDINAL RULE: Attendant must NEVER enter confined space for an unplanned rescue!",
+                                                            getString(R.string.ar_attendant_rule),
                                                             color = Color(0xFFFFD54F),
                                                             fontSize = 10.sp,
                                                             fontWeight = FontWeight.Bold,
@@ -641,7 +676,215 @@ class ArTrainingActivity : ComponentActivity() {
                                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
-                                                        Text("✓ Complete Safe Evacuation to Muster Point", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                        Text(getString(R.string.ar_complete_evac), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        // Specialized Fire & Explosion Module Interactive Cards
+                                        when (target) {
+                                            "exit" -> {
+                                                val isInitialExit = step == 0
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF142416), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFF2E7D32), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("🟢", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(
+                                                            if (isInitialExit) getString(R.string.ar_fire_escape_title) else getString(R.string.ar_fire_evacuate_title),
+                                                            color = Color(0xFFA5D6A7), fontWeight = FontWeight.Bold, fontSize = 14.sp
+                                                        )
+                                                    }
+                                                    Text(
+                                                        if (isInitialExit) getString(R.string.ar_fire_escape_desc) else getString(R.string.ar_fire_evacuate_desc),
+                                                        color = Color(0xFFC8E6C9), fontSize = 11.sp
+                                                    )
+                                                    Button(
+                                                        onClick = { select("exit") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(
+                                                            if (isInitialExit) getString(R.string.ar_fire_escape_confirm) else getString(R.string.ar_fire_evacuate_confirm),
+                                                            color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            "alarm" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF231414), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFFD32F2F), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("🚨", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_alarm_title), color = Color(0xFFFF5252), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text(getString(R.string.ar_fire_alarm_desc), color = Color(0xFFE57373), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("alarm") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_alarm_confirm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                            "extinguisher" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF231814), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFFE65100), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("🧯", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_extinguisher_title), color = Color(0xFFFFAB91), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text("✓ " + getString(R.string.ar_fire_ext_check1), color = Color(0xFFFFCCBC), fontSize = 11.sp)
+                                                    Text("✓ " + getString(R.string.ar_fire_ext_check2), color = Color(0xFFFFCCBC), fontSize = 11.sp)
+                                                    Text("✓ " + getString(R.string.ar_fire_ext_check3), color = Color(0xFFFFCCBC), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("extinguisher") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_ext_confirm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                            "pin" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF221F14), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFFFFB300), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("🟡", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_pass_pin_title), color = Color(0xFFFFE082), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text(getString(R.string.ar_fire_pass_pin_desc), color = Color(0xFFFFF8E1), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("pin") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB300)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_pass_pin_confirm), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                            "base" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF231614), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFFFF5722), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("🎯", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_pass_aim_title), color = Color(0xFFFFAB91), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text(getString(R.string.ar_fire_pass_aim_desc), color = Color(0xFFFFCCBC), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("base") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_pass_aim_confirm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                            "handle" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF1F1C18), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFFF57C00), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("✊", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_pass_squeeze_title), color = Color(0xFFFFCC80), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text(getString(R.string.ar_fire_pass_squeeze_desc), color = Color(0xFFFFE0B2), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("handle") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF57C00)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_pass_squeeze_confirm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                            "sweep" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF161E28), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFF0288D1), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("↔️", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_pass_sweep_title), color = Color(0xFF81D4FA), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text(getString(R.string.ar_fire_pass_sweep_desc), color = Color(0xFFB0BEC5), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("sweep") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0288D1)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_pass_sweep_confirm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                                    }
+                                                }
+                                            }
+                                            "hazard" -> {
+                                                Column(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .background(Color(0xFF221614), RoundedCornerShape(10.dp))
+                                                        .border(1.dp, Color(0xFFD84315), RoundedCornerShape(10.dp))
+                                                        .padding(12.dp),
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("⚡", fontSize = 16.sp)
+                                                        Spacer(Modifier.width(6.dp))
+                                                        Text(getString(R.string.ar_fire_cabinet_title), color = Color(0xFFFFAB91), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                                    }
+                                                    Text(getString(R.string.ar_fire_escape_desc), color = Color(0xFFFFCCBC), fontSize = 11.sp)
+                                                    Button(
+                                                        onClick = { select("hazard") },
+                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD84315)),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(getString(R.string.ar_fire_escape_confirm), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                                     }
                                                 }
                                             }
@@ -771,6 +1014,7 @@ class ArTrainingActivity : ComponentActivity() {
                 runCatching {
                     when (target) {
                         "alarm" -> toneGen?.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 400)
+                        "pin" -> toneGen?.startTone(ToneGenerator.TONE_PROP_PROMPT, 150)
                         "sweep", "handle" -> toneGen?.startTone(ToneGenerator.TONE_PROP_BEEP2, 180)
                         else -> toneGen?.startTone(ToneGenerator.TONE_PROP_ACK, 100)
                     }
@@ -805,7 +1049,8 @@ class ArTrainingActivity : ComponentActivity() {
 
             // State transitions based on targets
             when (target) {
-                "base" -> renderer?.suppressFire()   // Start suppression
+                "pin" -> renderer?.pullPin()
+                "base", "handle" -> renderer?.suppressFire()   // Start suppression & discharge plume
                 "sweep" -> renderer?.extinguishFire() // Complete extinguishing
                 "alarm" -> renderer?.triggerAlarm()   // Strobe alarm beacon
             }

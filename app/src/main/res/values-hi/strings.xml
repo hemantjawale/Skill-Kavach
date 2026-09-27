@@ -34,6 +34,7 @@
     <string name="ar_incorrect_target">गलत लक्ष्य। चरण %1$d: %2$s। %3$s मार्कर दबाएं।</string>
     <string name="ar_incorrect_aim">आग के आधार पर निशाना लगाएं, ऊपर नहीं।</string>
     <string name="ar_voice_unavailable">आवाज़ अनुपलब्ध है। ऊपर दिए निर्देश पढ़ें।</string>
+    <string name="ar_voice_unavailable_sat">इस डिवाइस पर संथाली के लिए वॉयस ऑडियो उपलब्ध नहीं है। संथाली पाठ और कैप्शन प्रदर्शित किए जा रहे हैं।</string>
     <string name="ar_progress_not_saved">प्रगति सहेजी नहीं जा सकी। स्क्रीन खुली रखें और पुन: प्रयास करें।</string>
     <string name="ar_min_duration">प्रक्रिया की समीक्षा करें। न्यूनतम अभ्यास 30 सेकंड है।</string>
 
@@ -75,6 +76,16 @@
     <string name="ar_sample_next">अगली स्तरीकृत गहराई मापें</string>
     <string name="ar_alarm_raised">प्रवेश वर्जित! विषैली H₂S गैस मिली। साइट अलार्म सक्रिय।</string>
     <string name="ar_evacuate_guide">हवा की दिशा के विपरीत निर्दिष्ट निकास मार्ग से सुरक्षित सभा स्थल पर जाएं।</string>
+    <string name="ar_ack_hazard">खतरे को स्वीकार करें और परिधि चिह्नित करें</string>
+    <string name="ar_sound_alarm">🚨 आपातकालीन साइट अलार्म बजाएं</string>
+    <string name="ar_confirm_test">✓ वायुमंडलीय परीक्षण रीडिंग की पुष्टि करें</string>
+    <string name="ar_attendant_rule">मुख्य नियम: अटेंडेंट को अप्रत्याशित बचाव के लिए कभी भी सीमित स्थान में प्रवेश नहीं करना चाहिए!</string>
+    <string name="ar_complete_evac">✓ मस्टर पॉइंट पर सुरक्षित निकासी पूरी करें</string>
+    <string name="ar_ventilate_action">💨 यांत्रिक ब्लोअर वेंटिलेशन सक्रिय करें</string>
+    <string name="ar_ventilating">चैंबर को वेंटिलेट किया जा रहा है...</string>
+    <string name="ar_retest_atmosphere">वायुमंडल का पुनः परीक्षण करें</string>
+    <string name="ar_detector_sampling">वायुमंडल का नमूना लिया जा रहा है...</string>
+    <string name="ar_detector_alarm">गंभीर अलार्म — उच्च खतरा पाया गया!</string>
 
     <string name="ar_close_training">प्रशिक्षण बंद करें</string>
     <string name="ar_practice_mode">अभ्यास मोड — बिना AR ट्रैकिंग</string>
@@ -89,6 +100,34 @@
     <string name="ar_assessment_required">प्रमाणन से पहले मूल्यांकन और व्यावहारिक समीक्षा आवश्यक है।</string>
     <string name="ar_save_training">प्रशिक्षण सहेजें</string>
     <string name="ar_saving">सहेजा जा रहा है…</string>
-    <string name="ar_placement_guide">चरण 1: कैमरा बनावटदार फर्श की ओर करें। चरण 2: फोन धीरे-धीरे हिलाएं। चरण 3: हरा गोला दिखने पर उपकरण रखें दबाएं।</string>
+    <!-- AR Fire & Explosion Module Strings (Hindi) -->
+    <string name="ar_fire_cabinet_title">औद्योगिक विद्युत नियंत्रण कैबिनेट</string>
+    <string name="ar_fire_escape_title">निकास मार्ग सत्यापन</string>
+    <string name="ar_fire_escape_desc">आग के पास जाने से पहले हमेशा सुनिश्चित करें कि आपके पीछे एक स्पष्ट निकास मार्ग है। कभी भी लपटों को अपना रास्ता न रोकने दें।</string>
+    <string name="ar_fire_escape_confirm">स्पष्ट निकास मार्ग की पुष्टि करें</string>
+    <string name="ar_fire_alarm_title">आपातकालीन फायर अलार्म स्टेशन</string>
+    <string name="ar_fire_alarm_desc">आग बुझाने का प्रयास करने से पहले तुरंत नियंत्रण कक्ष और सभी कर्मियों को सतर्क करें।</string>
+    <string name="ar_fire_alarm_confirm">फायर अलार्म स्टेशन खींचें</string>
+    <string name="ar_fire_extinguisher_title">क्लास ABC बहुउद्देशीय अग्निशामक</string>
+    <string name="ar_fire_ext_check1">दबाव गेज सुई हरे कार्यशील क्षेत्र में (100–195 psi)</string>
+    <string name="ar_fire_ext_check2">छेड़छाड़ सील सुरक्षित और निरीक्षण टैग अद्यतन</string>
+    <string name="ar_fire_ext_check3">डिस्चार्ज नोजल रुकावट से मुक्त</string>
+    <string name="ar_fire_ext_confirm">अग्निशामक की जांच करें और उठाएं</string>
+    <string name="ar_fire_pass_pin_title">PASS चरण 1: सुरक्षा पिन खींचें (PULL)</string>
+    <string name="ar_fire_pass_pin_desc">सील को तोड़ने और ऑपरेटिंग लीवर को अनलॉक करने के लिए रिंग-पिन को मजबूती से खींचें।</string>
+    <string name="ar_fire_pass_pin_confirm">पिन खींचें और सील तोड़ें</string>
+    <string name="ar_fire_pass_aim_title">PASS चरण 2: आग के आधार पर निशाना लगाएं (AIM)</string>
+    <string name="ar_fire_pass_aim_desc">6–8 फीट पीछे खड़े हों। नोजल को आग की लपटों पर नहीं, बल्कि जलते हुए आधार पर लक्षित करें।</string>
+    <string name="ar_fire_pass_aim_confirm">आग के आधार पर नोजल लक्षित करें</string>
+    <string name="ar_fire_pass_squeeze_title">PASS चरण 3: लीवर दबाएं (SQUEEZE)</string>
+    <string name="ar_fire_pass_squeeze_desc">दबावयुक्त अग्निशामक एजेंट को छोड़ने के लिए लीवर को धीरे-धीरे और समान रूप से दबाएं।</string>
+    <string name="ar_fire_pass_squeeze_confirm">डिस्चार्ज के लिए लीवर दबाएं</string>
+    <string name="ar_fire_pass_sweep_title">PASS चरण 4: दायें-बायें घुमाएं (SWEEP)</string>
+    <string name="ar_fire_pass_sweep_desc">जब तक आग पूरी तरह से बुझ न जाए, नोजल को आग के आधार पर दायें-बायें घुमाएं।</string>
+    <string name="ar_fire_pass_sweep_confirm">दायें-बायें स्वीप करें</string>
+    <string name="ar_fire_evacuate_title">सुरक्षित निकास और सभा स्थल</string>
+    <string name="ar_fire_evacuate_desc">आग बुझ गई है। पुनः आग लगने पर नजर रखते हुए पीछे हटें और निर्दिष्ट सभा स्थल पर जाएं।</string>
+    <string name="ar_fire_evacuate_confirm">सभा स्थल पर सुरक्षित निकास पूर्ण करें</string>
+
     <string name="ar_safety_disclaimer">⚠ केवल प्रशिक्षण सिमुलेशन। वास्तविक आग की पहचान या प्रमाणित अग्निशमन उपकरण का विकल्प नहीं है।</string>
 </resources>

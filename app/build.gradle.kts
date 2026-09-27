@@ -16,8 +16,8 @@ android {
         applicationId = "com.example.skilkavach"
         minSdk = 29
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 100
+        versionName = "1.0.0-SIH2026"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val apiUrl = providers.gradleProperty("API_BASE_URL").orElse("https://skill-kavach.onrender.com/").get()
