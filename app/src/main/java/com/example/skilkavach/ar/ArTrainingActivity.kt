@@ -945,28 +945,119 @@ class ArTrainingActivity : ComponentActivity() {
                                         }
                                     }
                                 } else {
-                                    // ── Training complete ──
+                                    // ── Training / Assessment Complete Summary ──
+                                    val duration = previousDuration + ((SystemClock.elapsedRealtime() - started) / 1000).toInt()
+                                    val finalResult = assessmentEngine.computeFinalAssessment(
+                                        quizScore = 100.0f,
+                                        lang = currentLang,
+                                        requiredKeywords = assessmentEngine.getRequiredKeywords(module.optString("id"), currentLang)
+                                    )
+
                                     HorizontalDivider(color = Color(0xFF333640), thickness = 0.5.dp)
-                                    Text(
-                                        getString(R.string.ar_training_complete),
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = Color(0xFF66BB6A),
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                    Text(
-                                        getString(R.string.ar_assessment_required),
-                                        color = Color(0xFFAAAAAA),
-                                    )
+
+                                    // Pass / Fail Header Badge (80% threshold)
+                                    Surface(
+                                        color = if (finalResult.passed) Color(0xFF1B5E20) else Color(0xFFB71C1C),
+                                        shape = RoundedCornerShape(10.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(
+                                            Modifier.padding(12.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = if (finalResult.passed) "PASSED (${finalResult.combinedScore.toInt()}%)"
+                                                       else "NEEDS IMPROVEMENT (${finalResult.combinedScore.toInt()}%)",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = if (practice) "Practice Session Completed" else "Official Assessment Result (Pass threshold: 80%)",
+                                                color = Color(0xFFE0E0E0),
+                                                fontSize = 11.sp
+                                            )
+                                        }
+                                    }
+
+                                    // Score Breakdown Table
+                                    Column(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(Color(0xFF22252E), RoundedCornerShape(8.dp))
+                                            .padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text("Assessment Score Breakdown", color = Color(0xFF4FC3F7), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                            Text("Quiz Score (30% weight):", color = Color.White, fontSize = 11.sp)
+                                            Text("${finalResult.quizScore.toInt()}%", color = Color(0xFF81C784), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                        }
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                            Text("Practical Behavioral (50% weight):", color = Color.White, fontSize = 11.sp)
+                                            Text("${finalResult.behavioralScore.toInt()}%", color = Color(0xFF81C784), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                        }
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                            Text("Oral Safety Explanation (20% weight):", color = Color.White, fontSize = 11.sp)
+                                            Text("${finalResult.voiceScore.toInt()}%", color = Color(0xFF81C784), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                        }
+                                        HorizontalDivider(color = Color(0xFF444752), thickness = 0.5.dp)
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                            Text("Time Elapsed:", color = Color(0xFFAAAAAA), fontSize = 11.sp)
+                                            Text("${duration / 60}m ${duration % 60}s", color = Color.White, fontSize = 11.sp)
+                                        }
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                            Text("Mistakes / Incorrect Actions:", color = Color(0xFFAAAAAA), fontSize = 11.sp)
+                                            Text("${finalResult.mistakesCount}", color = if (finalResult.mistakesCount == 0) Color(0xFF81C784) else Color(0xFFE57373), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                        }
+                                    }
+
+                                    // Improvement Suggestions Card
+                                    if (finalResult.improvementSuggestions.isNotEmpty()) {
+                                        Column(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .background(Color(0xFF2B2519), RoundedCornerShape(8.dp))
+                                                .border(0.5.dp, Color(0xFFFFB74D), RoundedCornerShape(8.dp))
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text("💡 Improvement Suggestions", color = Color(0xFFFFB74D), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                            finalResult.improvementSuggestions.forEach { suggestion ->
+                                                Text("• $suggestion", color = Color(0xFFFFF176), fontSize = 11.sp)
+                                            }
+                                        }
+                                    }
+
+                                    // Certification eligibility note
+                                    if (practice) {
+                                        Text(
+                                            "Note: Practice mode completed. Complete in Assessment Mode to earn a verified certificate.",
+                                            color = Color(0xFFFFB74D),
+                                            fontSize = 11.sp
+                                        )
+                                    } else if (!finalResult.passed) {
+                                        Text(
+                                            "Certificate not eligible. Minimum pass threshold is 80%. Retake assessment to qualify.",
+                                            color = Color(0xFFE57373),
+                                            fontSize = 11.sp
+                                        )
+                                    }
+
                                     Button(
                                         enabled = !busy,
                                         onClick = { saveTraining(steps) },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4FC3F7))
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (finalResult.passed && !practice) Color(0xFF66BB6A) else Color(0xFF4FC3F7)
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Text(
                                             if (busy) getString(R.string.ar_saving)
+                                            else if (!practice && finalResult.passed) "Save & Earn Verified Certificate"
                                             else getString(R.string.ar_save_training),
                                             color = Color.Black,
-                                            fontWeight = FontWeight.SemiBold,
+                                            fontWeight = FontWeight.Bold,
                                         )
                                     }
                                 }
@@ -1011,7 +1102,9 @@ class ArTrainingActivity : ComponentActivity() {
 
     private fun updateHighlight() {
         val steps = module.items("steps")
-        if (step < steps.size) {
+        // Target highlight glow is enabled ONLY in Practice Mode to teach procedure.
+        // In Assessment Mode, target highlights and glows are hidden to evaluate learner performance.
+        if (practice && step < steps.size) {
             val target = steps[step].getString("target")
             renderer?.labels?.highlightId = target
         } else {
@@ -1021,8 +1114,9 @@ class ArTrainingActivity : ComponentActivity() {
 
     /**
      * Handle target selection — validates against current step.
-     * Provides safety-oriented feedback for incorrect actions.
-     * Triggers fire state transitions for PASS steps and gas alarm activation.
+     * Logs BehavioralEvent to AssessmentEngine for scoring.
+     * In Practice Mode: provides helpful hints and target guidance.
+     * In Assessment Mode: penalizes score (-15 pts), provides safety warning without revealing solution.
      */
     private fun select(target: String) {
         val steps = module.items("steps")
@@ -1030,6 +1124,7 @@ class ArTrainingActivity : ComponentActivity() {
         val currentStep = steps[step]
         val expectedTarget = currentStep.getString("target")
         val isGas = module.optString("id") == "gas"
+        val modId = module.optString("id")
 
         if (target == expectedTarget) {
             triggerHaptic(if (target == "sweep" || target == "alarm") 150L else 50L)
@@ -1066,7 +1161,7 @@ class ArTrainingActivity : ComponentActivity() {
                     else -> "FIRE_INTERACTION"
                 }
             }
-            assessmentEngine.logAction(stepIndex = step, target = target, actionType = actionType, isCorrect = true)
+            assessmentEngine.logAction(stepIndex = step, target = target, actionType = actionType, isCorrect = true, moduleId = modId)
             step++
             feedback = getString(R.string.ar_correct)
 
@@ -1081,7 +1176,7 @@ class ArTrainingActivity : ComponentActivity() {
             updateHighlight()
 
             val completedStep = step
-            if (speechReady && voiceEnabled) {
+            if (speechReady && voiceEnabled && practice) {
                 val nextInstruction = if (step < steps.size) {
                     steps[step].localizedStepInstruction(currentLang)
                 } else {
@@ -1110,7 +1205,7 @@ class ArTrainingActivity : ComponentActivity() {
             }
         } else {
             val actionType = if (isGas) "GAS_INCORRECT_ATTEMPT" else "FIRE_INCORRECT_ATTEMPT"
-            assessmentEngine.logAction(stepIndex = step, target = target, actionType = actionType, isCorrect = false)
+            assessmentEngine.logAction(stepIndex = step, target = target, actionType = actionType, isCorrect = false, moduleId = modId)
             triggerHaptic(200L)
             if (voiceEnabled) {
                 runCatching {
@@ -1118,10 +1213,19 @@ class ArTrainingActivity : ComponentActivity() {
                 }
             }
 
-            // Safety-oriented feedback — tell user what to do, not "wrong!"
-            val currentTitle = currentStep.localizedStepTitle(currentLang)
-            val expectedLabel = localizedLabel(expectedTarget)
-            feedback = getString(R.string.ar_incorrect_target, step + 1, currentTitle, expectedLabel)
+            if (practice) {
+                // Practice mode: helpful step feedback revealing target
+                val currentTitle = currentStep.localizedStepTitle(currentLang)
+                val expectedLabel = localizedLabel(expectedTarget)
+                feedback = getString(R.string.ar_incorrect_target, step + 1, currentTitle, expectedLabel)
+            } else {
+                // Assessment mode: Safety warning feedback WITHOUT revealing exact solution
+                feedback = when (currentLang) {
+                    "hi" -> "⚠️ गलत अनुक्रम! जारी रखने से पहले सुरक्षा प्रक्रिया की समीक्षा करें।"
+                    "sat" -> "⚠️ ᱵᱟᱹᱲᱤᱡ ᱠᱟᱹᱢᱤᱦᱚᱨᱟ! ᱞᱟᱦᱟᱜ ᱢᱟᱲᱟᱝ ᱥᱩᱨᱚᱠᱷᱟ ᱱᱤᱭᱚᱢ ᱧᱮᱞ ᱢᱮ᱾"
+                    else -> "⚠️ Incorrect action sequence! Review safety procedure before proceeding."
+                }
+            }
         }
     }
 
@@ -1135,6 +1239,13 @@ class ArTrainingActivity : ComponentActivity() {
             finish()
             return
         }
+
+        val finalResult = assessmentEngine.computeFinalAssessment(
+            quizScore = 100.0f,
+            lang = currentLang,
+            requiredKeywords = assessmentEngine.getRequiredKeywords(module.optString("id"), currentLang)
+        )
+
         busy = true
         lifecycleScope.launch {
             try {
@@ -1146,7 +1257,10 @@ class ArTrainingActivity : ComponentActivity() {
                         .put("steps", JSONArray(steps.map { it.getString("target") }))
                         .put("durationSeconds", duration.coerceAtMost(7200))
                         .put("mode", if (practice) "PRACTICE" else "AR")
-                        .put("assessmentLog", assessmentEngine.getEventLogJson()),
+                        .put("assessmentLog", assessmentEngine.getEventLogJson())
+                        .put("combinedScore", finalResult.combinedScore.toDouble())
+                        .put("passed", finalResult.passed)
+                        .put("certificateEligible", !practice && finalResult.passed),
                 )
                 repo.savePractice(module.getString("id"), 0, if (practice) "PRACTICE" else "AR", 0)
                 finish()

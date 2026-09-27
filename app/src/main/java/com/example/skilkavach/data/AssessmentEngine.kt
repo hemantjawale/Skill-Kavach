@@ -9,7 +9,8 @@ data class BehavioralEvent(
     val actionType: String,
     val timestamp: Long,
     val hesitationMs: Long,
-    val isCorrect: Boolean
+    val isCorrect: Boolean,
+    val moduleId: String = ""
 )
 
 data class FinalAssessmentResult(
@@ -18,7 +19,10 @@ data class FinalAssessmentResult(
     val voiceScore: Float,
     val combinedScore: Float,
     val passed: Boolean,
-    val breakdown: String
+    val breakdown: String,
+    val mistakesCount: Int = 0,
+    val averageHesitationMs: Long = 0L,
+    val improvementSuggestions: List<String> = emptyList()
 )
 
 class AssessmentEngine {
@@ -32,7 +36,13 @@ class AssessmentEngine {
         isStressModeActive = stressMode
     }
 
-    fun logAction(stepIndex: Int, target: String, actionType: String, isCorrect: Boolean) {
+    fun logAction(
+        stepIndex: Int,
+        target: String,
+        actionType: String,
+        isCorrect: Boolean,
+        moduleId: String = ""
+    ) {
         val now = System.currentTimeMillis()
         val hesitationMs = now - lastActionTime
         lastActionTime = now
@@ -42,11 +52,58 @@ class AssessmentEngine {
                 stepIndex = stepIndex,
                 target = target,
                 actionType = actionType,
-                timestamp = System.currentTimeMillis(),
+                timestamp = now,
                 hesitationMs = hesitationMs,
-                isCorrect = isCorrect
+                isCorrect = isCorrect,
+                moduleId = moduleId
             )
         )
+    }
+
+    fun getEvents(): List<BehavioralEvent> = events.toList()
+
+    fun getIncorrectCount(): Int = events.count { !it.isCorrect }
+
+    fun getCorrectCount(): Int = events.count { it.isCorrect }
+
+    fun getAverageHesitationMs(): Long {
+        if (events.isEmpty()) return 0L
+        return events.map { it.hesitationMs }.average().toLong()
+    }
+
+    fun generateImprovementSuggestions(lang: String = "en"): List<String> {
+        val suggestions = mutableListOf<String>()
+        val incorrectCount = getIncorrectCount()
+        val avgHesitation = getAverageHesitationMs()
+
+        if (incorrectCount > 0) {
+            val msg = when (lang) {
+                "hi" -> "प्रक्रिया चरण अनुक्रम की समीक्षा करें (गलतियां: $incorrectCount)"
+                "sat" -> "ᱠᱟᱹᱢᱤᱦᱚᱨᱟ ᱫᱷᱟᱯ ᱧᱮᱞ ᱢᱮ (ᱵᱟᱹᱲᱤᱡ: $incorrectCount)"
+                else -> "Review procedural step sequence (incorrect actions: $incorrectCount)"
+            }
+            suggestions.add(msg)
+        }
+
+        if (avgHesitation > 4000) {
+            val msg = when (lang) {
+                "hi" -> "आपातकालीन प्रतिक्रिया गति में सुधार करें (औसत हिचकिचाहट: ${avgHesitation / 1000}s)"
+                "sat" -> "ᱞᱟᱹᱠᱛᱤᱭᱟᱱ ᱠᱟᱹᱢᱤ ᱩᱥᱟᱹᱨᱟᱭ ᱢᱮ (ᱚᱠᱛᱚ: ${avgHesitation / 1000}s)"
+                else -> "Improve emergency reaction speed (average hesitation: ${avgHesitation / 1000}s)"
+            }
+            suggestions.add(msg)
+        }
+
+        if (suggestions.isEmpty()) {
+            val msg = when (lang) {
+                "hi" -> "उत्कृष्ट सुरक्षा प्रदर्शन! निरंतर सतर्कता बनाए रखें।"
+                "sat" -> "ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ ᱥᱩᱨᱚᱠᱷᱟ ᱠᱟᱹᱢᱤ! ᱱᱟᱯᱟᱭ ᱛᱟᱦᱮᱸᱱ ᱢᱮ᱾"
+                else -> "Excellent safety protocol execution! Maintain vigilance."
+            }
+            suggestions.add(msg)
+        }
+
+        return suggestions
     }
 
     /**
@@ -126,6 +183,9 @@ class AssessmentEngine {
 
         val combinedScore = (quizScore * 0.30f) + (behavioralScore * 0.50f) + (voiceScore * 0.20f)
         val passed = combinedScore >= 80.0f
+        val mistakes = getIncorrectCount()
+        val avgHesitation = getAverageHesitationMs()
+        val suggestions = generateImprovementSuggestions(lang)
 
         val breakdown = when (lang) {
             "hi" -> "प्रश्नोत्तरी: ${quizScore.toInt()}%, व्यावहारिक: ${behavioralScore.toInt()}%, मौखिक: ${voiceScore.toInt()}%"
@@ -139,7 +199,10 @@ class AssessmentEngine {
             voiceScore = voiceScore,
             combinedScore = combinedScore,
             passed = passed,
-            breakdown = breakdown
+            breakdown = breakdown,
+            mistakesCount = mistakes,
+            averageHesitationMs = avgHesitation,
+            improvementSuggestions = suggestions
         )
     }
 
@@ -147,6 +210,7 @@ class AssessmentEngine {
         val array = JSONArray()
         for (e in events) {
             array.put(JSONObject().apply {
+                if (e.moduleId.isNotEmpty()) put("moduleId", e.moduleId)
                 put("step", e.stepIndex)
                 put("target", e.target)
                 put("action", e.actionType)
