@@ -158,6 +158,7 @@ class TrainingRenderer(
     private val onStatus: (String) -> Unit,
     private val onHit: (String) -> Unit,
     val moduleId: String = "fire",
+    val context: Context? = null
 ) : GLSurfaceView.Renderer {
 
     @Volatile private var resetRequested = false
@@ -415,15 +416,15 @@ class TrainingRenderer(
 
                 when (marker.id) {
                     "hazard" -> {
-                        model = IndustrialMeshes.confinedSpaceHatch()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/manhole_hatch.glb") { IndustrialMeshes.confinedSpaceHatch() } else IndustrialMeshes.confinedSpaceHatch()
                         px = 0.0f; py = 0.0f; pz = -1.20f; scale = 1.0f; rotY = 0f
                     }
                     "permit" -> {
-                        model = IndustrialMeshes.permitClipboard()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/permit_board.glb") { IndustrialMeshes.permitClipboard() } else IndustrialMeshes.permitClipboard()
                         px = -0.75f; py = 0.0f; pz = -0.55f; scale = 1.0f; rotY = 25f
                     }
                     "detector" -> {
-                        model = IndustrialMeshes.gasDetector()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/gas_detector.glb") { IndustrialMeshes.gasDetector() } else IndustrialMeshes.gasDetector()
                         px = -0.52f; py = 0.73f; pz = -1.10f; scale = 1.0f; rotY = -25f
                     }
                     "ppe" -> {
@@ -435,11 +436,11 @@ class TrainingRenderer(
                         px = 0.90f; py = 0.0f; pz = -0.65f; scale = 1.0f; rotY = -35f
                     }
                     "alarm" -> {
-                        model = IndustrialMeshes.industrialAlarmBeacon()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/fire_alarm.glb") { IndustrialMeshes.industrialAlarmBeacon() } else IndustrialMeshes.industrialAlarmBeacon()
                         px = -0.90f; py = 1.25f; pz = -1.20f; scale = 1.0f; rotY = 20f
                     }
                     "exit" -> {
-                        model = IndustrialMeshes.evacuationMusterSign()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/exit_sign.glb") { IndustrialMeshes.evacuationMusterSign() } else IndustrialMeshes.evacuationMusterSign()
                         px = 1.10f; py = 1.35f; pz = 0.35f; scale = 1.1f; rotY = -140f
                     }
                     else -> {
@@ -463,25 +464,25 @@ class TrainingRenderer(
             // Companion ambient industrial objects (non-interactive, empty label)
             elements += SceneElement(
                 id = "tripod_companion", label = "",
-                model = IndustrialMeshes.rescueTripod(),
+                model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/rescue_tripod.glb") { IndustrialMeshes.rescueTripod() } else IndustrialMeshes.rescueTripod(),
                 x = 0.0f, y = 0.0f, z = -1.20f,
                 scale = 1.0f, rotationY = 0f
             )
             elements += SceneElement(
                 id = "barricade_l", label = "",
-                model = IndustrialMeshes.safetyBarricade(),
+                model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/safety_barricade.glb") { IndustrialMeshes.safetyBarricade() } else IndustrialMeshes.safetyBarricade(),
                 x = -0.55f, y = 0.0f, z = -0.45f,
                 scale = 1.0f, rotationY = 0f
             )
             elements += SceneElement(
                 id = "barricade_r", label = "",
-                model = IndustrialMeshes.safetyBarricade(),
+                model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/safety_barricade.glb") { IndustrialMeshes.safetyBarricade() } else IndustrialMeshes.safetyBarricade(),
                 x = 0.55f, y = 0.0f, z = -0.45f,
                 scale = 1.0f, rotationY = 0f
             )
             elements += SceneElement(
                 id = "blower_companion", label = "",
-                model = IndustrialMeshes.ventilationBlower(),
+                model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/ventilation_fan.glb") { IndustrialMeshes.ventilationBlower() } else IndustrialMeshes.ventilationBlower(),
                 x = 0.55f, y = 0.0f, z = -1.05f,
                 scale = 1.0f, rotationY = -45f
             )
@@ -504,7 +505,7 @@ class TrainingRenderer(
 
                 when (marker.id) {
                     "extinguisher" -> {
-                        model = IndustrialMeshes.fireExtinguisher(isPinPulled)
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/fire_extinguisher.glb") { IndustrialMeshes.fireExtinguisher(isPinPulled) } else IndustrialMeshes.fireExtinguisher(isPinPulled)
                         px = -0.35f; py = 0f; pz = 0.25f; scale = 1f; rotY = 25f
                     }
                     "pin" -> {
@@ -528,15 +529,15 @@ class TrainingRenderer(
                         px = -0.33f; py = 0.47f; pz = 0.25f; scale = 1f; rotY = 0f
                     }
                     "exit" -> {
-                        model = IndustrialMeshes.exitSign()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/exit_sign.glb") { IndustrialMeshes.exitSign() } else IndustrialMeshes.exitSign()
                         px = 0f; py = 1.4f; pz = -0.8f; scale = 1.2f; rotY = 0f
                     }
                     "alarm" -> {
-                        model = IndustrialMeshes.fireAlarm()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/fire_alarm.glb") { IndustrialMeshes.fireAlarm() } else IndustrialMeshes.fireAlarm()
                         px = -0.55f; py = 1.1f; pz = -0.4f; scale = 1f; rotY = 20f
                     }
                     "base", "hazard" -> {
-                        model = IndustrialMeshes.electricalCabinetFire()
+                        model = if (context != null) GlbLoader.loadModelWithFallback(context, "models/fire_cabinet.glb") { IndustrialMeshes.electricalCabinetFire() } else IndustrialMeshes.electricalCabinetFire()
                         px = 0.30f; py = 0.0f; pz = -0.35f; scale = 1f; rotY = -25f
                     }
                     "sweep" -> {

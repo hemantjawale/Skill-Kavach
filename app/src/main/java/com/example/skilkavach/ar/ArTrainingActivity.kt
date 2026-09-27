@@ -217,7 +217,8 @@ class ArTrainingActivity : ComponentActivity() {
                                     markers,
                                     { s -> runOnUiThread { status = s } },
                                     { target -> runOnUiThread { select(target) } },
-                                    moduleId = module.optString("id", "fire")
+                                    moduleId = module.optString("id", "fire"),
+                                    context = this@ArTrainingActivity
                                 )
                                 renderer = r
                                 // Highlight the current step's target
