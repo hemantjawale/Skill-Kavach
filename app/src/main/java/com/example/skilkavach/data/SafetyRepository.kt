@@ -46,6 +46,7 @@ class SafetyRepository(private val context: Context) {
     private val dao =
         Room.databaseBuilder(context, SafetyDatabase::class.java, "safety.db")
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .fallbackToDestructiveMigration()
             .build()
             .dao()
     private val vault = Vault()
@@ -70,21 +71,34 @@ class SafetyRepository(private val context: Context) {
     suspend fun initialize() = mutex.withLock {
         if (state.value.initialized) return@withLock
         try {
-            if (dao.getAllWorkers().isEmpty()) {
-                dao.insertWorkers(DEFAULT_SEEDED_WORKERS)
+            runCatching {
+                if (dao.getAllWorkers().isEmpty()) {
+                    dao.insertWorkers(DEFAULT_SEEDED_WORKERS)
+                }
             }
-            session = dao.get("session")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
-            val snapshot = dao.get("snapshot")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
+            session = runCatching {
+                dao.get("session")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
+            }.getOrNull()
+            val snapshot = runCatching {
+                dao.get("snapshot")?.encrypted?.let { vault.decrypt(it) }?.let { JSONObject(it) }
+            }.getOrNull()
+            
+            val pendingActions = session?.let {
+                runCatching {
+                    val userId = it.getJSONObject("user").getString("id")
+                    dao.pending(userId)
+                }.getOrDefault(emptyList())
+            }.orEmpty()
+
             state.value =
                 LocalState(
                     snapshot,
-                    session
-                        ?.let { dao.pending(it.getJSONObject("user").getString("id")) }
-                        .orEmpty(),
+                    pendingActions,
                     initialized = true,
                 )
         } catch (e: Exception) {
             if (e is CancellationException) throw e
+            android.util.Log.e("SafetyRepository", "Failed to initialize local storage", e)
             session = null
             state.value =
                 LocalState(
@@ -94,6 +108,12 @@ class SafetyRepository(private val context: Context) {
                     storageProblem = true,
                 )
         }
+    }
+
+    suspend fun resetStorageAndContinue() = mutex.withLock {
+        runCatching { dao.clear() }
+        session = null
+        state.value = LocalState(initialized = true)
     }
 
     suspend fun getSeededWorkers(): List<WorkerEntity> = withContext(Dispatchers.IO) {

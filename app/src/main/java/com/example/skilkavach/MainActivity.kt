@@ -194,6 +194,7 @@ private fun SafetyApp(repo: SafetyRepository) {
         Page {
             Title("Saved data needs attention", state.message)
             Action("Retry opening saved data", !busy) { run { repo.retryInitialization() } }
+            Secondary("Reset local storage & start fresh") { run { repo.resetStorageAndContinue() } }
         }
         return
     }

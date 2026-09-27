@@ -197,7 +197,7 @@ Output: `app/build/outputs/apk/release/app-release.apk`
 * **File Size**: `6,913,500 bytes` (~6.9 MB)
 * **SHA-256 Checksum**:
   ```
-  4fc79c2b3e547552655ee0da5e9534b698a5c9439759a4bccbc32e96e8452fcf
+  0c58ee2244585a2f19c9c8fdfc337f3df0ebffc5dfba8c5f373f9d76d21468bd
   ```
 
 ---
