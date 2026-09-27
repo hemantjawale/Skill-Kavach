@@ -34,8 +34,24 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val ksFile = file("release-key.jks")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = "sih2026pass"
+                keyAlias = "sih2026key"
+                keyPassword = "sih2026pass"
+            }
+        }
+    }
+
     buildTypes {
         release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
             optimization {
                 enable = true
             }
